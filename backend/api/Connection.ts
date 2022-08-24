@@ -9,7 +9,7 @@ export default class Connection {
         this.mysqlConnection = await mysql2.createConnection({
             host: "localhost",
             user: "root",
-            password: "Password",
+            password: "password",
             database: "soventory",
             port:3306
            });
