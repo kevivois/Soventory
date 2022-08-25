@@ -1,8 +1,10 @@
-import { dir } from "console"
+
 import express from "express"
+import jwt from "jsonwebtoken"
 import instance from "../Connection"
 const Connection = instance.getInstance()
 const router = express.Router()
+const env = require("../../env.json")
 
 router.get("/:id",async(req,res) => {
   
@@ -11,7 +13,7 @@ router.get("/:id",async(req,res) => {
   return res.status(202).json(result)
 
 })
-router.get("/name/():username",async(req,res) => {
+router.get("/name/:username",async(req,res) => {
 
   var result = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.params.username}"`)
   return res.status(202).json(result)
@@ -51,13 +53,22 @@ router.post("/login",async(req,res) => {
   }
 
   var isExisting = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}" and mot_de_passe="${req.body.mot_de_passe}"`)
-
-  var logged = isExisting[0] ? true : false
-  var status = isExisting[0] ? 200 : 400
-
-  return res.status(status).json({"logged":logged})
+  if(isExisting[0])
+  {
+    var droit = await getRightOfUser(isExisting[0].id)
+    var token = generateAccessToken(isExisting[0].nom_utilisateur,droit)
+  }
   
 
 })
+
+function generateAccessToken(id:string,droit:[] | string) : string
+{
+  return jwt.sign({id:id,droit:droit},env.TOKEN_SECRET,{expiresIn:"1800s"})
+}
+async function getRightOfUser(id:string)
+{
+  return await Connection.query(`Select droit from utilisateur inner join droit on droit.id = droit_FK where utilisateur.id=${id}`)
+}
 
 export default router;
