@@ -1,6 +1,8 @@
 import mysql2 from "mysql2"
 import ConnClass from "./Connection"
+
 import userRoute from "./route/userRoute"
+import itemRoute from "./route/itemRoute"
 const Connection  = ConnClass.getInstance()
 const cors = require("cors")
 const express = require("express")
@@ -11,7 +13,7 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.json());
 
 app.use("/user",userRoute)
-
+app.use("/item",itemRoute)
 
 
 app.listen(PORT,() => {    
