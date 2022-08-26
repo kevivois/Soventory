@@ -3,8 +3,8 @@ import instance from "../../Connection"
 import { FormatNumberLength } from "../../../utils"
 const Connection = instance.getInstance()
 const router = express.Router()
-const auth = require("../middleware/auth")
-const { isAdmin, canRead, canWrite } = require("../../middleware")
+const auth = require("../../middleware/auth")
+const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
 router.get("/all", [auth, canRead], async (req: any, res: any) => {

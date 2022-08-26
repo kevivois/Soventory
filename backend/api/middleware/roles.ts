@@ -1,9 +1,12 @@
 import Instance from "../Connection"
+import jwt from "jsonwebtoken"
+const env = require("../../env.json")
 const Connection = Instance.getInstance()
-export async function isAdmin(req:any,res:any,next:any) : Promise<void>
-{
-    let droit = await Connection.query(`select * from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
-    if(droit[0] && droit[0].droit == "ADMINISTRATEUR")
+export function isAdmin(req:any,res:any,next:any) : void
+{   
+    let droit = req.user.droit
+
+    if(droit && droit == "ADMINISTRATEUR")
     {
         return next()
     }
@@ -12,11 +15,11 @@ export async function isAdmin(req:any,res:any,next:any) : Promise<void>
         res.status(401).send({"error":"you are not allowed to do this action"})
     }
 }
-export async function canRead(req:any,res:any,next:any) : Promise<void>
+export function canRead(req:any,res:any,next:any) : void
 {
-    let droit = await Connection.query(`select * from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
+    let droit = req.user.droit
 
-    if(droit[0] && (droit[0].droit == "LIRE" || droit[0].droit == "ADMINISTRATEUR" || droit[0].droit == "ECRIRE"))
+    if(droit && (droit == "LIRE" || droit == "ADMINISTRATEUR" || droit == "ECRIRE"))
     {
         return next()
     }
@@ -25,11 +28,12 @@ export async function canRead(req:any,res:any,next:any) : Promise<void>
         return res.status(401).send({"error":"you are not allowed to do this action"})
     }
 }
-export async function canWrite(req:any,res:any,next:any) : Promise<void>
-{
-    let droit = await Connection.query(`select * from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
-
-    if(droit[0] && (droit[0].droit == "ECRIRE" || droit[0].droit == "ADMINISTRATEUR"))
+export function canWrite(req:any,res:any,next:any) : void
+{   
+    
+    let droit = req.user.droit
+    
+    if(droit && (droit == "ECRIRE" || droit == "ADMINISTRATEUR"))
     {
         return next()
     }

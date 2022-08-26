@@ -3,8 +3,8 @@ import instance from "../../Connection"
 import { FormatNumberLength } from "../../../utils"
 const Connection = instance.getInstance()
 const router = express.Router()
-const auth = require("../middleware/auth")
-const { isAdmin, canRead, canWrite } = require("../../middleware")
+const auth = require("../../middleware/auth")
+const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
 router.post("/create", [auth, canWrite], async (req: any, res: any) => {
@@ -75,4 +75,5 @@ router.get("/lieu/:id", [auth, canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select * from lieu where id = ${req.params.id}`)
     return res.status(200).send(query)
 })
+
 export default router
