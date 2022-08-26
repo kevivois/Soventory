@@ -2,7 +2,7 @@ import mysql2 from "mysql2"
 import ConnClass from "./Connection"
 
 import userRoute from "./route/userRoute"
-import itemRoute from "./route/itemRoute"
+import itemRoute from "./route/item/itemRoute"
 const Connection  = ConnClass.getInstance()
 const cors = require("cors")
 const express = require("express")

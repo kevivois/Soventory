@@ -1,6 +1,6 @@
-import jwt from "jsonwebtoken"
-const env = require("../env.json")
 
+const env = require("../env.json")
+const jwt = require("jsonwebtoken")
 module.exports = (req:any,res:any,next:any) => {
     const token = req.header("token")
     if(!token) return res.status(401).send({

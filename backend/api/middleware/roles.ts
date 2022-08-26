@@ -1,40 +1,40 @@
 import Instance from "../Connection"
 const Connection = Instance.getInstance()
-export async function isAdmin(req:any,res:any,next:any) : Promise<boolean>
+export async function isAdmin(req:any,res:any,next:any) : Promise<void>
 {
-    let droit = await Connection.query(`select droit from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
-    if(droit[0].droit == "ADMINISTRATEUR")
+    let droit = await Connection.query(`select * from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
+    if(droit[0] && droit[0].droit == "ADMINISTRATEUR")
     {
-        return true
+        return next()
     }
     else
     {
-        return false
+        res.status(401).send({"error":"you are not allowed to do this action"})
     }
 }
-export async function canRead(req:any,res:any,next:any) : Promise<boolean>
+export async function canRead(req:any,res:any,next:any) : Promise<void>
 {
-    let droit = await Connection.query(`select droit from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
+    let droit = await Connection.query(`select * from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
 
-    if(droit[0].droit == "LIRE")
+    if(droit[0] && (droit[0].droit == "LIRE" || droit[0].droit == "ADMINISTRATEUR" || droit[0].droit == "ECRIRE"))
     {
-        return true
+        return next()
     }
     else
     {
-        return false
+        return res.status(401).send({"error":"you are not allowed to do this action"})
     }
 }
-export async function canWrite(req:any,res:any,next:any) : Promise<boolean>
+export async function canWrite(req:any,res:any,next:any) : Promise<void>
 {
-    let droit = await Connection.query(`select droit from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
+    let droit = await Connection.query(`select * from utilisateur inner join droit on droit_FK=droit.id where utilisateur.id = ${req.body.id}`)
 
-    if(droit[0].droit == "ECRIRE")
+    if(droit[0] && (droit[0].droit == "ECRIRE" || droit[0].droit == "ADMINISTRATEUR"))
     {
-        return true
+        return next()
     }
     else
     {
-        return false
+        return res.status(401).send({"error":"you are not allowed to do this action"})
     }
 }

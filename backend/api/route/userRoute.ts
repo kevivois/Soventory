@@ -6,21 +6,22 @@ import instance from "../Connection"
 const Connection = instance.getInstance()
 const router = express.Router()
 const env = require("../../env.json")
+const { isAdmin, canRead, canWrite } = require("../middleware")
 
-router.get("/:id",async(req,res) => {
+router.get("/:id",[isAdmin],async(req:any,res:any) => {
   
   var result = await Connection.query(`select * from utilisateur where id=${req.params.id}`)
   
   return res.status(202).json(result)
 
 })
-router.get("/name/:username",async(req,res) => {
+router.get("/name/:username",[isAdmin],async(req:any,res:any) => {
 
   var result = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.params.username}"`)
   return res.status(202).json(result)
 
 })
-router.post("/create",async(req,res) => {
+router.post("/create",[isAdmin],async(req:any,res:any) => {
   try
   {
 
