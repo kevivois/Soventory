@@ -65,6 +65,7 @@ router.post("/login",async(req,res) => {
       throw new Error("invalid password or username")
     }
     var droit = await getRightOfUser(user[0].id)
+    console.log(droit)
     var token = generateAccessToken(user[0].nom_utilisateur,user[0].id,droit[0].droit)
     return res.status(200).json({
       "user":user[0],
