@@ -18,7 +18,6 @@ export function isAdmin(req:any,res:any,next:any) : void
 export function canRead(req:any,res:any,next:any) : void
 {
     let droit = req.user.droit
-
     if(droit && (droit == "LIRE" || droit == "ADMINISTRATEUR" || droit == "ECRIRE"))
     {
         return next()

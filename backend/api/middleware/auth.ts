@@ -6,7 +6,6 @@ module.exports = (req:any,res:any,next:any) => {
     if(!token) return res.status(401).send({
         error:"no token provided"
     })
-
     try
     {
         const user = jwt.verify(token,env.TOKEN_SECRET);
