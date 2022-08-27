@@ -19,7 +19,6 @@ router.post("/me/update",[auth],async(req:any,res:any) => {
     const {nom_utilisateur,mot_de_passe} = req.body
     if(nom_utilisateur && mot_de_passe)
     {
-
       const encryptedPassword = await bcrypt.hash(mot_de_passe,10)
       const occurence = await Connection.query(`select * from utilisateur where nom_utilisateur='${nom_utilisateur}'`)
       if(occurence.length > 0)
@@ -147,5 +146,4 @@ async function getRightOfUser(id:number)
   var result = await Connection.query(`Select droit.name as name from utilisateur inner join droit on droit.id = droit_FK where utilisateur.id=${id}`)
   return result[0].name || ""
 }
-
 export default router;

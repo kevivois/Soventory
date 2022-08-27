@@ -9,23 +9,27 @@ const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
 router.get("/all", [auth, canRead], async (req: any, res: any) => {
-    var query = await Connection.query(`select * from item inner join section on section_FK=section.id
-    inner join materiel on type_material_FK=materiel.id
-    inner join etat on etat_FK=etat.id
-    inner join marque on marque_FK=marque.id
-    inner join lieu on lieu_FK = lieu.id`)
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+        from item inner join section on section_FK=section.id
+             inner join materiel on type_material_FK=materiel.id
+             inner join etat on etat_FK=etat.id
+             inner join marque on marque_FK=marque.id
+             inner join lieu on lieu_FK = lieu.id`)
     return res.status(200).send(query)
 
 })
 
 router.get("/:id", [auth, canRead], async(req: any, res: any) => {
 
-    var query = await Connection.query(`select * from item inner join section on section_FK=section.id
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+                                                from item inner join section on section_FK=section.id
                                                      inner join materiel on type_material_FK=materiel.id
                                                      inner join etat on etat_FK=etat.id
                                                      inner join marque on marque_FK=marque.id
                                                      inner join lieu on lieu_FK = lieu.id
-                                                     where item.id="${req.params.id}`)
+                                                     where item.id=${req.params.id}`)
 
     return res.status(200).send(query)
 })
@@ -45,7 +49,7 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     try
     {
         var query = await Connection.query(`update item set ${Object.keys(req.body).map((key) => `${key} = "${req.body[key]}"`).join(",")} where id = ${req.params.id}`)
-    return res.status(200).send({ "id": query.insertId })
+        return res.status(200).send({ "id": query.insertId })
     }
     catch(e)
     {
@@ -53,6 +57,7 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
         return res.status(400).send({"error":"invalid request"})
     }
 })
+
 router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
     var query = await Connection.query(`delete from item where id = ${req.params.id}`)
     return res.status(200).send({ "id": query.insertId })
