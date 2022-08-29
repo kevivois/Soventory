@@ -1,6 +1,15 @@
-1: create table in db "refreshTokens" with {id:rdm string,userTo: link to user id table,}
-in frontend : for each request, accessToken and refresh token saved in cookies from user side
-in backend: check foreach request if accessToken is valid/expired , if expired, try to regenerate a new accessToken if refreshToken is in the db
-when logging into frontend : store new refreshToken in frontend cookies and db refreshTokens
+ create table in db "refreshTokens" with {id:rdm string,userTo: link to user id table,}
+ 
+when logging into frontend : create new refreshToken and accessToken store both in the cookies and finally store the new refreshToken in the db
 
-when logout : delete refreshToken from the db and refreshToken and access from the db
+foreach user frontend request : get tokens from cookies, if accessToken is not expired and is valid : proceed the request, if accessToken not valid / expired : try to generate a new one with the refreshToken , if refreshToken is not in the db , throw error : forbidden , if refreshToken is valid : generate a new accessToken and proceed the request
+
+in backend: check foreach request if accessToken is valid/expired , if expired, try to regenerate a new accessToken if refreshToken is in the db
+
+
+
+when user logout : delete refreshToken from the db and delete all tokens in cookies
+
+time for each tokens:
+refreshToken: unlimited time, depends on db if exist or not
+accessToken: between 10-45mn
