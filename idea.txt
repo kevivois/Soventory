@@ -1,0 +1,6 @@
+1: create table in db "refreshTokens" with {id:rdm string,userTo: link to user id table,}
+in frontend : for each request, accessToken and refresh token saved in cookies from user side
+in backend: check foreach request if accessToken is valid/expired , if expired, try to regenerate a new accessToken if refreshToken is in the db
+when logging into frontend : store new refreshToken in frontend cookies and db refreshTokens
+
+when logout : delete refreshToken from the db and refreshToken and access from the db
