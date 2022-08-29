@@ -1,4 +1,4 @@
- create table in db "refreshTokens" with {id:rdm string,userTo: link to user id table,}
+ create table in db "refreshTokens" with {id:int,token:rdmString,userTo: link to user id table,}
  
 when logging into frontend : create new refreshToken and accessToken store both in the cookies and finally store the new refreshToken in the db
 
