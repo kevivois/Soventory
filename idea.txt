@@ -13,3 +13,5 @@ when user logout : delete refreshToken from the db and delete all tokens in cook
 time for each tokens:
 refreshToken: unlimited time, depends on db if exist or not
 accessToken: between 10-45mn
+
+inspire from https://www.youtube.com/watch?v=XYjOteYbCMo
