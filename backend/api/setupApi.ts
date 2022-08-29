@@ -1,6 +1,6 @@
 
 import ConnClass from "./Connection"
-
+import cookieParser from "cookie-parser"
 import userRoute from "./route/userRoute"
 import itemRoute from "./route/item/itemRoute"
 
@@ -16,6 +16,7 @@ const express = require("express")
 const PORT = 3001;
 const app = express()
 app.options('*', cors());
+app.use(cookieParser());
 app.use(express.urlencoded({extended:true}))   
 app.use(express.json());
 app.use("/user",userRoute)

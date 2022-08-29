@@ -7,6 +7,7 @@ const Connection = instance.getInstance()
 const router = express.Router()
 const env = require("../../env.json")
 const { isAdmin, canRead, canWrite } = require("../middleware/roles")
+import { verifyJWT, signJWT } from "../utils/token.utils"
 const auth = require("../middleware/auth")
 
 router.get("/me",[auth],async (req:any,res:any)=>{
@@ -109,7 +110,7 @@ router.post("/create",async(req:any,res:any) => {
 router.post("/login",async(req,res) => {
   if(!req.body.nom_utilisateur || !req.body.mot_de_passe)
   {
-    throw new Error("undefined variables in body")
+    return res.status(400).send({"error":"Missing parameters"})
   }
 
   var user = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
@@ -119,17 +120,28 @@ router.post("/login",async(req,res) => {
 
     if (!Logged)
     {
-      throw new Error("invalid password or username")
+      return res.status(400).send({"error":"Wrong password or email"})
     }
     var droit = await getRightOfUser(user[0].id)
-    var token = generateAccessToken(user[0].id,droit)
-    return res.status(200).json({
-      "user":user[0],
-      "token":token})
-  }
-  return res.sendStatus(400)
-})
+    var accessToken = signJWT({id:user[0].id,droit:droit},"1m")
+    var refreshToken = signJWT({id:user[0].id,droit:droit},undefined)
+    console.log(String(refreshToken).length)
+    //adding refresh token to database
+    await Connection.query(`insert into refreshtoken (token,utilisateur_FK) values ("${refreshToken}","${user[0].id}")`)
 
+    // saving into cookies
+    res.cookie("refreshToken",refreshToken,{httpOnly:true})
+    res.cookie("accessToken",accessToken,{httpOnly:true})
+    return res.status(200).send({user:user[0],droit:droit,refreshToken:refreshToken,accessToken:accessToken})
+  }
+  return res.status(400).send({"error":"Wrong password or email"})
+})
+router.post("/logout",[auth],async(req:any,res:any) => {
+  await Connection.query(`delete from refreshtoken where token="${req.cookies.refreshToken}"`)
+  res.clearCookie("refreshToken")
+  res.clearCookie("accessToken")
+  return res.status(200).send({"message":"Logged out"})
+})
 router.get("/get/:id",[isAdmin],async(req:any,res:any) => {
   
   var result = await Connection.query(`select * from utilisateur where id=${req.params.id}`)
@@ -137,10 +149,6 @@ router.get("/get/:id",[isAdmin],async(req:any,res:any) => {
   return res.status(202).json(result)
 
 })
-function generateAccessToken(id:number,droit:string) : string
-{
-  return jwt.sign({id:id,droit:droit},env.TOKEN_SECRET,{expiresIn:"24h"})
-}
 async function getRightOfUser(id:number)
 {
   var result = await Connection.query(`Select droit.name as name from utilisateur inner join droit on droit.id = droit_FK where utilisateur.id=${id}`)
