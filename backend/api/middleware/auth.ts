@@ -3,7 +3,8 @@ const env = require("../env.json")
 const jwt = require("jsonwebtoken")
 import ConnClass from "../Connection"
 const Connection = ConnClass.getInstance()
-import {verifyJWT} from "../utils/token.utils"
+import {verifyJWT,signJWT} from "../utils/token.utils"
+import {getRightOfUser} from "../utils/item.utils"
 module.exports = async(req:any,res:any,next:any) => {
 
     const { accessToken, refreshToken } = req.cookies
@@ -20,7 +21,6 @@ module.exports = async(req:any,res:any,next:any) => {
         const verify = verifyJWT(accessToken)
         const expiredAccessToken = verify.expired
         const userAccessToken = verify.user
-        console.log(verify)
         if (expiredAccessToken) {
             if (refreshToken) {
                 const { user, expired } = verifyJWT(refreshToken)
@@ -34,21 +34,19 @@ module.exports = async(req:any,res:any,next:any) => {
                     if(tokenQuery.length > 0)
                     {
                         //generate new access token
-                        var newAccessToken = jwt.sign({id:user.id,droit:user.droit},env.TOKEN_SECRET,{expiresIn:"1m"})
-                        req.user = user
-                        console.log(user)
+                        var droit = await getRightOfUser(user.id)
+                        var newAccessToken = signJWT({id:user.id,droit:droit},"1m")
+                        req.user = {id:user.id,droit:droit}
                         res.cookie("accessToken",newAccessToken,{httpOnly:true})
                         console.log("new access token generated")
                         return next()
                     }
                     else
                     {
-                        console.log("Forbidden1")
                         return res.status(401).send("Forbidden")
                     }
                 }
             } else {
-                console.log("Forbidden2")
                 return res.status(401).send("Forbidden")
             }
         }
@@ -60,7 +58,6 @@ module.exports = async(req:any,res:any,next:any) => {
     }
     else
     {
-        console.log("Forbidden3")
         return res.status(401).send("Forbidden")
     }
 }

@@ -3,6 +3,7 @@ import express from "express"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import instance from "../Connection"
+import {getRightOfUser} from "../utils/item.utils"
 const Connection = instance.getInstance()
 const router = express.Router()
 const env = require("../../env.json")
@@ -113,7 +114,7 @@ router.post("/login",async(req,res) => {
     return res.status(400).send({"error":"Missing parameters"})
   }
 
-  var user = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
+  var user:any = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
   if(user[0])
   {
     var Logged = bcrypt.compareSync(req.body.mot_de_passe,user[0].mot_de_passe)
@@ -124,7 +125,7 @@ router.post("/login",async(req,res) => {
     }
     var droit = await getRightOfUser(user[0].id)
     var accessToken = signJWT({id:user[0].id,droit:droit},"1m")
-    var refreshToken = signJWT({id:user[0].id,droit:droit},undefined)
+    var refreshToken = signJWT({id:user[0].id},undefined)
     console.log(String(refreshToken).length)
     //adding refresh token to database
     await Connection.query(`insert into refreshtoken (token,utilisateur_FK) values ("${refreshToken}","${user[0].id}")`)
@@ -149,9 +150,4 @@ router.get("/get/:id",[isAdmin],async(req:any,res:any) => {
   return res.status(202).json(result)
 
 })
-async function getRightOfUser(id:number)
-{
-  var result = await Connection.query(`Select droit.name as name from utilisateur inner join droit on droit.id = droit_FK where utilisateur.id=${id}`)
-  return result[0].name || ""
-}
 export default router;
