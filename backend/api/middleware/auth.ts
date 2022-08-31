@@ -10,7 +10,7 @@ module.exports = async(req:any,res:any,next:any) => {
     const { accessToken, refreshToken } = req.cookies
 
     if (!accessToken && !refreshToken) {
-        return res.status(401).send("Forbidden")
+        return res.status(401).send({"error":"Forbidden"})
     }
     if(accessToken)
     {
@@ -21,11 +21,16 @@ module.exports = async(req:any,res:any,next:any) => {
         const verify = verifyJWT(accessToken)
         const expiredAccessToken = verify.expired
         const userAccessToken = verify.user
+        var droit = await getRightOfUser(userAccessToken.id)
         if (expiredAccessToken) {
             if (refreshToken) {
                 const { user, expired } = verifyJWT(refreshToken)
+                if(!droit || droit == "")
+                {
+                    droit = await getRightOfUser(verify.user.id)
+                }
                 if (expired) {
-                    return res.status(401).send("Forbidden")
+                    return res.status(401).send({"error":"Forbidden"})
                 }
                 else
                 {
@@ -34,8 +39,7 @@ module.exports = async(req:any,res:any,next:any) => {
                     if(tokenQuery.length > 0)
                     {
                         //generate new access token
-                        var droit = await getRightOfUser(user.id)
-                        var newAccessToken = signJWT({id:user.id,droit:droit},"1m")
+                        var newAccessToken = signJWT({id:user.id,droit:droit},"30m")
                         req.user = {id:user.id,droit:droit}
                         res.cookie("accessToken",newAccessToken,{httpOnly:true})
                         console.log("new access token generated")
@@ -43,22 +47,22 @@ module.exports = async(req:any,res:any,next:any) => {
                     }
                     else
                     {
-                        return res.status(401).send("Forbidden")
+                        return res.status(401).send({"error":"Forbidden"})
                     }
                 }
             } else {
-                return res.status(401).send("Forbidden")
+                return res.status(401).send({"error":"Forbidden"})
             }
         }
         else
         {
-            req.user = userAccessToken
+            req.user = {id:userAccessToken.id,droit:droit}
             return next()
         }
     }
     else
     {
-        return res.status(401).send("Forbidden")
+        return res.status(401).send({"error":"Forbidden"})
     }
 }
 

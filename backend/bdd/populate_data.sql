@@ -1,5 +1,5 @@
 
-#insert into materiel (nom) values ("Portable");
+insert into materiel (nom) values ("Portable");
 insert into marque (nom) values("HP");
 insert into section (nom) values ("ME");
 insert into etat (nom) values ("OK");

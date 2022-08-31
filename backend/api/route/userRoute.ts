@@ -21,7 +21,7 @@ router.post("/me/update",[auth],async(req:any,res:any) => {
     const {nom_utilisateur,mot_de_passe} = req.body
     if(nom_utilisateur && mot_de_passe)
     {
-      const encryptedPassword = await bcrypt.hash(mot_de_passe,10)
+      const encryptedPassword = bcrypt.hashSync(req.body.mot_de_passe,10)
       const occurence = await Connection.query(`select * from utilisateur where nom_utilisateur='${nom_utilisateur}'`)
       if(occurence.length > 0)
       {
@@ -124,7 +124,7 @@ router.post("/login",async(req,res) => {
       return res.status(400).send({"error":"Wrong password or email"})
     }
     var droit = await getRightOfUser(user[0].id)
-    var accessToken = signJWT({id:user[0].id,droit:droit},"1m")
+    var accessToken = signJWT({id:user[0].id,droit:droit},"30m")
     var refreshToken = signJWT({id:user[0].id},undefined)
     console.log(String(refreshToken).length)
     //adding refresh token to database
@@ -143,7 +143,7 @@ router.post("/logout",[auth],async(req:any,res:any) => {
   res.clearCookie("accessToken")
   return res.status(200).send({"message":"Logged out"})
 })
-router.get("/get/:id",[isAdmin],async(req:any,res:any) => {
+router.get("/get/:id",[auth,isAdmin],async(req:any,res:any) => {
   
   var result = await Connection.query(`select * from utilisateur where id=${req.params.id}`)
   

@@ -6,10 +6,6 @@ export  function ItemIntegrity(req:any, res:any, next:any) {
     let item = req.body
     let errors = []
 
-    if(!item.name || item.name == "")
-    {
-        errors.push("name is required")
-    }
     if(!item.type_material_FK)
     {
         errors.push("type_material_FK is required")
@@ -22,9 +18,9 @@ export  function ItemIntegrity(req:any, res:any, next:any) {
     {
         errors.push("model is required")
     }
-    if(!item.num_seriel || item.num_seriel == "")
+    if(!item.num_serie || item.num_serie == "")
     {
-        errors.push("num_seriel is required")
+        errors.push("num_serie is required")
     }
     if(!item.num_produit)
     {
