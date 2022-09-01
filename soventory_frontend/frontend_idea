@@ -1,0 +1,1 @@
+when user try to log : if correct data : connect , if not : return ,message (like bar at the bottom of the page) "incorrect email or password "
