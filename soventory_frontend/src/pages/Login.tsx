@@ -8,39 +8,33 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined.js';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-function Copyright(props: any) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
+import SoventoryIcon from "../logo/plussegaush.png"
+import env from "../env.json"
 const theme = createTheme();
 
 export default function SignIn() {
-    const [email, setEmail] = React.useState('');
+    const [name, setName] = React.useState('');
     const [password, setPassword] = React.useState('');
-    const [remember, setRemember] = React.useState(false);
   
-  const handleConnection : any = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log({
-        email: email,
-        password: password,
-        remember: remember
-    });
+  const handleConnection : () => Promise<void> =  async () => {
+    
+    if(name && password && name != "" && password != ""){
+    {
+      const query = await fetch(env.API_BASE+"/user/login",{
+        method: "POST",
+        body: JSON.stringify({"nom_utilisateur":name,"mot_de_passe":password})
+      })
+      const response = await query.json();
+      if(response.success)
+      {
+        console.log("success",response);
+      }
     }
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -54,23 +48,24 @@ export default function SignIn() {
             alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+          <Avatar sx={{ m: 1,bgcolor:"transparent" }}>
+            <img src={SoventoryIcon} style={{width:"100%"}} />
           </Avatar>
           <Typography component="h1" variant="h5">
             Se connecter
           </Typography>
-          <Box component="form" onSubmit={handleConnection} noValidate sx={{ mt: 1 }}>
+          <Box component="form" noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
               fullWidth
               id="email"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               label="Email"
               name="email"
               autoComplete="email"
               autoFocus
+              value={name}
             />
             <TextField
               margin="normal"
@@ -82,13 +77,11 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
-            />
-            <FormControlLabel
-              control={<Checkbox name='remember' color="primary" onChange={(e) => setRemember(e.target.checked)} value={remember} />}
-              label="Se souvenir de moi"
+              value={password}
             />
             <Button
               type="submit"
+              onClick={handleConnection}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}

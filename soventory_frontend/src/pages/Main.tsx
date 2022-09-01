@@ -6,8 +6,7 @@ export default  function Main()
     return (
         <div>
             <Routes>
-                <Route path="/" element={<p>test</p>} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<Login />} />
             </Routes>
         </div>
     );
