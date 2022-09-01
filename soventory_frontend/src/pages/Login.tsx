@@ -11,7 +11,10 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Snackbar from '@mui/material/Snackbar';
 import SoventoryIcon from "../logo/plussegaush.png"
+
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import env from "../env.json"
 const theme = createTheme();
 
@@ -21,24 +24,27 @@ export default function SignIn() {
   
   const handleConnection : () => Promise<void> =  async () => {
     
-    if(name && password && name != "" && password != ""){
+    if(name && password && name != "" && password != "")
     {
-      const query = await fetch(env.API_BASE+"/user/login",{
+      const query = await fetch("http://localhost:3001/user/login",{
         method: "POST",
-        body: JSON.stringify({"nom_utilisateur":name,"mot_de_passe":password})
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({nom_utilisateur:name,mot_de_passe:password})
+        
       })
       const response = await query.json();
+      console.log(response);
       if(response.success)
       {
         console.log("success",response);
       }
     }
-    }
-  }
-
+  };
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+      <div>
         <CssBaseline />
         <Box
           sx={{
@@ -59,11 +65,11 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
-              id="email"
+              id="name"
               onChange={(e) => setName(e.target.value)}
-              label="Email"
-              name="email"
-              autoComplete="email"
+              label="Nom d'utilisateur"
+              name="name"
+              autoComplete="name"
               autoFocus
               value={name}
             />
@@ -80,8 +86,7 @@ export default function SignIn() {
               value={password}
             />
             <Button
-              type="submit"
-              onClick={handleConnection}
+            onClick={handleConnection}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
@@ -92,7 +97,7 @@ export default function SignIn() {
             </Grid>
           </Box>
         </Box>
-      </Container>
+      </div>
     </ThemeProvider>
   );
 }

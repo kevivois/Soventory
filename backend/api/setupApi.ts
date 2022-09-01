@@ -9,16 +9,18 @@ import etatRoute from "./route/item/etat"
 import marqueRoute from "./route/item/marque"
 import materielRotue  from"./route/item/materiel"
 import sectionRoute from"./route/item/section"
-
+import {handleCors} from "./middleware/cors"
+import bodyParser from "body-parser"
 const Connection  = ConnClass.getInstance()
 const cors = require("cors")
 const express = require("express")
 const PORT = 3001;
 const app = express()
-app.options('*', cors());
-app.use(cookieParser());
 app.use(express.urlencoded({extended:true}))   
 app.use(express.json());
+app.use(cookieParser());
+app.options('*', cors());
+app.use(handleCors)
 app.use("/user",userRoute)
 app.use("/item",itemRoute)
 

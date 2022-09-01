@@ -109,6 +109,7 @@ router.post("/create",async(req:any,res:any) => {
   }
 })
 router.post("/login",async(req,res) => {
+  console.log(req.body)
   if(!req.body.nom_utilisateur || !req.body.mot_de_passe)
   {
     return res.status(400).send({"error":"Missing parameters"})
@@ -123,13 +124,21 @@ router.post("/login",async(req,res) => {
     {
       return res.status(400).send({"error":"Wrong password or email"})
     }
+    var refreshToken = ""
+    var ExistingToken = await Connection.query(`select * from refreshtoken where utilisateur_FK=${user[0].id}`)
+    if(ExistingToken[0])
+    {
+      refreshToken = ExistingToken[0].token
+    }
+    else
+    {
+      refreshToken = signJWT({id:user[0].id},undefined)
+      await Connection.query(`insert into refreshtoken (token,utilisateur_FK) values ("${refreshToken}","${user[0].id}")`)
+    }
     var droit = await getRightOfUser(user[0].id)
     var accessToken = signJWT({id:user[0].id,droit:droit},"30m")
-    var refreshToken = signJWT({id:user[0].id},undefined)
-    console.log(String(refreshToken).length)
     //adding refresh token to database
-    await Connection.query(`insert into refreshtoken (token,utilisateur_FK) values ("${refreshToken}","${user[0].id}")`)
-
+    console.log(refreshToken)
     // saving into cookies
     res.cookie("refreshToken",refreshToken,{httpOnly:true})
     res.cookie("accessToken",accessToken,{httpOnly:true})

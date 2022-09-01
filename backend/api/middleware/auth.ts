@@ -8,16 +8,11 @@ import {getRightOfUser} from "../utils/item.utils"
 module.exports = async(req:any,res:any,next:any) => {
 
     const { accessToken, refreshToken } = req.cookies
-
     if (!accessToken && !refreshToken) {
         return res.status(401).send({"error":"Forbidden"})
     }
     if(accessToken)
     {
-        if (accessToken == "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZHJvaXQiOiJBRE1JTklTVFJBVEVVUiIsImlhdCI6MTY2MTgwNjkxMywiZXhwIjoxNjYxODA2OTczfQ.S4ROQU1EtF1wLdk-_jfdSWSnNZD_sp45-0L_fVcBXBtzaSl9sqE-b-MGJlTlC0klEOe0lkb3EDf0eQ6F_kkuTM1055O9neCnD39XsOwnMSsLoVXGb5Vppv3mwxLtH7dNWTUhKQU5uDMIjKNVsSsYqucFvt-HbI9B8m0u1STTIpA")
-        {
-            console.log("okok")
-        }
         const verify = verifyJWT(accessToken)
         const expiredAccessToken = verify.expired
         const userAccessToken = verify.user
