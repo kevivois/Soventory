@@ -1,0 +1,3 @@
+when user logging :
+check firstly the email if exist : if not return "account doesn't exist, if yes : check the password , 
+if password incorrect return message "email or password incorrect" 
