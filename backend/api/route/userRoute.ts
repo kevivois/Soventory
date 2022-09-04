@@ -10,6 +10,7 @@ const env = require("../../env.json")
 const { isAdmin, canRead, canWrite } = require("../middleware/roles")
 import { verifyJWT, signJWT } from "../utils/token.utils"
 const auth = require("../middleware/auth")
+import {createCookie} from "../utils/cookie.utils"
 
 router.get("/me",[auth],async (req:any,res:any)=>{
     const {id} = req.user
@@ -92,7 +93,6 @@ router.post("/create",async(req:any,res:any) => {
       throw new Error("undefined variables in body")
     }
     var droit = await Connection.query(`select id from droit where name="${req.body.droit}"`)
-    console.log(droit)
     var isExisting = await Connection.query(`select id from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
     if(isExisting.length > 0)
     {
@@ -109,7 +109,6 @@ router.post("/create",async(req:any,res:any) => {
   }
 })
 router.post("/login",async(req,res) => {
-  console.log(req.body)
   if(!req.body.nom_utilisateur || !req.body.mot_de_passe)
   {
     return res.status(400).send({"error":"Missing parameters"})
@@ -138,13 +137,16 @@ router.post("/login",async(req,res) => {
     var droit = await getRightOfUser(user[0].id)
     var accessToken = signJWT({id:user[0].id,droit:droit},"30m")
     //adding refresh token to database
-    console.log(refreshToken)
     // saving into cookies
-    res.cookie("refreshToken",refreshToken,{httpOnly:true})
-    res.cookie("accessToken",accessToken,{httpOnly:true})
+    createCookie("refreshToken",refreshToken,req,res,3.154e10)
+    createCookie("accessToken",accessToken,req,res,undefined)
     return res.status(200).send({user:user[0],droit:droit,refreshToken:refreshToken,accessToken:accessToken})
   }
   return res.status(400).send({"error":"Wrong password or email"})
+})
+router.get("/getcookies",async(req,res) => {
+  console.log(req.cookies)
+  return res.status(200).send(req.cookies)
 })
 router.post("/logout",[auth],async(req:any,res:any) => {
   await Connection.query(`delete from refreshtoken where token="${req.cookies.refreshToken}"`)

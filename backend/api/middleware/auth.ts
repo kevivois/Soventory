@@ -5,6 +5,7 @@ import ConnClass from "../Connection"
 const Connection = ConnClass.getInstance()
 import {verifyJWT,signJWT} from "../utils/token.utils"
 import {getRightOfUser} from "../utils/item.utils"
+import {createCookie} from "../utils/cookie.utils"
 module.exports = async(req:any,res:any,next:any) => {
 
     const { accessToken, refreshToken } = req.cookies
@@ -36,7 +37,7 @@ module.exports = async(req:any,res:any,next:any) => {
                         //generate new access token
                         var newAccessToken = signJWT({id:user.id,droit:droit},"30m")
                         req.user = {id:user.id,droit:droit}
-                        res.cookie("accessToken",newAccessToken,{httpOnly:true})
+                        createCookie("accessToken",newAccessToken,req,res,undefined)
                         console.log("new access token generated")
                         return next()
                     }

@@ -16,10 +16,15 @@ const cors = require("cors")
 const express = require("express")
 const PORT = 3001;
 const app = express()
-app.use(express.urlencoded({extended:true}))   
-app.use(express.json());
+
 app.use(cookieParser());
-app.options('*', cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use(cors({
+    origin:"http://localhost:3000", // change after deployment
+    credentials:true
+}))
 app.use(handleCors)
 app.use("/user",userRoute)
 app.use("/item",itemRoute)

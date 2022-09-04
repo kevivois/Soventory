@@ -13,7 +13,6 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Snackbar from '@mui/material/Snackbar';
 import SoventoryIcon from "../logo/plussegaush.png"
-
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import env from "../env.json"
 const theme = createTheme();
@@ -21,6 +20,8 @@ const theme = createTheme();
 export default function SignIn() {
     const [name, setName] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [receivedData, setReceivedData] = React.useState(null);
+    const [loggedIn, setLoggedIn] = React.useState(false);
   
   const handleConnection : () => Promise<void> =  async () => {
     
@@ -28,6 +29,7 @@ export default function SignIn() {
     {
       const query = await fetch("http://localhost:3001/user/login",{
         method: "POST",
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json'
         },
@@ -35,14 +37,22 @@ export default function SignIn() {
         
       })
       const response = await query.json();
-      console.log(response);
-      if(response.success)
+      if(response.refreshToken)
       {
-        console.log("success",response);
+        setReceivedData(response);
+        setLoggedIn(true);
       }
     }
   };
-  return (
+  if(loggedIn)
+  {
+    //redirect to dashboard
+    // window.location.href = "http://localhost:3000" + "/dashboard";
+     return <div>loggedId</div>
+  }
+  else
+  {
+  return ( 
     <ThemeProvider theme={theme}>
       <div>
         <CssBaseline />
@@ -85,6 +95,7 @@ export default function SignIn() {
               autoComplete="current-password"
               value={password}
             />
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <Button
             onClick={handleConnection}
               fullWidth
@@ -92,7 +103,8 @@ export default function SignIn() {
               sx={{ mt: 3, mb: 2 }}
             >
               Se connecter
-            </Button>
+            </Button> 
+            </div>
             <Grid container>
             </Grid>
           </Box>
@@ -100,4 +112,5 @@ export default function SignIn() {
       </div>
     </ThemeProvider>
   );
+  }
 }
