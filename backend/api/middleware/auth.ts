@@ -17,13 +17,17 @@ module.exports = async(req:any,res:any,next:any) => {
         const verify = verifyJWT(accessToken)
         const expiredAccessToken = verify.expired
         const userAccessToken = verify.user
-        var droit = await getRightOfUser(userAccessToken.id)
+        var droit = ""
+        if(userAccessToken)
+        {
+            droit = await getRightOfUser(userAccessToken.id)
+        }
         if (expiredAccessToken) {
             if (refreshToken) {
                 const { user, expired } = verifyJWT(refreshToken)
                 if(!droit || droit == "")
                 {
-                    droit = await getRightOfUser(verify.user.id)
+                    droit = await getRightOfUser(user.id)
                 }
                 if (expired) {
                     return res.status(401).send({"error":"Forbidden"})

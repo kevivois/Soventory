@@ -1,79 +1,167 @@
 import React,{useState,useEffect} from "react"
-
-export default function DataTable()
+import HeaderMode from "./Mode";
+import TextField from "@mui/material/TextField";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import SearchIcon from "@mui/icons-material/Search";
+import {FilteringFilter,SortingFilter,SearchingFilter} from "./FIlterMode";
+import Headers from "./headers"
+import "./style/TableStyle.css"
+export default function DataTable(props:{data:any[]})
 {
-    const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [data, setData] = useState<any[]>(props.data);
+    const [headers,setHeaders] = useState<typeof Headers>(Headers)
+    const [filteredData,setFilteredData] = useState<any[]>(data);
+    const [filterList,setFilterList] = useState<any[]>([]);
 
     useEffect(() => {
-        async function fetchData()
+        filterList.forEach((filter)=>{
+            if(filter.name==="filtering")
+            {
+                var filtering : FilteringFilter = filter;
+            }
+            else if(filter.name==="sorting")
+            {
+                var sorting : SortingFilter = filter;
+            }
+            else if(filter.name==="searching")
+            {
+                var searching : SearchingFilter = filter;
+                onSearchTextChange(searching.value);
+            }
+        })
+
+
+    },[...filterList,filterList.length,filterList])
+
+    const AddNewFilter = (filter:any) => {
+        var newFilterList = [...filteredData];
+
+        if(filter.name === "searching")
         {
-            try
-            {
-                const query = await fetch("http://localhost:3001/item/inner/all",{
-                    credentials: "include"
-                });
-                const response = await query.json();
-                setData(response);
-            }
-            catch (error)
-            {
-                console.log(error)
-            }
-            finally
-            {
-                setLoading(false);
-            }
+            //check if there is a searching filter
+            var searchingFilter = newFilterList.find((filter)=>filter.name==="searching");
+            if(searchingFilter)
+            searchingFilter.value = filter.value;
         }
-        fetchData();
-    }, []);
+        else
+        {
+            newFilterList.push(filter);
+        }
+        setFilterList(newFilterList);
+    }
 
+    const onSearchTextChange = (text:any) => {
+        function eachData(filterText:any,data:any) :boolean
+        {
+            var result = false;
+            Object.values(data).forEach((value) => {
+                const vl = String(value).toLowerCase();
+                    if (vl.includes(filterText.toLowerCase()))
+                    {
+                        result =  true;
+                    }
+            });
+            return result;
+        }
+        var newData = [...data];
+        newData = [];
+        data.forEach((dt) => {
+          if (eachData(text,dt)) {
+            newData.push(dt);
+          }
+        });
+        setFilteredData(newData);
+      };
+    const orderByHeader = (header:any) => {
+        const newHeaders = [...headers];
+        newHeaders.forEach((h) => {
+            if (h.key === header.key) {
+                h.order = h.order === "asc" ? "desc" : "asc";
+            }
+        });
+        setHeaders(newHeaders);
+        const newFilteredData = [...filteredData];
+        newFilteredData.sort((a, b) => {
+            if (a[header.key] < b[header.key]) {
+                return header.order === "asc" ? -1 : 1;
+            }
+            if (a[header.key] > b[header.key]) {
+                return header.order === "asc" ? 1 : -1;
+            }
+            return 0;
+        });
+        setFilteredData(newFilteredData);
+    };
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error :(</p>;
+      const onClickSetMode = (header:any, mode:any) => {
+        var newHeaders = [...headers];
+    
+        var newHeader : typeof header;
+    
+        newHeaders.forEach((h) => {
+          if (h.key === header.key && h.mode === header.mode) {
+            newHeader = h;
+          }
+        });
+        var indexof = newHeaders.indexOf(newHeader);
+        newHeader.mode = mode;
+        newHeaders[indexof] = newHeader;
+    
+        setHeaders(newHeaders);
+      };
 
     return (
+        <div className="App">
+            <div className="SearchBar">
+            <TextField
+            id="outlined-basic"
+            variant="outlined"
+            fullWidth
+            label="Search"
+            onChange={(event) => onSearchTextChange(event.target.value)}/>
+            </div>
+            <div className="table">
         <table>
             <thead>
                 <tr>
-                    <th>Id</th>
-                    <th>materiel</th>
-                    <th>marque</th>
-                    <th>modele</th>
-                    <th>Numero de série</th>
-                    <th>Numero de produit</th>
-                    <th>section</th>
-                    <th>état</th>
-                    <th>lieu</th>
-                    <th>remarques</th>
-                    <th>Date d'achat</th>
-                    <th>garantie</th>
-                    <th>Date de fin de garantie</th>
-                    <th>prix</th>
+                    {headers.map((header) => {
+                        if(header.mode == HeaderMode.FILTER)
+                        {
+                            return (<th key={header.id}>{header.labelName}</th>)
+                        }
+                        else{
+                            if(header.filter !== undefined && header.filter == true)
+                            {
+                                return (<th key={header.id}>{header.labelName}<FilterAltIcon style={{float:"right"}} /></th>)
+                            }
+                            else if(header.ordering !== undefined && header.ordering == true)
+                            {
+                                const icon = header.order === "asc" ? "▲" : "▼";
+                                return (<th onClick={() => orderByHeader(header)} key={header.id}>{header.labelName}{icon}</th>)
+                            }
+                            else
+                            {
+                                return (<th key={header.id}>{header.labelName}</th>)
+                            }
+                            
+                        }
+                       
+                        })}
                 </tr>
             </thead>
             <tbody>
-                { data.length && data.length > 0 ? 
-                data.map((item:any) => (
-                    <tr key={item.id} style={{textAlign:"center"}}>
-                        <td>{item.id}</td>
-                        <td>{item.materiel}</td>
-                        <td>{item.marque}</td>
-                        <td>{item.modele}</td>
-                        <td>{item.num_serie}</td>
-                        <td>{item.num_produit}</td>
-                        <td>{item.section}</td>
-                        <td>{item.etat}</td>
-                        <td>{item.lieu}</td>
-                        <td>{item.remarque}</td>
-                        <td>{new Date(item.date_achat as Date).toLocaleDateString("fr")}</td>
-                        <td>{item.garantie}</td>
-                        <td>{new Date(item.fin_garantie as Date).toLocaleDateString("fr")}</td>
-                        <td>{item.prix}</td>
-                    </tr>
-                )) : <tr><td colSpan={3}>No data</td></tr> }
-            </tbody>
-        </table>
+                {filteredData.map((row) => {
+                    return (
+                        <tr key={row.id}>
+                            {headers.map((header) => {
+                                return (<td key={header.id}>{row[header.key]}</td>)
+                            })}
+                        </tr>
+                    )
+                })}
+             </tbody>
+            </table>
+            </div>
+        </div>
     );
 }
