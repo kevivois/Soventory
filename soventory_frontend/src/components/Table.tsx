@@ -11,6 +11,7 @@ export default function DataTable(props:{data:any[]})
     const [data, setData] = useState<any[]>(props.data);
     const [headers,setHeaders] = useState<typeof Headers>(Headers)
     const [filteredData,setFilteredData] = useState<any[]>(data);
+    const [renderedData,setRenderedData] = useState<any[]>(data);
     const [filterList,setFilterList] = useState<any[]>([]);
 
     useEffect(() => {
@@ -20,23 +21,38 @@ export default function DataTable(props:{data:any[]})
            {
             ApplyFilteringFilter(filter);
            }
-           else if(filter instanceof Searching)
-           {
-            ApplySearchingFilter(filter);
-           }
-           else if(filter instanceof Sorting)
-           {
-            console.log(filterList.length)
-            ApplySortingFilter(filter);
-           }
         })
+        filterList.forEach((filter:Filter)=>{
+            if(filter instanceof  Searching)
+            {
+             ApplySearchingFilter(filter);
+            }
+            else if(filter instanceof Sorting)
+            {
+                ApplySortingFilter(filter);
+            }
+         })
 
 
-    },[filterList])
+    },[...filterList])
+
+    useEffect(() => {
+        // creating an filter by value filter test
+        //let filter = new Filtering(headers[4],["WEIURHWEU"]);
+        // adding the filter to the filter list
+        //AddNewFilter(filter);
+    },[])
 
     const ApplyFilteringFilter = (filter:Filtering)=>
     {
-
+        console.log("a")
+        let selectedValues = filter.selectedValues;
+        let header = filter.header;
+        let newData : any[] = []
+        selectedValues.forEach((value:string)=>{
+            newData.push(...data.filter((item:any)=>item[header.key]===value))
+        })
+        setFilteredData(newData);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
@@ -58,7 +74,7 @@ export default function DataTable(props:{data:any[]})
                 }
                 return 0;
             });
-            setFilteredData(newFilteredData);
+            setRenderedData(newFilteredData);
     }
     const ApplySearchingFilter = (filter:Searching)=>
     {
@@ -76,13 +92,13 @@ export default function DataTable(props:{data:any[]})
         }
         var newData = [...data];
         newData = [];
-        data.forEach((dt) => {
+        filteredData.forEach((dt) => {
           if (eachData(filter.value,dt)) {
             newData.push(dt);
           }
         });
        
-        setFilteredData(newData);
+        setRenderedData(newData);
     }
     const AddNewFilter = (filter:Filter) => {
         var newFilterList = [...filteredData];
@@ -149,6 +165,9 @@ export default function DataTable(props:{data:any[]})
     
         setHeaders(newHeaders);
       };
+      const onClickFilterPopupOpen = (header:any) => {
+        
+      };
 
     return (
         <div className="App">
@@ -165,14 +184,9 @@ export default function DataTable(props:{data:any[]})
             <thead>
                 <tr>
                     {headers.map((header) => {
-                        if(header.mode == HeaderMode.FILTER)
-                        {
-                            return (<th key={header.id}>{header.labelName}</th>)
-                        }
-                        else{
                             if(header.filter !== undefined && header.filter == true)
                             {
-                                return (<th key={header.id}>{header.labelName}<FilterAltIcon style={{float:"right"}} /></th>)
+                                return (<th key={header.id}>{header.labelName}<FilterAltIcon style={{float:"right"}} onClick={() => onClickFilterPopupOpen(header) } /></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
@@ -184,13 +198,12 @@ export default function DataTable(props:{data:any[]})
                                 return (<th key={header.id}>{header.labelName}</th>)
                             }
                             
-                        }
                        
                         })}
                 </tr>
             </thead>
             <tbody>
-                {filteredData.map((row) => {
+                {renderedData.map((row) => {
                     return (
                         <tr key={row.id}>
                             {headers.map((header) => {

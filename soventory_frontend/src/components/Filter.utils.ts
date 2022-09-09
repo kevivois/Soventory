@@ -10,6 +10,7 @@ export interface HeaderType{
     sorting?:boolean;
     ordering?:boolean;
     order?:string;
+    filter?:boolean;
     id:number;
 }
 export interface IFilter{
@@ -26,11 +27,10 @@ export class Filter implements IFilter {
 }
 
 export class Filtering implements Filter {
-    name:string
+    name=FilterMode.FILTERING
     header:HeaderType;
     selectedValues:string[]
-    constructor(name:string,header:HeaderType,selectedValues:string[]){
-        this.name = name
+    constructor(header:HeaderType,selectedValues:string[]){
         this.header = header
         this.selectedValues = selectedValues
     }
