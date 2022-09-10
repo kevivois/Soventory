@@ -7,7 +7,7 @@ import itemRoute from "./route/item/itemRoute"
 import lieuRoute from"./route/item/lieu"
 import etatRoute from "./route/item/etat"
 import marqueRoute from "./route/item/marque"
-import materielRotue  from"./route/item/materiel"
+import materielRoute  from"./route/item/materiel"
 import sectionRoute from"./route/item/section"
 import {handleCors} from "./middleware/cors"
 import bodyParser from "body-parser"
@@ -32,7 +32,7 @@ app.use("/item",itemRoute)
 app.use("/item.lieu",lieuRoute)
 app.use("/item.etat",etatRoute)
 app.use("/item.marque",marqueRoute)
-app.use("/item.materiel",materielRotue)
+app.use("/item.materiel",materielRoute)
 app.use("/item.section",sectionRoute)
 
 

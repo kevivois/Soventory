@@ -6,13 +6,29 @@ import SearchIcon from "@mui/icons-material/Search";
 import {Filtering,Searching,Sorting,Filter,HeaderType} from "./Filter.utils";
 import Headers from "./headers"
 import "./style/TableStyle.css"
-export default function DataTable(props:{data:any[]})
+import DialogTitle from "@mui/material/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import { DialogContent } from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import RadioGroup from "@mui/material/RadioGroup";
+import Radio from "@mui/material/Radio";
+export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
 {
     const [data, setData] = useState<any[]>(props.data);
     const [headers,setHeaders] = useState<typeof Headers>(Headers)
     const [filteredData,setFilteredData] = useState<any[]>(data);
     const [renderedData,setRenderedData] = useState<any[]>(data);
     const [filterList,setFilterList] = useState<any[]>([]);
+    const [openPopup,setOpenPopup] = useState<boolean>(false);
+    const [headerFiltering,setHeaderFiltering] = useState<HeaderType>(headers[0]);
+    const [materiels,setMateriels] = useState<any[]>(props.materiels);
+    const [marques,setMarques] = useState<any[]>(props.marques);
+    const [sections,setSections] = useState<any[]>(props.sections);
+    const [etats,setEtats] = useState<any[]>(props.etats);
+    const [lieux,setLieux] = useState<any[]>(props.lieux);
+    const [filterDataList,setFilterDataList] = useState<any[]>([]);
 
     useEffect(() => {
         
@@ -33,15 +49,10 @@ export default function DataTable(props:{data:any[]})
             }
          })
 
+         console.log(lieux,etats,sections,marques,materiels)
 
     },[...filterList])
 
-    useEffect(() => {
-        // creating an filter by value filter test
-        //let filter = new Filtering(headers[4],["WEIURHWEU"]);
-        // adding the filter to the filter list
-        //AddNewFilter(filter);
-    },[])
 
     const ApplyFilteringFilter = (filter:Filtering)=>
     {
@@ -167,6 +178,29 @@ export default function DataTable(props:{data:any[]})
       };
       const onClickFilterPopupOpen = (header:any) => {
         
+        console.log(header.key)
+        if(header.key === "materiel")
+        {
+            setFilterDataList(materiels);
+        }
+        else if(header.key === "marque")
+        {
+            setFilterDataList(marques);
+        }
+        else if(header.key === "section")
+        {
+            setFilterDataList(sections);
+        }
+        else if(header.key === "etat")
+        {
+            setFilterDataList(etats);
+        }
+        else if(header.key === "lieu")
+        {
+            setFilterDataList(lieux);
+        }
+        setHeaderFiltering(header);
+        setOpenPopup(true)
       };
 
     return (
@@ -215,6 +249,34 @@ export default function DataTable(props:{data:any[]})
              </tbody>
             </table>
             </div>
+            <div className="FilterPopup">
+            <Dialog
+      sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
+      maxWidth="xs"
+      open={openPopup}
+    >
+      <DialogTitle>Phone Ringtone</DialogTitle>
+      <DialogContent dividers>
+          {filterDataList.map((dt) => {
+                return (
+                <div key={dt.id}>
+            <FormControlLabel
+              value={dt.nom}
+              key={dt.id}
+              control={<Radio />}
+              label={dt.nom}
+            />
+            </div>
+                )
+        })}
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={() => setOpenPopup(false)}>
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
+        </div>
         </div>
     );
 }

@@ -27,7 +27,7 @@ const headers = [
     {
         key:"modele",
         labelName:"Modèle",
-        filter:true,
+        filter:false,
         mode:HeaderMode.DEFAULT,
 
         id:3
@@ -50,6 +50,7 @@ const headers = [
         key:"section",
         labelName:"Section",
         mode:HeaderMode.DEFAULT,
+        filter:true,
 
         id:6
     },
