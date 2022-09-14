@@ -12,6 +12,7 @@ import { DialogContent } from "@mui/material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import Checkbox from '@mui/material/Checkbox';
 import RadioGroup from "@mui/material/RadioGroup";
 import Radio from "@mui/material/Radio";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
@@ -29,13 +30,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [etats,setEtats] = useState<any[]>(props.etats);
     const [lieux,setLieux] = useState<any[]>(props.lieux);
     const [filterDataList,setFilterDataList] = useState<any[]>([]);
+    const [checkBoxFilterList,setCheckBoxFilterList] = useState<any[]>([]);
+
 
     useEffect(() => {
         
         filterList.forEach((filter:Filter)=>{
            if(filter instanceof  Filtering)
            {
-            ApplyFilteringFilter(filter);
+            ApplyFilteringFilter(filterList.indexOf(filter),filter);
            }
         })
         filterList.forEach((filter:Filter)=>{
@@ -49,25 +52,34 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             }
          })
 
-         console.log(lieux,etats,sections,marques,materiels)
-
-    },[...filterList])
+    },[filterList])
 
 
-    const ApplyFilteringFilter = (filter:Filtering)=>
+    const ApplyFilteringFilter = (id:number,filter:Filtering)=>
     {
-        console.log("a")
+        var dataToFilter = [...filteredData];
+        if(id == 0) {dataToFilter = [...data]};
         let selectedValues = filter.selectedValues;
         let header = filter.header;
         let newData : any[] = []
-        selectedValues.forEach((value:string)=>{
-            newData.push(...data.filter((item:any)=>item[header.key]===value))
-        })
-        setFilteredData(newData);
+        if(selectedValues.length > 0)
+        {
+            dataToFilter.forEach((row:any)=>{
+                var adding = false
+                selectedValues.forEach((value:any)=>{
+                    if(row[header.key] == value.nom && value.checked)
+                    {
+                        adding = true
+                    }
+                })
+                if (adding) {newData.push(row)}
+            });
+        }
+        setFilteredData(newData.length > 0 ? newData : dataToFilter);
+        setRenderedData(newData.length > 0 ? newData : dataToFilter);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
-            console.log("sorting")
             const newHeaders = [...headers];
             newHeaders.forEach((h) => {
                 if (h.key === filter.header.key) {
@@ -177,8 +189,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setHeaders(newHeaders);
       };
       const onClickFilterPopupOpen = (header:any) => {
-        
-        console.log(header.key)
         if(header.key === "materiel")
         {
             setFilterDataList(materiels);
@@ -202,6 +212,63 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setHeaderFiltering(header);
         setOpenPopup(true)
       };
+
+      const addNewCheckBoxToCheckBoxList = (dt:any,event:any) => {
+        var newCheckBoxFilterList = [...checkBoxFilterList];
+        // check if checkbox exist in list
+        var index = newCheckBoxFilterList.findIndex((item:any) => item.nom === dt.nom);
+            // if exist and true do nothing
+            if(index === -1)
+            {
+                newCheckBoxFilterList.push({...dt,checked:event.target.checked});
+            }
+      
+        setCheckBoxFilterList(newCheckBoxFilterList);
+        
+    };
+
+    const addCheckBoxFilter = () => {
+        var newFilterList = [...filterList];
+        var newFilter = new Filtering(headerFiltering, checkBoxFilterList);
+        setCheckBoxFilterList([])
+        var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
+        if (index !== -1) {
+                var v = newFilter.selectedValues
+                newFilterList[index].selectedValues.push(...v);
+        } else {
+            newFilterList.push(newFilter);
+        }
+        
+        if(newFilter.selectedValues.length > 0)
+        {
+            newFilter.selectedValues.forEach((v:any) => {
+                if(!v.checked)
+                {
+                    var removing = false;
+                    newFilterList.forEach((flt:any) => {
+                        if(flt instanceof Filtering)
+                        {
+                            var index = flt.selectedValues.findIndex((item:any) => item.nom === v.nom);
+                            if(index !== -1)
+                            {
+                                flt.selectedValues.splice(index,1);
+                                removing = true;
+                            }
+                        }
+                    }
+                    )
+                    if(removing)
+                    {
+                        newFilterList = newFilterList.filter((flt:any) => flt.selectedValues.length > 0);
+                    }
+                }
+            });
+
+        }
+        setFilterList(newFilterList);
+        setOpenPopup(false)
+    }
+
 
     return (
         <div className="App">
@@ -255,15 +322,28 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
       maxWidth="xs"
       open={openPopup}
     >
-      <DialogTitle>Phone Ringtone</DialogTitle>
+      <DialogTitle>Filters</DialogTitle>
       <DialogContent dividers>
           {filterDataList.map((dt) => {
+                var checked = false
+                filterList.forEach((flt) => {
+                    if(flt instanceof Filtering && flt.header.key === headerFiltering.key)
+                    {
+                        flt.selectedValues.forEach((v) => {
+                            if(v.nom === dt.nom && v.checked == true)
+                            {
+                                checked = true
+                            }
+                        })
+                    }
+                })
+
                 return (
                 <div key={dt.id}>
             <FormControlLabel
               value={dt.nom}
               key={dt.id}
-              control={<Radio />}
+              control={<Checkbox color="primary" defaultChecked={checked} onChange={(event) => addNewCheckBoxToCheckBoxList(dt,event)} />}
               label={dt.nom}
             />
             </div>
@@ -271,8 +351,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         })}
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={() => setOpenPopup(false)}>
-          Close
+        <Button autoFocus onClick={() => {addCheckBoxFilter()}}>
+          Ok
         </Button>
       </DialogActions>
     </Dialog>

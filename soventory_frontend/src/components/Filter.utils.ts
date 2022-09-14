@@ -29,7 +29,7 @@ export class Filter implements IFilter {
 export class Filtering implements Filter {
     name=FilterMode.FILTERING
     header:HeaderType;
-    selectedValues:string[]
+    selectedValues:any[]
     constructor(header:HeaderType,selectedValues:string[]){
         this.header = header
         this.selectedValues = selectedValues
