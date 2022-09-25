@@ -35,11 +35,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
 
     useEffect(() => {
-        
+        var idx = 0;
         filterList.forEach((filter:Filter)=>{
            if(filter instanceof  Filtering)
            {
-            ApplyFilteringFilter(filterList.indexOf(filter),filter);
+            ApplyFilteringFilter(idx,filter);
+            idx++;
            }
         })
         setRemovingFirst(true);
@@ -61,25 +62,17 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     {
         var dataToFilter = [...filteredData];
         var selectedValues = filter.selectedValues;
-
-        var isRemoving = selectedValues.find((v:any) => v.checked == false) != undefined ? true : false;
         let header = filter.header;
         let newData : any[] = []
-        if(id == 0 || (isRemoving && removingFirst)) {
+        if(id == 0 ) {
             dataToFilter = [...data]
-            if(isRemoving && removingFirst)
-            {
-                setRemovingFirst(false);
-            }
-            console.log("a1")
         };
         if(selectedValues.length > 0)
         {
-            console.log(dataToFilter)
             dataToFilter.forEach((row:any)=>{
                 var adding = false
                 selectedValues.forEach((value:any)=>{
-                    if(row[header.key] == value.nom && value.checked)
+                    if(row[header.key] == value.nom)
                     {
                         adding = true
                     }
@@ -89,8 +82,14 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
             });
         }
-        setFilteredData(newData.length > 0 ? newData : dataToFilter);
-        setRenderedData(newData.length > 0 ? newData : dataToFilter);
+        else if(id == 0)
+        {
+            
+            newData = [...data]
+        }
+    //    console.log(newData,id,selectedValues)
+        setFilteredData(newData);
+        setRenderedData(newData);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
@@ -249,23 +248,29 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var newFilter = new Filtering(headerFiltering, checkBoxFilterList);
         setCheckBoxFilterList([])
         var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
-        if(index === -1)
+        
+        newFilter.selectedValues.forEach((value:any)=>{
+           if(!value.checked)
+           {
+            var idx = newFilterList[index].selectedValues.findIndex((item:any) => item.nom === value.nom);
+            newFilterList[index].selectedValues.splice(idx,1);
+           }
+        })
+
+        if(index !== -1)
         {
-            newFilterList.push(newFilter);
+            newFilterList[index].selectedValues =  newFilterList[index].selectedValues.filter((item:any) => item.checked === true);
+            newFilter.selectedValues = newFilter.selectedValues.filter((item:any) => item.checked === true);
+            var v = newFilterList[index].selectedValues
+            newFilter.selectedValues.push(...v)
+            newFilterList[index] = newFilter;
+            console.log(newFilterList)
         }
         else
         {
-            newFilterList[index].selectedValues.forEach((slc : any) => {
-                var idx = newFilter.selectedValues.findIndex((item:any) => item.nom === slc.nom);
-                if(idx === -1)
-                {
-                    newFilter.selectedValues.push(slc);
-                }
-            });
-            console.log(newFilter)
-            newFilterList[index] = newFilter;
+            newFilterList.push(newFilter);
         }
-        
+
         setFilterList(newFilterList);
         setOpenPopup(false)
     }
@@ -331,7 +336,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     if(flt instanceof Filtering && flt.header.key === headerFiltering.key)
                     {
                         flt.selectedValues.forEach((v) => {
-                            if(v.nom === dt.nom && v.checked == true)
+                            if(v.nom === dt.nom )
                             {
                                 checked = true
                             }
