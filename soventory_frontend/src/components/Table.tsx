@@ -31,6 +31,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [lieux,setLieux] = useState<any[]>(props.lieux);
     const [filterDataList,setFilterDataList] = useState<any[]>([]);
     const [checkBoxFilterList,setCheckBoxFilterList] = useState<any[]>([]);
+    const [removingFirst,setRemovingFirst] = useState<boolean>(true);
 
 
     useEffect(() => {
@@ -41,6 +42,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             ApplyFilteringFilter(filterList.indexOf(filter),filter);
            }
         })
+        setRemovingFirst(true);
         filterList.forEach((filter:Filter)=>{
             if(filter instanceof  Searching)
             {
@@ -58,12 +60,22 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const ApplyFilteringFilter = (id:number,filter:Filtering)=>
     {
         var dataToFilter = [...filteredData];
-        if(id == 0) {dataToFilter = [...data]};
-        let selectedValues = filter.selectedValues;
+        var selectedValues = filter.selectedValues;
+
+        var isRemoving = selectedValues.find((v:any) => v.checked == false) != undefined ? true : false;
         let header = filter.header;
         let newData : any[] = []
+        if(id == 0 || (isRemoving && removingFirst)) {
+            dataToFilter = [...data]
+            if(isRemoving && removingFirst)
+            {
+                setRemovingFirst(false);
+            }
+            console.log("a1")
+        };
         if(selectedValues.length > 0)
         {
+            console.log(dataToFilter)
             dataToFilter.forEach((row:any)=>{
                 var adding = false
                 selectedValues.forEach((value:any)=>{
@@ -72,7 +84,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                         adding = true
                     }
                 })
-                if (adding) {newData.push(row)}
+                if (adding) {
+                    newData.push(row)
+                }
             });
         }
         setFilteredData(newData.length > 0 ? newData : dataToFilter);
