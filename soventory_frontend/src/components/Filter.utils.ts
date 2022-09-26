@@ -12,6 +12,8 @@ export interface HeaderType{
     order?:string;
     filter?:boolean;
     id:number;
+    isDropDownList?:boolean,
+    canEdit?:boolean,
     inner?:boolean;
 }
 export interface IFilter{

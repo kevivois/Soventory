@@ -5,6 +5,8 @@ const headers = [
         labelName:"Id",
         mode:HeaderMode.DEFAULT,
         sorting:true,
+        canEdit:true,
+        isDropDownList:false,
         ordering:true,
         order:"asc",
         id:0
@@ -13,6 +15,8 @@ const headers = [
         key:"materiel",
         labelName:"Materiel",
         mode:HeaderMode.DEFAULT,
+        canEdit:false,
+        isDropDownList:true,
         filter:true,
         inner:true,
         id:1
@@ -22,6 +26,8 @@ const headers = [
         labelName:"Marque",
         filter:true,
         mode:HeaderMode.DEFAULT,
+        canEdit:false,
+        isDropDownList:true,
         inner:true,
         id:2
     },
@@ -30,6 +36,7 @@ const headers = [
         labelName:"Modèle",
         filter:false,
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:3
     },
@@ -37,6 +44,7 @@ const headers = [
         key:"num_serie",
         labelName:"Numéro de série",
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:4
     },
@@ -44,6 +52,7 @@ const headers = [
         key:"num_produit",
         labelName:"Numéro de produit",
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:5
     },
@@ -51,6 +60,8 @@ const headers = [
         key:"section",
         labelName:"Section",
         mode:HeaderMode.DEFAULT,
+        canEdit:false,
+        isDropDownList:true,
         filter:true,
         inner:true,
         id:6
@@ -60,6 +71,8 @@ const headers = [
         labelName:"Etat",
         filter:true,
         mode:HeaderMode.DEFAULT,
+        canEdit:false,
+        isDropDownList:true,
         inner:true,
         id:7
     },
@@ -68,6 +81,8 @@ const headers = [
         labelName:"Lieu",
         filter:true,        
         mode:HeaderMode.DEFAULT,
+        canEdit:false,
+        isDropDownList:true,
         inner:true,
         id:8
     },
@@ -75,12 +90,14 @@ const headers = [
         key:"remarque",
         labelName:"Remarque",
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:9
     },
     {
         key:"date_achat",
         labelName:"Date d'achat",
+        canEdit:true,
         mode:HeaderMode.DEFAULT,
         inner:false,
         id:10
@@ -89,6 +106,7 @@ const headers = [
         key:"garantie",
         labelName:"Garantie",
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:11
     },
@@ -96,6 +114,7 @@ const headers = [
         key:"fin_garantie",
         labelName:"Fin de garantie",
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:12
         
@@ -104,6 +123,7 @@ const headers = [
         key:"prix",
         labelName:"Prix",
         mode:HeaderMode.DEFAULT,
+        canEdit:true,
         inner:false,
         id:13
     }
