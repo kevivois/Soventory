@@ -67,12 +67,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         if(id == 0 ) {
             dataToFilter = [...data]
         };
-        if(selectedValues.length > 0)
+        if(selectedValues.filter((v:any)  => v.checked == true).length > 0)
         {
             dataToFilter.forEach((row:any)=>{
                 var adding = false
                 selectedValues.forEach((value:any)=>{
-                    if(row[header.key] == value.nom)
+                    if(row[header.key] == value.nom && value.checked == true)
                     {
                         adding = true
                     }
@@ -82,11 +82,19 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
             });
         }
-        else if(id == 0)
+        else
         {
-            
-            newData = [...data]
+            var idx = filterList.indexOf(filter);
+            var newFilterList = [...filterList];
+            newFilterList.splice(idx,1);
+            setFilterList(newFilterList);
+            if(id == 0)
+            {
+                newData = [...data]
+            }
+
         }
+        console.log(newData,filter)
     //    console.log(newData,id,selectedValues)
         setFilteredData(newData);
         setRenderedData(newData);
@@ -101,6 +109,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             setHeaders(newHeaders);
             const newFilteredData = [...filteredData];
+            const rdtData = [...renderedData];
             newFilteredData.sort((a, b) => {
                 if (a[filter.header.key] < b[filter.header.key]) {
                     return filter.header.order === "asc" ? -1 : 1;
@@ -156,7 +165,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         else if(filter instanceof Filtering)
         {
            //check if there is a filtering filter with the same header
-              var index = newFilterList.findIndex((flt:Filter)=> flt.header === filter.header);
+              var index = newFilterList.findIndex((flt:Filter)=> flt instanceof Filtering && flt.header === filter.header);
               
                 if(index !== -1)
                 {
@@ -249,28 +258,23 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setCheckBoxFilterList([])
         var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
         
-        newFilter.selectedValues.forEach((value:any)=>{
-           if(!value.checked)
-           {
-            var idx = newFilterList[index].selectedValues.findIndex((item:any) => item.nom === value.nom);
-            newFilterList[index].selectedValues.splice(idx,1);
-           }
-        })
-
         if(index !== -1)
         {
-            newFilterList[index].selectedValues =  newFilterList[index].selectedValues.filter((item:any) => item.checked === true);
-            newFilter.selectedValues = newFilter.selectedValues.filter((item:any) => item.checked === true);
-            var v = newFilterList[index].selectedValues
-            newFilter.selectedValues.push(...v)
+
+            newFilterList[index].selectedValues.forEach((item:any) => {
+                var index2 = newFilter.selectedValues.findIndex((item2:any) => item2.nom === item.nom);
+                if(index2 === -1)
+                {
+                    newFilter.selectedValues.push(item);
+                }
+            });
             newFilterList[index] = newFilter;
-            console.log(newFilterList)
         }
         else
         {
             newFilterList.push(newFilter);
         }
-
+        console.log(newFilterList)
         setFilterList(newFilterList);
         setOpenPopup(false)
     }
@@ -336,7 +340,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     if(flt instanceof Filtering && flt.header.key === headerFiltering.key)
                     {
                         flt.selectedValues.forEach((v) => {
-                            if(v.nom === dt.nom )
+                            if(v.nom === dt.nom && v.checked == true)
                             {
                                 checked = true
                             }
