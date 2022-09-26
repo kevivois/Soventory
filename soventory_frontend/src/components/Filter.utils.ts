@@ -12,6 +12,7 @@ export interface HeaderType{
     order?:string;
     filter?:boolean;
     id:number;
+    inner?:boolean;
 }
 export interface IFilter{
     name:string

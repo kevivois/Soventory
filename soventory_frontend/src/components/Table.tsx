@@ -35,15 +35,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
 
     useEffect(() => {
-        var idx = 0;
-        filterList.forEach((filter:Filter)=>{
-           if(filter instanceof  Filtering)
-           {
-            ApplyFilteringFilter(idx,filter);
-            idx++;
-           }
-        })
-        setRemovingFirst(true);
+ 
+            ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
+
         filterList.forEach((filter:Filter)=>{
             if(filter instanceof  Searching)
             {
@@ -58,44 +52,32 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     },[filterList])
 
 
-    const ApplyFilteringFilter = (id:number,filter:Filtering)=>
+    const ApplyFilteringFilter = async (filters:any[])=>
     {
-        var dataToFilter = [...filteredData];
-        var selectedValues = filter.selectedValues;
-        let header = filter.header;
-        let newData : any[] = []
-        if(id == 0 ) {
-            dataToFilter = [...data]
-        };
-        if(selectedValues.filter((v:any)  => v.checked == true).length > 0)
-        {
-            dataToFilter.forEach((row:any)=>{
-                var adding = false
-                selectedValues.forEach((value:any)=>{
-                    if(row[header.key] == value.nom && value.checked == true)
-                    {
-                        adding = true
-                    }
-                })
-                if (adding) {
-                    newData.push(row)
-                }
-            });
-        }
-        else
-        {
-            var idx = filterList.indexOf(filter);
-            var newFilterList = [...filterList];
-            newFilterList.splice(idx,1);
-            setFilterList(newFilterList);
-            if(id == 0)
+        var checkBoxFilter = checkBoxFilterList;
+        var body = filters.map((filter:Filtering)=>{
+            // name : value
+            if(filter.header.inner)
             {
-                newData = [...data]
+                return {name:`${filter.header.key}.nom`,values:filter.selectedValues}
             }
+            else
+            {
+                return {name:filter.header.key,values:filter.selectedValues}
+            }
+        })
 
-        }
-        console.log(newData,filter)
-    //    console.log(newData,id,selectedValues)
+
+        if(body.length == 0) return;
+        var query = await fetch("http://localhost:3001/item/byValues",{
+            credentials: "include",
+            method:"POST",
+            headers: {
+                'Content-Type': 'application/json'
+              },
+            body:JSON.stringify(body)
+        })
+        var newData = await query.json();
         setFilteredData(newData);
         setRenderedData(newData);
     }
@@ -274,7 +256,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             newFilterList.push(newFilter);
         }
-        console.log(newFilterList)
+        //console.log(newFilterList)
         setFilterList(newFilterList);
         setOpenPopup(false)
     }

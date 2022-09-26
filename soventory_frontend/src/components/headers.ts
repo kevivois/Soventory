@@ -14,6 +14,7 @@ const headers = [
         labelName:"Materiel",
         mode:HeaderMode.DEFAULT,
         filter:true,
+        inner:true,
         id:1
     },
     {
@@ -21,7 +22,7 @@ const headers = [
         labelName:"Marque",
         filter:true,
         mode:HeaderMode.DEFAULT,
-
+        inner:true,
         id:2
     },
     {
@@ -29,21 +30,21 @@ const headers = [
         labelName:"Modèle",
         filter:false,
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:3
     },
     {
         key:"num_serie",
         labelName:"Numéro de série",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:4
     },
     {
         key:"num_produit",
         labelName:"Numéro de produit",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:5
     },
     {
@@ -51,7 +52,7 @@ const headers = [
         labelName:"Section",
         mode:HeaderMode.DEFAULT,
         filter:true,
-
+        inner:true,
         id:6
     },
     {
@@ -59,7 +60,7 @@ const headers = [
         labelName:"Etat",
         filter:true,
         mode:HeaderMode.DEFAULT,
-
+        inner:true,
         id:7
     },
     {
@@ -67,35 +68,35 @@ const headers = [
         labelName:"Lieu",
         filter:true,        
         mode:HeaderMode.DEFAULT,
-
+        inner:true,
         id:8
     },
     {
         key:"remarque",
         labelName:"Remarque",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:9
     },
     {
         key:"date_achat",
         labelName:"Date d'achat",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:10
     },
     {
         key:"garantie",
         labelName:"Garantie",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:11
     },
     {
         key:"fin_garantie",
         labelName:"Fin de garantie",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:12
         
     },
@@ -103,7 +104,7 @@ const headers = [
         key:"prix",
         labelName:"Prix",
         mode:HeaderMode.DEFAULT,
-
+        inner:false,
         id:13
     }
 ]
