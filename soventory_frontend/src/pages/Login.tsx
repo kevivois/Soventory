@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -22,6 +23,27 @@ export default function SignIn() {
     const [password, setPassword] = React.useState('');
     const [receivedData, setReceivedData] = React.useState(null);
     const [loggedIn, setLoggedIn] = React.useState(false);
+
+    useEffect(() => {
+     
+      async function tryLogin()
+      {
+        const query = await fetch("http://localhost:3001/user/tryLogin", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+          'Content-Type': 'application/json'
+          },
+        });
+        const response = await query.json();
+        console.log(response)
+        if(response.logged)
+        {
+          setLoggedIn(true);
+        }
+      }
+      tryLogin();
+    },[]);
   
   const handleConnection : () => Promise<void> =  async () => {
     

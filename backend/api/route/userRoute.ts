@@ -161,4 +161,8 @@ router.get("/get/:id",[auth,isAdmin],async(req:any,res:any) => {
   return res.status(202).json(result)
 
 })
+router.get("/tryLogin",[auth],async(req:any,res:any) => {
+  return res.status(200).send({"message":"Logged in","logged":true})})
+
+
 export default router;
