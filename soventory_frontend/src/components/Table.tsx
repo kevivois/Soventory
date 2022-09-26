@@ -55,19 +55,21 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const ApplyFilteringFilter = async (filters:any[])=>
     {
         var checkBoxFilter = checkBoxFilterList;
-        var body = filters.map((filter:Filtering)=>{
+        var body = [...filters.map((filter:Filtering)=>{
             // name : value
+            var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
+            if(selectedValues.length == 0) {return null}
             if(filter.header.inner)
             {
-                return {name:`${filter.header.key}.nom`,values:filter.selectedValues}
+                return {name:`${filter.header.key}.nom`,values:selectedValues}
             }
             else
             {
-                return {name:filter.header.key,values:filter.selectedValues}
+                return {name:filter.header.key,values:selectedValues}
             }
-        })
-
-
+        })].filter((item:any)=>item != null);
+        
+        console.log(body)
         if(body.length == 0) return;
         var query = await fetch("http://localhost:3001/item/byValues",{
             credentials: "include",
@@ -296,7 +298,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 </tr>
             </thead>
             <tbody>
-                {renderedData.map((row) => {
+                {renderedData.length > 0 ?  renderedData.map((row) => {
                     return (
                         <tr key={row.id}>
                             {headers.map((header) => {
@@ -304,7 +306,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             })}
                         </tr>
                     )
-                })}
+                }): <a href="#clearFilters" onClick={() => {
+                    setFilterList([]);
+                    setCheckBoxFilterList([]);
+                    setRenderedData(data);
+                    setFilteredData(data);
+                }} style={{textAlign:"center"}}>No Data, clear filters</a>}
              </tbody>
             </table>
             </div>

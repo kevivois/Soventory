@@ -110,19 +110,11 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
                 start = ""
             }
 
-
-            if(value.checked)
-            {
-                joinAnd = true
                 return (`${start} ${req.body[key].name} = "${value.nom}" ${end}`)
-            }
-            else
-            {
-                joinAnd = false
-            }
+
         }
         ).join(" or ")
-    }).join(end == ")" ? " and " : "")
+    }).join(`and`)
     console.log(whereCondition)
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
