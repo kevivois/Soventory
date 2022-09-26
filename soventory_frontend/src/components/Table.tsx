@@ -1,4 +1,4 @@
-import React,{useState,useEffect, useCallback} from "react"
+import React,{useState,useEffect} from "react"
 import HeaderMode from "./Mode";
 import TextField from "@mui/material/TextField";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -15,9 +15,6 @@ import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
 import RadioGroup from "@mui/material/RadioGroup";
 import Radio from "@mui/material/Radio";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import ReactSelect from "react-select";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -35,20 +32,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [filterDataList,setFilterDataList] = useState<any[]>([]);
     const [checkBoxFilterList,setCheckBoxFilterList] = useState<any[]>([]);
     const [removingFirst,setRemovingFirst] = useState<boolean>(true);
-    const [modifyingCase,setModifyingCase] = useState<{id:any,headerName:any,value:any}>({id:-1,headerName:"",value:""});
-    const [headerModfiying,setHeaderModfiying] = useState<HeaderType>(headers[0]);
 
 
     useEffect(() => {
-        var idx = 0;
-        filterList.forEach((filter:Filter)=>{
-           if(filter instanceof  Filtering)
-           {
-            ApplyFilteringFilter(idx,filter);
-            idx++;
-           }
-        })
-        setRemovingFirst(true);
+ 
+            ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
+
         filterList.forEach((filter:Filter)=>{
             if(filter instanceof  Searching)
             {
@@ -62,45 +51,35 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
     },[filterList])
 
-    useEffect(() => {
 
-    },[modifyingCase])
-
-    useEffect(() => {
-        getFilterDataList(headerModfiying);
-    },[headerModfiying])
-
-
-    const ApplyFilteringFilter = (id:number,filter:Filtering)=>
+    const ApplyFilteringFilter = async (filters:any[])=>
     {
-        var dataToFilter = [...filteredData];
-        var selectedValues = filter.selectedValues;
-        let header = filter.header;
-        let newData : any[] = []
-        if(id == 0 ) {
-            dataToFilter = [...data]
-        };
-        if(selectedValues.length > 0)
-        {
-            dataToFilter.forEach((row:any)=>{
-                var adding = false
-                selectedValues.forEach((value:any)=>{
-                    if(row[header.key] == value.nom)
-                    {
-                        adding = true
-                    }
-                })
-                if (adding) {
-                    newData.push(row)
-                }
-            });
-        }
-        else if(id == 0)
-        {
-            
-            newData = [...data]
-        }
-    //    console.log(newData,id,selectedValues)
+        var checkBoxFilter = checkBoxFilterList;
+        var body = [...filters.map((filter:Filtering)=>{
+            // name : value
+            var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
+            if(selectedValues.length == 0) {return null}
+            if(filter.header.inner)
+            {
+                return {name:`${filter.header.key}.nom`,values:selectedValues}
+            }
+            else
+            {
+                return {name:filter.header.key,values:selectedValues}
+            }
+        })].filter((item:any)=>item != null);
+        
+        console.log(body)
+        if(body.length == 0) return;
+        var query = await fetch("http://localhost:3001/item/byValues",{
+            credentials: "include",
+            method:"POST",
+            headers: {
+                'Content-Type': 'application/json'
+              },
+            body:JSON.stringify(body)
+        })
+        var newData = await query.json();
         setFilteredData(newData);
         setRenderedData(newData);
     }
@@ -114,6 +93,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             setHeaders(newHeaders);
             const newFilteredData = [...filteredData];
+            const rdtData = [...renderedData];
             newFilteredData.sort((a, b) => {
                 if (a[filter.header.key] < b[filter.header.key]) {
                     return filter.header.order === "asc" ? -1 : 1;
@@ -169,7 +149,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         else if(filter instanceof Filtering)
         {
            //check if there is a filtering filter with the same header
-              var index = newFilterList.findIndex((flt:Filter)=> flt.header === filter.header);
+              var index = newFilterList.findIndex((flt:Filter)=> flt instanceof Filtering && flt.header === filter.header);
               
                 if(index !== -1)
                 {
@@ -214,7 +194,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     
         setHeaders(newHeaders);
       };
-      const getFilterDataList = (header:any) => {
+      const onClickFilterPopupOpen = (header:any) => {
         if(header.key === "materiel")
         {
             setFilterDataList(materiels);
@@ -235,13 +215,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             setFilterDataList(lieux);
         }
-      }
-      const onClickFilterPopupOpen = (header:any) => {
-        getFilterDataList(header)
         setHeaderFiltering(header);
         setOpenPopup(true)
       };
-
 
       const addNewCheckBoxToCheckBoxList = (dt:any,event:any) => {
         var newCheckBoxFilterList = [...checkBoxFilterList];
@@ -266,28 +242,23 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setCheckBoxFilterList([])
         var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
         
-        newFilter.selectedValues.forEach((value:any)=>{
-           if(!value.checked)
-           {
-            var idx = newFilterList[index].selectedValues.findIndex((item:any) => item.nom === value.nom);
-            newFilterList[index].selectedValues.splice(idx,1);
-           }
-        })
-
         if(index !== -1)
         {
-            newFilterList[index].selectedValues =  newFilterList[index].selectedValues.filter((item:any) => item.checked === true);
-            newFilter.selectedValues = newFilter.selectedValues.filter((item:any) => item.checked === true);
-            var v = newFilterList[index].selectedValues
-            newFilter.selectedValues.push(...v)
+
+            newFilterList[index].selectedValues.forEach((item:any) => {
+                var index2 = newFilter.selectedValues.findIndex((item2:any) => item2.nom === item.nom);
+                if(index2 === -1)
+                {
+                    newFilter.selectedValues.push(item);
+                }
+            });
             newFilterList[index] = newFilter;
-            console.log(newFilterList)
         }
         else
         {
             newFilterList.push(newFilter);
         }
-
+        //console.log(newFilterList)
         setFilterList(newFilterList);
         setOpenPopup(false)
     }
@@ -327,34 +298,20 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 </tr>
             </thead>
             <tbody>
-                {renderedData.map((row) => {
+                {renderedData.length > 0 ?  renderedData.map((row) => {
                     return (
                         <tr key={row.id}>
                             {headers.map((header) => {
-                                if(modifyingCase.id === row.id && modifyingCase.headerName === header.key)
-                                {
-                                    if(header.canEdit)
-                                    {
-                                        return (<td key={header.id}><TextField style={{width:"100%"}} value={row[header.key]} onChange={(event) => setModifyingCase({...modifyingCase,value:event.target.value})} /></td>)
-                                    }
-                                    else if(header.isDropDownList)
-                                    {
-                                        var v = Object.keys(props).find((key) => key === header.key);
-                                       
-                                            // show a drop down list of current header list values without call the re-render error
-                                    }
-                                }
-                                else
-                                {
-                                    return (<td key={header.id} onClick={() => {
-                                        setModifyingCase({id:row.id,headerName:header.key,value:row[header.key]})
-                                    }}>{row[header.key]}</td>)
-                                }
                                 return (<td key={header.id}>{row[header.key]}</td>)
                             })}
                         </tr>
                     )
-                })}
+                }): <a href="#clearFilters" onClick={() => {
+                    setFilterList([]);
+                    setCheckBoxFilterList([]);
+                    setRenderedData(data);
+                    setFilteredData(data);
+                }} style={{textAlign:"center"}}>No Data, clear filters</a>}
              </tbody>
             </table>
             </div>
@@ -372,8 +329,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     if(flt instanceof Filtering && flt.header.key === headerFiltering.key)
                     {
                         flt.selectedValues.forEach((v) => {
-
-                            if(v.nom === dt.nom )
+                            if(v.nom === dt.nom && v.checked == true)
                             {
                                 checked = true
                             }
