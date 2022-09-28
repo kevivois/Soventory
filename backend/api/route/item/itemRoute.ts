@@ -15,12 +15,13 @@ router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
              inner join materiel on type_material_FK=materiel.id
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
-             inner join lieu on lieu_FK = lieu.id`)
+             inner join lieu on lieu_FK = lieu.id
+             where archive=0`)
     return res.status(200).send(query)
 
 })
 router.get("/all", [auth,canRead], async (req: any, res: any) => {
-    var query = await Connection.query(`select * from item`)
+    var query = await Connection.query(`select * from item where archive=0`)
     return res.status(200).send(query)
 
 })
@@ -82,14 +83,9 @@ router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
 })
 router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
 
-    if(req.body == "")
-    {
-        return res.status(200).send([])
-    }
-    var joinAnd = false
     var end = ")"
     var start = "("
-    var whereCondition = Object.keys(req.body).map((key) => {
+    var whereCondition = "where" + Object.keys(req.body).map((key) => {
         return req.body[key].values.map((value: any) => {
             // test if it's the last value
             if (value == req.body[key].values[req.body[key].values.length - 1] && req.body[key].values.length > 1)
@@ -115,7 +111,14 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
         }
         ).join(" or ")
     }).join(`and`)
-    console.log(whereCondition)
+    if(req.body == "")
+    {
+        whereCondition = "";
+    }
+    else
+    {
+        whereCondition += "and archive = 0"
+    }
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
         from item inner join section on section_FK=section.id
@@ -123,8 +126,67 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
-             where ${whereCondition}`)
+             ${whereCondition}`)
     return res.status(200).send(query)
 })
 
+router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) => {
+
+    var end = ")"
+    var start = "("
+    var whereCondition = "where" + Object.keys(req.body).map((key) => {
+        return req.body[key].values.map((value: any) => {
+            // test if it's the last value
+            if (value == req.body[key].values[req.body[key].values.length - 1] && req.body[key].values.length > 1)
+            {
+                end = ")"
+            }
+            else
+            {
+                end = ""
+            }
+            // test if it's the start of the query
+            if (value == req.body[key].values[0] && req.body[key].values.length > 1)
+            {
+                start = "("
+            }
+            else
+            {
+                start = ""
+            }
+
+                return (`${start} ${req.body[key].name} = "${value.nom}" ${end}`)
+
+        }
+        ).join(" or ")
+    }).join(`and`)
+    if(req.body == "")
+    {
+        whereCondition = "where archive = 1";
+    }
+    else
+    {
+        whereCondition += "and archive = 1"
+    }
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+        from item inner join section on section_FK=section.id
+             inner join materiel on type_material_FK=materiel.id
+             inner join etat on etat_FK=etat.id
+             inner join marque on marque_FK=marque.id
+             inner join lieu on lieu_FK = lieu.id
+             ${whereCondition}`)
+    return res.status(200).send(query)
+})
+router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+        from item inner join section on section_FK=section.id
+             inner join materiel on type_material_FK=materiel.id
+             inner join etat on etat_FK=etat.id
+             inner join marque on marque_FK=marque.id
+             inner join lieu on lieu_FK = lieu.id
+             where archive = 1`);
+    return res.status(200).send(query);
+})
 export default router

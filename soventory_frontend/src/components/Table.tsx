@@ -15,6 +15,7 @@ import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
 import RadioGroup from "@mui/material/RadioGroup";
 import Radio from "@mui/material/Radio";
+import "./style/Table.css";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -35,9 +36,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
 
     useEffect(() => {
- 
-            ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
-
+        
+            if(filterList.filter((item:any) => item instanceof Filtering).length > 0)
+            {
+                ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
+            }
+            
         filterList.forEach((filter:Filter)=>{
             if(filter instanceof  Searching)
             {
@@ -68,9 +72,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 return {name:filter.header.key,values:selectedValues}
             }
         })].filter((item:any)=>item != null);
-        
-        console.log(body)
-        if(body.length == 0) return;
         var query = await fetch("http://localhost:3001/item/byValues",{
             credentials: "include",
             method:"POST",
@@ -258,23 +259,22 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             newFilterList.push(newFilter);
         }
-        //console.log(newFilterList)
         setFilterList(newFilterList);
         setOpenPopup(false)
     }
 
 
     return (
-        <div className="App">
+        <div className="App" style={{display:"inline-block",width:"100%"}}>
             <div className="SearchBar">
-            <TextField
+            <TextField style={{width:"100%",float:"left"}}
             id="outlined-basic"
             variant="outlined"
-            fullWidth
             label="Search"
             onChange={(event) => AddNewFilter(new Searching(event.target.value))}/>
             </div>
-            <div className="table">
+            <div className="table" style={{
+            }}>
         <table>
             <thead>
                 <tr>
@@ -292,8 +292,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             {
                                 return (<th key={header.id}>{header.labelName}</th>)
                             }
-                            
-                       
                         })}
                 </tr>
             </thead>
@@ -302,11 +300,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     return (
                         <tr key={row.id}>
                             {headers.map((header) => {
-                                return (<td key={header.id}>{row[header.key]}</td>)
+                                return (<td  key={header.id}>{row[header.key]}</td>)
                             })}
                         </tr>
                     )
-                }): <a href="#clearFilters" onClick={() => {
+                }): <a href="#" onClick={() => {
                     setFilterList([]);
                     setCheckBoxFilterList([]);
                     setRenderedData(data);
@@ -336,7 +334,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                         })
                     }
                 })
-
                 return (
                 <div key={dt.id}>
             <FormControlLabel

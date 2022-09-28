@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Snackbar from '@mui/material/Snackbar';
 import SoventoryIcon from "../logo/plussegaush.png"
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { Navigate } from 'react-router-dom';
 import env from "../env.json"
 const theme = createTheme();
 
@@ -68,9 +69,7 @@ export default function SignIn() {
   };
   if(loggedIn)
   {
-    //redirect to dashboard
-    // window.location.href = "http://localhost:3000" + "/dashboard";
-     return <div>loggedId</div>
+     return <Navigate to ="/dashboard"/>
   }
   else
   {
