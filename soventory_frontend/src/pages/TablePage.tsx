@@ -114,7 +114,7 @@ export default function  TablePage()
     },[])
 
     return (
-        <div className="App">
+        <div className="App" style={{width:"100%"}}>
             {loading ? <div>Loading...</div> : <Table data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />}
         </div>
     );

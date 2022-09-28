@@ -16,15 +16,14 @@ import {
   FaRegLaughWink,
   FaHeart
 } from "react-icons/fa";
-
-const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any, handleToggleSidebar:any }) => {
+import { IconType } from "react-icons/lib";
+const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any, handleToggleSidebar:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[]}) => {
   return (
     <ProSidebar
-    style={{height:"100vh"}}
+    style={{height:"100vh",width:"100%"}}
       rtl={props.rtl}
       collapsed={props.collapsed}
       toggled={props.toggled}
-      breakPoint="md"
       onToggle={props.handleToggleSidebar}
     >
       <SidebarHeader>
@@ -40,21 +39,23 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any, handleTog
             whiteSpace: "nowrap"
           }}
         >
-          'sidebarTitle'
+          {props.title}
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <Menu iconShape="circle">
-          <MenuItem
-            icon={<FaTachometerAlt />}
-            suffix={<span className="badge red">'new'</span>}
-          >
-           Dashboard
-          </MenuItem>
-          <MenuItem icon={<FaGem />}> Account</MenuItem>
-          <MenuItem icon={<FaGem />}> Parameters</MenuItem>
-          <MenuItem icon={<FaGem />}> Feedback</MenuItem>
+          {props.options.map((option) => {
+            return (
+              <MenuItem
+                key={option.key}
+                icon={<option.icon />}
+                onClick={() => option.onClickMenuitem(option.id)}
+              >
+                {option.labelName}
+              </MenuItem>
+            );
+          })}
         </Menu>
       </SidebarContent>
     </ProSidebar>

@@ -5,7 +5,6 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
 import {Filtering,Searching,Sorting,Filter,HeaderType} from "./Filter.utils";
 import Headers from "./headers"
-import "./style/TableStyle.css"
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import { DialogContent } from "@mui/material";
@@ -265,9 +264,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
 
     return (
-        <div className="App" style={{display:"inline-block",width:"100%"}}>
+        <div className="App" style={{width:"100%",display:"flex",flexDirection:"column"}}>
             <div className="SearchBar">
-            <TextField style={{width:"100%",float:"left"}}
+            <TextField sx={{width:"100%",float:"left"}}
             id="outlined-basic"
             variant="outlined"
             label="Search"
