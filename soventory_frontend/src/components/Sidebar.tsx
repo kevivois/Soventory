@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ProSidebar,
   Menu,
@@ -17,14 +17,15 @@ import {
   FaHeart
 } from "react-icons/fa";
 import { IconType } from "react-icons/lib";
-const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any, handleToggleSidebar:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[]}) => {
+import { Link } from "react-router-dom";
+const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[]}) => {
   return (
     <ProSidebar
     style={{height:"100vh",width:"100%"}}
       rtl={props.rtl}
       collapsed={props.collapsed}
       toggled={props.toggled}
-      onToggle={props.handleToggleSidebar}
+      onToggle={undefined}
     >
       <SidebarHeader>
         <div
@@ -50,7 +51,10 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any, handleTog
               <MenuItem
                 key={option.key}
                 icon={<option.icon />}
-                onClick={() => option.onClickMenuitem(option.id)}
+                onClick={() => {
+                    option.onClickMenuitem(option.id);
+                }}
+
               >
                 {option.labelName}
               </MenuItem>

@@ -5,8 +5,10 @@ import Box from '@mui/material/Box';
 import SideBar from "../components/Sidebar"
 import "react-pro-sidebar/dist/css/styles.css";
 import "../components/style/Sidebar.scss"
+import { Navigate } from 'react-router-dom';
 import {FaTachometerAlt} from "react-icons/fa"
 import {FaGem} from "react-icons/fa"
+import { useNavigate } from 'react-router-dom';
 import { IconType } from 'react-icons/lib';
 const MODE={
     TABLE:1,
@@ -15,10 +17,11 @@ const MODE={
     FEEDBACK:4,
 }
 
-export default function Dashboard()
+export default function Dashboard(props:{mode:number})
 {
-    const [mode,setMode] = useState<number>(MODE.TABLE);
+    const [mode,setMode] = useState<number>(props.mode);
     const [content,setContent] = useState<JSX.Element | undefined>(<div>loading</div>);
+    const naviguate = useNavigate();
     const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[] = [
         {
             id:1,
@@ -26,7 +29,8 @@ export default function Dashboard()
             labelName:"Dashboard",
             icon:FaTachometerAlt,
             onClickMenuitem:(which:number) => {
-                setMode(which);
+                 naviguate("/dashboard");
+                 setMode(which);
             }
         },
         {
@@ -35,7 +39,8 @@ export default function Dashboard()
             labelName:"Account",
             icon:FaGem,
             onClickMenuitem:(which:number) => {
-                setMode(which);
+                 naviguate("/account");
+                 setMode(which);
             }
         },
         {
@@ -44,7 +49,8 @@ export default function Dashboard()
             labelName:"Parameters",
             icon:FaGem,
             onClickMenuitem:(which:number) => {
-                setMode(which);
+                 naviguate("/parameters");
+                 setMode(which);
             }
         },
         {
@@ -53,6 +59,7 @@ export default function Dashboard()
             labelName:"Feedback",
             icon:FaGem,
             onClickMenuitem:(which:number) => {
+                naviguate("/feedback");
                 setMode(which);
             }
         },
@@ -106,19 +113,15 @@ export default function Dashboard()
     useEffect(() => {
         async function load(){
             let content = await renderScreen(mode);
-            console.log(mode)
             setContent(content);
         }
         load();
         
     },[mode])
 
-    const onClickMenuitem = async (which:number) => {
-        console.log(which);
-    }
     
     return <div style={{display:"block",width:"100vw"}}>
-        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar collapsed={false} image={false} handleToggleSidebar={onClickMenuitem} rtl={false} toggled={true} title={"Menu"} options={menuOptions} /></div>
+        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar collapsed={false} image={false} rtl={false} toggled={true} title={"Menu"} options={menuOptions} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
         </div>
 }

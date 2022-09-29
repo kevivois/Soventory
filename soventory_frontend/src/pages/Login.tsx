@@ -69,10 +69,9 @@ export default function SignIn() {
   };
   if(loggedIn)
   {
-     return <Navigate to ="/dashboard"/>
+    return <Navigate to="/dashboard" />
+    
   }
-  else
-  {
   return ( 
     <ThemeProvider theme={theme}>
       <div>
@@ -134,4 +133,3 @@ export default function SignIn() {
     </ThemeProvider>
   );
   }
-}
