@@ -13,6 +13,14 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
 import RadioGroup from "@mui/material/RadioGroup";
+import MenuList from "@mui/material/MenuList";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import Menu from "@mui/material/Menu";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import "./style/Table.css";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
@@ -32,6 +40,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [filterDataList,setFilterDataList] = useState<any[]>([]);
     const [checkBoxFilterList,setCheckBoxFilterList] = useState<any[]>([]);
     const [removingFirst,setRemovingFirst] = useState<boolean>(true);
+    const[rowMenuAnchorEl,setRowMenuAnchorEl] = useState<null | HTMLElement>(null);
+    const rowMenuOpen = Boolean(rowMenuAnchorEl);
+
+    const handlerowMenuClose = (e:any) => {
+        e.preventDefault();
+        setRowMenuAnchorEl(null);
+    };
+    const handlerowMenuOpen = (event: React.MouseEvent<HTMLElement>,row:any) => {
+        setRowMenuAnchorEl(event.currentTarget);
+    };
 
 
     useEffect(() => {
@@ -58,6 +76,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const ApplyFilteringFilter = async (filters:any[])=>
     {
         var checkBoxFilter = checkBoxFilterList;
+        console.log("a")
         var body = [...filters.map((filter:Filtering)=>{
             // name : value
             var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
@@ -178,22 +197,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setFilterList(newFilterList);
     }
 
-      const onClickSetMode = (header:any, mode:any) => {
-        var newHeaders = [...headers];
-    
-        var newHeader : typeof header;
-    
-        newHeaders.forEach((h) => {
-          if (h.key === header.key && h.mode === header.mode) {
-            newHeader = h;
-          }
-        });
-        var indexof = newHeaders.indexOf(newHeader);
-        newHeader.mode = mode;
-        newHeaders[indexof] = newHeader;
-    
-        setHeaders(newHeaders);
-      };
       const onClickFilterPopupOpen = (header:any) => {
         if(header.key === "materiel")
         {
@@ -218,7 +221,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setHeaderFiltering(header);
         setOpenPopup(true)
       };
-
+      
       const addNewCheckBoxToCheckBoxList = (dt:any,event:any) => {
         var newCheckBoxFilterList = [...checkBoxFilterList];
         // check if checkbox exist in list
@@ -235,6 +238,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setCheckBoxFilterList(newCheckBoxFilterList);
         
     };
+    const onRightClick = (event:any,row:any) => {
+        // on each row right click
+        // set entire row background color to #e0e0e0
+        handlerowMenuOpen(event,row);
+        event.preventDefault();
+    }
 
     const addCheckBoxFilter = () => {
         var newFilterList = [...filterList];
@@ -260,6 +269,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         }
         setFilterList(newFilterList);
         setOpenPopup(false)
+    }
+
+    const editRow = (id:number) => {
+        console.log(id)
+    }
+    const deleteRow = (id:number) => {
+        console.log(id)
     }
 
 
@@ -297,9 +313,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             <tbody>
                 {renderedData.length > 0 ?  renderedData.map((row) => {
                     return (
-                        <tr key={row.id}>
+                        <tr key={row.id} onMouseOver={(event) => {
+                            // set color of the entire row when mouse over
+                            const target = event.currentTarget as HTMLTableRowElement;
+                            target.style.backgroundColor = "#e0e0e0";
+                        }} onMouseOutCapture={(event) => {
+                            const target = event.currentTarget as HTMLTableRowElement;
+                            target.style.backgroundColor = "white";
+                        }}>
                             {headers.map((header) => {
-                                return (<td  key={header.id}>{row[header.key]}</td>)
+                                return (<td  key={header.id} onContextMenu={(event) => onRightClick(event,row)} >{row[header.key]}</td>)
                             })}
                         </tr>
                     )
@@ -351,6 +374,81 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </Button>
       </DialogActions>
     </Dialog>
+        </div>
+        <div className="rowMenu" style={{border:"none"}}>
+        <Paper sx={{ maxWidth: '100%' }}>
+        <Menu style={{border:"none"}} 
+        id="simple-menu"
+        anchorEl={rowMenuAnchorEl}
+        open={Boolean(rowMenuAnchorEl)}
+        onClose={handlerowMenuClose}
+        onClick={(event) => {
+            //know wich action is clicked
+            const target = event.target as HTMLLIElement;
+            const action = target.innerText;
+            //know wich row id from the list is clicked from event
+            const id = rowMenuAnchorEl?.parentElement?.getElementsByTagName("td")[0].innerText;
+            if(!id) return;
+            if(action === "Edit")
+            {
+                editRow(parseInt(id));
+            }
+            else if(action === "Delete")
+            {
+                deleteRow(parseInt(id));
+            }
+            
+
+            handlerowMenuClose(event);
+        }}
+        onContextMenu={handlerowMenuClose}
+        PaperProps={{
+            elevation: 0,
+            sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            '& .MuiAvatar-root': {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+                border:"none"
+            },
+            '&:before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                border:"none",
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+            },
+            },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+        <MenuList>
+            <MenuItem>
+            <ListItemIcon>
+                <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <Typography variant="inherit">Edit</Typography>
+            </MenuItem>
+            <MenuItem>
+            <ListItemIcon>
+                <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <Typography variant="inherit">Delete</Typography>
+            </MenuItem>
+        </MenuList>
+        </Menu>
+        </Paper>
         </div>
         </div>
     );
