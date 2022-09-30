@@ -10,6 +10,8 @@ import {FaTachometerAlt} from "react-icons/fa"
 import {FaGem} from "react-icons/fa"
 import { useNavigate } from 'react-router-dom';
 import { IconType } from 'react-icons/lib';
+import {CgOptions} from "react-icons/cg"
+import {VscAccount,VscFeedback} from "react-icons/vsc"
 const MODE={
     TABLE:1,
     ACCOUNT:2,
@@ -37,7 +39,7 @@ export default function Dashboard(props:{mode:number})
             id:2,
             key:"account",
             labelName:"Account",
-            icon:FaGem,
+            icon:VscAccount,
             onClickMenuitem:(which:number) => {
                  naviguate("/account");
                  setMode(which);
@@ -47,7 +49,7 @@ export default function Dashboard(props:{mode:number})
             id:3,
             key:"parameters",
             labelName:"Parameters",
-            icon:FaGem,
+            icon:CgOptions,
             onClickMenuitem:(which:number) => {
                  naviguate("/parameters");
                  setMode(which);
@@ -57,7 +59,7 @@ export default function Dashboard(props:{mode:number})
             id:4,
             key:"feedback",
             labelName:"Feedback",
-            icon:FaGem,
+            icon:VscFeedback,
             onClickMenuitem:(which:number) => {
                 naviguate("/feedback");
                 setMode(which);
@@ -107,6 +109,19 @@ export default function Dashboard(props:{mode:number})
                     return renderFeedback();
             }
         }
+
+    const disconnect = async () => {
+        const query = await fetch("http://localhost:3001/user/logout",{
+            credentials: "include",
+            method: "POST"
+        });
+        const response = await query.json();
+        if(response.message == "Logged out")
+        {
+            naviguate("/");
+        }
+        console.log(response);
+    };
         
 
 
@@ -121,7 +136,7 @@ export default function Dashboard(props:{mode:number})
 
     
     return <div style={{display:"block",width:"100vw"}}>
-        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar collapsed={false} image={false} rtl={false} toggled={true} title={"Menu"} options={menuOptions} /></div>
+        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar collapsed={false} image={false} rtl={false} toggled={true} title={"Menu"} options={menuOptions} disconnectFunction={disconnect} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
         </div>
 }

@@ -9,6 +9,7 @@ export default function  TablePage()
     const [lieux,setLieux] = useState<any[]>([])
     const [sections,setSections] = useState<any[]>([])
     const [loading,setLoading] = useState<boolean>(true)
+    const [loadingMessage,setLoadingMessage] = useState<string>("Loading")
 
     useEffect(() => {
         async function fetchItems()
@@ -88,11 +89,13 @@ export default function  TablePage()
         }
         async function fetchSections()
         {
+            var status = -1;
             try
             {
                 const query = await fetch("http://localhost:3001/item.section/all",{
                     credentials: "include"
                 });
+                status = query.status;
                 const response = await query.json();
                 setSections(response);
             }
@@ -102,6 +105,10 @@ export default function  TablePage()
             }
             finally
             {
+                if(String(status).startsWith("4"))
+                {
+                    return setLoadingMessage("You are not allowed to access this page");
+                }
                 setLoading(false);
             }
         }
@@ -115,7 +122,7 @@ export default function  TablePage()
 
     return (
         <div className="App" style={{width:"100%"}}>
-            {loading ? <div>Loading...</div> : <Table data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />}
+            {loading ? <div>{loadingMessage}</div> : <Table data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />}
         </div>
     );
 }

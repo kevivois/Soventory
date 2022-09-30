@@ -14,11 +14,14 @@ import {
   FaList,
   FaGithub,
   FaRegLaughWink,
-  FaHeart
+  FaHeart,
 } from "react-icons/fa";
+import {
+  BiLogOut
+} from "react-icons/bi";
 import { IconType } from "react-icons/lib";
 import { Link } from "react-router-dom";
-const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[]}) => {
+const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[],disconnectFunction:() => Promise<void>}) => {
   return (
     <ProSidebar
     style={{height:"100vh",width:"100%"}}
@@ -62,6 +65,13 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:stri
           })}
         </Menu>
       </SidebarContent>
+      <SidebarFooter>
+      <Menu iconShape="circle">
+          <MenuItem icon={<BiLogOut />} onClick={props.disconnectFunction}>
+            Disconnect
+          </MenuItem>
+        </Menu>
+      </SidebarFooter>
     </ProSidebar>
   );
 };
