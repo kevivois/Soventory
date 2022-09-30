@@ -12,13 +12,14 @@ import { useNavigate } from 'react-router-dom';
 import { IconType } from 'react-icons/lib';
 import {CgOptions} from "react-icons/cg"
 import {VscAccount,VscFeedback} from "react-icons/vsc"
+import {BsArchive} from "react-icons/bs"
 const MODE={
     TABLE:1,
     ACCOUNT:2,
     PARAMETERS:3,
     FEEDBACK:4,
+    ARCHIVE:5,
 }
-
 export default function Dashboard(props:{mode:number})
 {
     const [mode,setMode] = useState<number>(props.mode);
@@ -26,7 +27,7 @@ export default function Dashboard(props:{mode:number})
     const naviguate = useNavigate();
     const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[] = [
         {
-            id:1,
+            id:MODE.TABLE,
             key:"dashboard",
             labelName:"Dashboard",
             icon:FaTachometerAlt,
@@ -36,7 +37,17 @@ export default function Dashboard(props:{mode:number})
             }
         },
         {
-            id:2,
+            id:MODE.ARCHIVE,
+            key:"archives",
+            labelName:"Archives",
+            icon:BsArchive,
+            onClickMenuitem:(which:number) => {
+                 naviguate("/archives");
+                 setMode(which);
+            }
+        },
+        {
+            id:MODE.ACCOUNT,
             key:"account",
             labelName:"Account",
             icon:VscAccount,
@@ -46,7 +57,7 @@ export default function Dashboard(props:{mode:number})
             }
         },
         {
-            id:3,
+            id:MODE.PARAMETERS,
             key:"parameters",
             labelName:"Parameters",
             icon:CgOptions,
@@ -56,7 +67,7 @@ export default function Dashboard(props:{mode:number})
             }
         },
         {
-            id:4,
+            id:MODE.FEEDBACK,
             key:"feedback",
             labelName:"Feedback",
             icon:VscFeedback,
@@ -66,12 +77,16 @@ export default function Dashboard(props:{mode:number})
             }
         },
     ]
-
-
-
     const renderTable = async () => {
         return (
             <TablePage />
+        );
+    }
+    const renderArchives = async () => {
+        return (
+            <div>
+                <h1>Archives</h1>
+            </div>
         );
     }
     const renderAccount = async () => {
@@ -107,9 +122,10 @@ export default function Dashboard(props:{mode:number})
                     return renderParameters();
                 case MODE.FEEDBACK:
                     return renderFeedback();
+                case MODE.ARCHIVE:
+                    return renderArchives();
             }
         }
-
     const disconnect = async () => {
         const query = await fetch("http://localhost:3001/user/logout",{
             credentials: "include",
@@ -120,11 +136,7 @@ export default function Dashboard(props:{mode:number})
         {
             naviguate("/");
         }
-        console.log(response);
     };
-        
-
-
     useEffect(() => {
         async function load(){
             let content = await renderScreen(mode);
@@ -132,9 +144,7 @@ export default function Dashboard(props:{mode:number})
         }
         load();
         
-    },[mode])
-
-    
+    },[mode]);
     return <div style={{display:"block",width:"100vw"}}>
         <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar collapsed={false} image={false} rtl={false} toggled={true} title={"Menu"} options={menuOptions} disconnectFunction={disconnect} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>

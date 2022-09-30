@@ -22,6 +22,7 @@ import Menu from "@mui/material/Menu";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
+import ArchiveIcon from '@mui/icons-material/Archive';
 import "./style/Table.css";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
 {
@@ -274,7 +275,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const editRow = (id:number) => {
         console.log(id)
     }
-    const deleteRow = (id:number) => {
+    const addToArchive = (id:number) => {
         console.log(id)
     }
 
@@ -322,7 +323,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             target.style.backgroundColor = "white";
                         }}>
                             {headers.map((header) => {
-                                return (<td  key={header.id} onContextMenu={(event) => onRightClick(event,row)} >{row[header.key]}</td>)
+                                let content = row[header.key];
+                                if(header.key === "date_achat" || header.key === "fin_garantie") {content = new Date(row[header.key]).toLocaleDateString()}
+                                return (<td  style={{
+                                    "wordWrap": "break-word",
+                                    "maxWidth": "150px",
+                                    "overflow": "hidden",
+                                    "textOverflow": "ellipsis",
+                                    "whiteSpace": "nowrap",
+                                    "cursor": "pointer"
+                                }}  key={header.id} onContextMenu={(event) => onRightClick(event,row)} >{content}</td>)
                             })}
                         </tr>
                     )
@@ -377,7 +387,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         <div className="rowMenu" style={{border:"none"}}>
         <Paper sx={{ maxWidth: '100%' }}>
-        <Menu style={{border:"none"}} 
+        <Menu style={{border:"none"}}
         id="simple-menu"
         anchorEl={rowMenuAnchorEl}
         open={Boolean(rowMenuAnchorEl)}
@@ -393,12 +403,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             {
                 editRow(parseInt(id));
             }
-            else if(action === "Delete")
+            else if(action === "Add to archive")
             {
-                deleteRow(parseInt(id));
+                addToArchive(parseInt(id));
             }
-            
-
             handlerowMenuClose(event);
         }}
         onContextMenu={handlerowMenuClose}
@@ -431,7 +439,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             },
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'center' }}
         >
         <MenuList>
             <MenuItem>
@@ -442,9 +450,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             </MenuItem>
             <MenuItem>
             <ListItemIcon>
-                <DeleteIcon fontSize="small" />
+                <ArchiveIcon fontSize="small" />
             </ListItemIcon>
-            <Typography variant="inherit">Delete</Typography>
+            <Typography variant="inherit">Add to archive</Typography>
             </MenuItem>
         </MenuList>
         </Menu>

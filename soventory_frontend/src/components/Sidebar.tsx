@@ -46,7 +46,6 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:stri
           {props.title}
         </div>
       </SidebarHeader>
-
       <SidebarContent>
         <Menu iconShape="circle">
           {props.options.map((option) => {
@@ -57,7 +56,6 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:stri
                 onClick={() => {
                     option.onClickMenuitem(option.id);
                 }}
-
               >
                 {option.labelName}
               </MenuItem>
