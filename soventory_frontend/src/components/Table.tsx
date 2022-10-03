@@ -23,7 +23,9 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import ArchiveIcon from '@mui/icons-material/Archive';
+import {FiFilter} from "react-icons/fi"
 import "./style/Table.css";
+import FilterOverlay from "./FilterOverlay";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -40,9 +42,14 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [lieux,setLieux] = useState<any[]>(props.lieux);
     const [filterDataList,setFilterDataList] = useState<any[]>([]);
     const [checkBoxFilterList,setCheckBoxFilterList] = useState<any[]>([]);
-    const [removingFirst,setRemovingFirst] = useState<boolean>(true);
     const[rowMenuAnchorEl,setRowMenuAnchorEl] = useState<null | HTMLElement>(null);
-    const rowMenuOpen = Boolean(rowMenuAnchorEl);
+    const [searchBarValue,setSearchBarValue] = useState<string>("");
+    const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
+
+
+    useEffect(()=>{
+        console.log(openPopup)
+    },[openPopup])
 
     const handlerowMenuClose = (e:any) => {
         e.preventDefault();
@@ -52,12 +59,39 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setRowMenuAnchorEl(event.currentTarget);
     };
 
+    async function fetchItems()
+        {
+            try
+            {
+                const query = await fetch("http://localhost:3001/item/inner/all",{
+                    credentials: "include"
+                });
+                const response = await query.json();
+                setData(response);
+            }
+            catch (error)
+            {
+                console.log(error)
+            }
+        }
+
+    function clearFilters(){
+        setFilterList([]);
+        setCheckBoxFilterList([]);
+        setFilteredData(data);
+        setRenderedData(data);
+        setSearchBarValue("")
+    }
 
     useEffect(() => {
         
             if(filterList.filter((item:any) => item instanceof Filtering).length > 0)
             {
                 ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
+            }
+            else
+            {
+               fetchItems();
             }
             
         filterList.forEach((filter:Filter)=>{
@@ -72,6 +106,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
          })
 
     },[filterList])
+
 
 
     const ApplyFilteringFilter = async (filters:any[])=>
@@ -198,7 +233,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setFilterList(newFilterList);
     }
 
-      const onClickFilterPopupOpen = (header:any) => {
+      const onClickFilterPopupOpen = (event:any,header:any) => {
+        let target = event.currentTarget as any;
+        setDivFilterOverlay(target);
         if(header.key === "materiel")
         {
             setFilterDataList(materiels);
@@ -282,31 +319,42 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
     return (
         <div className="App" style={{width:"100%",display:"flex",flexDirection:"column"}}>
+            <div className="SearchDiv">
             <div className="SearchBar">
-            <TextField sx={{width:"100%",float:"left"}}
+            <TextField sx={{width:"100%",float:"right"}}
             id="outlined-basic"
             variant="outlined"
             label="Search"
-            onChange={(event) => AddNewFilter(new Searching(event.target.value))}/>
+            value={searchBarValue}
+            onChange={(event) => {
+                setSearchBarValue(event.target.value);
+                AddNewFilter(new Searching(event.target.value))}}/></div>
+            <div className="clearFiltersButton">
+            <Button variant="outlined" onClick={() => {
+               clearFilters();
+            }}><FiFilter style={{marginRight:"5px"}}/>Clear filters</Button>
+            <div>
+            </div>
+            </div>
             </div>
             <div className="table" style={{
             }}>
         <table>
             <thead>
-                <tr>
+                <tr className="columnContainer">
                     {headers.map((header) => {
                             if(header.filter !== undefined && header.filter == true)
                             {
-                                return (<th key={header.id}>{header.labelName}<FilterAltIcon style={{float:"right"}} onClick={() => onClickFilterPopupOpen(header) } /></th>)
+                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100%",alignItems:"center"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
                                 const icon = header.order === "asc" ? "▲" : "▼";
-                                return (<th onClick={() => AddNewFilter(new Sorting(header,header.order))} key={header.id}>{header.labelName}{icon}</th>)
+                                return (<th className="tableHeader" onClick={() => AddNewFilter(new Sorting(header,header.order))} key={header.id}>{header.labelName}{icon}</th>)
                             }
                             else
                             {
-                                return (<th key={header.id}>{header.labelName}</th>)
+                                return (<th className="tableHeader" key={header.id}>{header.labelName}</th>)
                             }
                         })}
                 </tr>
@@ -325,28 +373,17 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             {headers.map((header) => {
                                 let content = row[header.key];
                                 if(header.key === "date_achat" || header.key === "fin_garantie") {content = new Date(row[header.key]).toLocaleDateString()}
-                                return (<td  style={{
-                                    "wordWrap": "break-word",
-                                    "maxWidth": "150px",
-                                    "overflow": "hidden",
-                                    "textOverflow": "ellipsis",
-                                    "whiteSpace": "nowrap",
-                                    "cursor": "pointer"
-                                }}  key={header.id} onContextMenu={(event) => onRightClick(event,row)} >{content}</td>)
+                                return (<td className="tableContent"  key={header.id} onContextMenu={(event) => onRightClick(event,row)} >{content}</td>)
                             })}
                         </tr>
                     )
-                }): <a href="#" onClick={() => {
-                    setFilterList([]);
-                    setCheckBoxFilterList([]);
-                    setRenderedData(data);
-                    setFilteredData(data);
-                }} style={{textAlign:"center"}}>No Data, clear filters</a>}
+                }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>No data</td></tr>}
              </tbody>
             </table>
             </div>
             <div className="FilterPopup">
             <Dialog
+            
       sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
       maxWidth="xs"
       open={openPopup}
@@ -457,6 +494,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </MenuList>
         </Menu>
         </Paper>
+        </div>
+        <div className="FilterOverlay" style={{width:"100%"}}>
+            {!true ?  <FilterOverlay options={filterDataList} isOpen={openPopup} ref={divFilterOverlay} onEachOptionClick={addNewCheckBoxToCheckBoxList} onClose={addCheckBoxFilter}></FilterOverlay>:null}
         </div>
         </div>
     );

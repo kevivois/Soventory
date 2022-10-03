@@ -9,7 +9,7 @@ export default function  TablePage()
     const [lieux,setLieux] = useState<any[]>([])
     const [sections,setSections] = useState<any[]>([])
     const [loading,setLoading] = useState<boolean>(true)
-    const [loadingMessage,setLoadingMessage] = useState<string>("Loading")
+    const [loadingMessage,setLoadingMessage] = useState<String>("Loading")
 
     useEffect(() => {
         async function fetchItems()

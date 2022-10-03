@@ -21,7 +21,7 @@ import {
 } from "react-icons/bi";
 import { IconType } from "react-icons/lib";
 import { Link } from "react-router-dom";
-const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[],disconnectFunction:() => Promise<void>}) => {
+const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[],disconnectFunction:() => Promise<void>,menuIcon:string}) => {
   return (
     <ProSidebar
     style={{height:"100vh",width:"100%"}}
@@ -40,10 +40,13 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:stri
             letterSpacing: "1px",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: "nowrap"
+            whiteSpace: "nowrap",
+            textAlign: "center",
+            display:"inline-flex",
+            flexDirection:"row",
           }}
         >
-          {props.title}
+          <div><img src={props.menuIcon} style={{width:"50px",height:"50px",marginLeft:"10px"}}/></div> <div style={{margin:"auto",marginLeft:"10px"}}>{props.title}</div>
         </div>
       </SidebarHeader>
       <SidebarContent>

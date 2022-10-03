@@ -2,17 +2,87 @@ table {
     width: 100%; 
     border-collapse: collapse; 
   }
-  /* Zebra striping */
-  tr:nth-of-type(odd) { 
-    background: #eee; 
-  }
-  th { 
-    background: #333; 
-    color: white; 
-    font-weight: bold; 
-  }
-  td, th { 
+  td { 
     padding: 6px; 
-    border: 1px solid #ccc; 
+    border: 1px solid #dee2e6;
     text-align: left; 
   }
+.tableHeader {
+    text-align: left; 
+    font-size: 20px;
+    font-weight: bold;
+    border-width: 1px 1px 1px 1px;
+    padding: 1rem 1rem;
+    border: 1px solid #dee2e6;
+    display: table-cell;
+    vertical-align: inherit;
+    font-weight: 500;
+    font-size: 18px;
+    box-sizing: border-box;
+    color: #343a40;
+    background: #f8f9fa;
+    width:"100%";
+}
+.columnContainer
+{
+  height:70px;
+}
+.FilterIcon{
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-decoration: none;
+    overflow: hidden;
+    position: relative;
+    text-align: left;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+.headerContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    width: 100%;
+    height: 100%;
+}
+.tableContent {
+  word-wrap: break-word;
+  display: table-cell;
+  max-width: 150px;
+  height: fit-content;
+  cursor: auto;
+  border: 1px solid #dee2e6;
+  min-width: 6.2rem;
+  width:max-content;
+  overflow: hidden;
+  text-overflow: ellipsis !important;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.SearchDiv{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.SearchBar {
+  width: 50%;
+  padding: 0.75rem 0.75rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    border-radius: 6px;
+}
+.clearFiltersButton{
+  width: 10%;
+  padding: 0.75rem 0.75rem;
+  font-size: 1rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    border-radius: 6px;
+}

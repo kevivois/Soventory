@@ -113,7 +113,7 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
     }).join(`and`)
     if(req.body == "")
     {
-        whereCondition = "";
+        whereCondition = "where archive = 0";
     }
     else
     {
@@ -176,6 +176,7 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
              ${whereCondition}`)
+
     return res.status(200).send(query)
 })
 router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {

@@ -13,6 +13,7 @@ import { IconType } from 'react-icons/lib';
 import {CgOptions} from "react-icons/cg"
 import {VscAccount,VscFeedback} from "react-icons/vsc"
 import {BsArchive} from "react-icons/bs"
+import ProjectIcon from "../logo/plussegaush.png"
 const MODE={
     TABLE:1,
     ACCOUNT:2,
@@ -146,7 +147,7 @@ export default function Dashboard(props:{mode:number})
         
     },[mode]);
     return <div style={{display:"block",width:"100vw"}}>
-        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar collapsed={false} image={false} rtl={false} toggled={true} title={"Menu"} options={menuOptions} disconnectFunction={disconnect} /></div>
+        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
         </div>
 }
