@@ -12,17 +12,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
-import RadioGroup from "@mui/material/RadioGroup";
-import MenuList from "@mui/material/MenuList";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import Menu from "@mui/material/Menu";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Radio from "@mui/material/Radio";
-import ArchiveIcon from '@mui/icons-material/Archive';
+import EditOverlay from "./EditOverlay";
 import {FiFilter} from "react-icons/fi"
 import "./style/Table.css";
 import FilterOverlay from "./FilterOverlay";
@@ -42,21 +32,17 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [lieux,setLieux] = useState<any[]>(props.lieux);
     const [filterDataList,setFilterDataList] = useState<any[]>([]);
     const [checkBoxFilterList,setCheckBoxFilterList] = useState<any[]>([]);
-    const[rowMenuAnchorEl,setRowMenuAnchorEl] = useState<null | HTMLElement>(null);
+    const[rowToEdit,setRowToEdit] = useState<number | null>(null);
     const [searchBarValue,setSearchBarValue] = useState<string>("");
+    const [openEditPopup,setOpenEditPopup] = useState<boolean>(false);
     const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
-
-
-    useEffect(()=>{
-        console.log(openPopup)
-    },[openPopup])
-
-    const handlerowMenuClose = (e:any) => {
-        e.preventDefault();
-        setRowMenuAnchorEl(null);
+    
+    const handleEditPageClose = () => {
+        setOpenEditPopup(false)
     };
-    const handlerowMenuOpen = (event: React.MouseEvent<HTMLElement>,row:any) => {
-        setRowMenuAnchorEl(event.currentTarget);
+    const handleEditPageOpen = (event: React.MouseEvent<HTMLElement>,row:any) => {
+        setRowToEdit(row.id);
+        setOpenEditPopup(true);
     };
 
     async function fetchItems()
@@ -276,10 +262,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setCheckBoxFilterList(newCheckBoxFilterList);
         
     };
-    const onRightClick = (event:any,row:any) => {
+    const onRowClick = (event:any,row:any) => {
         // on each row right click
         // set entire row background color to #e0e0e0
-        handlerowMenuOpen(event,row);
+        handleEditPageOpen(event,row);
         event.preventDefault();
     }
 
@@ -373,7 +359,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             {headers.map((header) => {
                                 let content = row[header.key];
                                 if(header.key === "date_achat" || header.key === "fin_garantie") {content = new Date(row[header.key]).toLocaleDateString()}
-                                return (<td className="tableContent"  key={header.id} onContextMenu={(event) => onRightClick(event,row)} >{content}</td>)
+                                return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
                         </tr>
                     )
@@ -422,81 +408,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
       </DialogActions>
     </Dialog>
         </div>
-        <div className="rowMenu" style={{border:"none"}}>
-        <Paper sx={{ maxWidth: '100%' }}>
-        <Menu style={{border:"none"}}
-        id="simple-menu"
-        anchorEl={rowMenuAnchorEl}
-        open={Boolean(rowMenuAnchorEl)}
-        onClose={handlerowMenuClose}
-        onClick={(event) => {
-            //know wich action is clicked
-            const target = event.target as HTMLLIElement;
-            const action = target.innerText;
-            //know wich row id from the list is clicked from event
-            const id = rowMenuAnchorEl?.parentElement?.getElementsByTagName("td")[0].innerText;
-            if(!id) return;
-            if(action === "Edit")
-            {
-                editRow(parseInt(id));
-            }
-            else if(action === "Add to archive")
-            {
-                addToArchive(parseInt(id));
-            }
-            handlerowMenuClose(event);
-        }}
-        onContextMenu={handlerowMenuClose}
-        PaperProps={{
-            elevation: 0,
-            sx: {
-            overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            mt: 1.5,
-            '& .MuiAvatar-root': {
-                width: 32,
-                height: 32,
-                ml: -0.5,
-                mr: 1,
-                border:"none"
-            },
-            '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: 0,
-                right: 14,
-                width: 10,
-                height: 10,
-                border:"none",
-                bgcolor: 'background.paper',
-                transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0,
-            },
-            },
-        }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'center' }}
-        >
-        <MenuList>
-            <MenuItem>
-            <ListItemIcon>
-                <EditIcon fontSize="small" />
-            </ListItemIcon>
-            <Typography variant="inherit">Edit</Typography>
-            </MenuItem>
-            <MenuItem>
-            <ListItemIcon>
-                <ArchiveIcon fontSize="small" />
-            </ListItemIcon>
-            <Typography variant="inherit">Add to archive</Typography>
-            </MenuItem>
-        </MenuList>
-        </Menu>
-        </Paper>
-        </div>
-        <div className="FilterOverlay" style={{width:"100%"}}>
-            {!true ?  <FilterOverlay options={filterDataList} isOpen={openPopup} ref={divFilterOverlay} onEachOptionClick={addNewCheckBoxToCheckBoxList} onClose={addCheckBoxFilter}></FilterOverlay>:null}
+        
+        <div className="editOverlay">
+        {openEditPopup ? <EditOverlay open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} onApply={(newRow) => console.log(newRow)} /> : null}
+            
         </div>
         </div>
     );

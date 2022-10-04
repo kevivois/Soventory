@@ -146,7 +146,7 @@ export default function Dashboard(props:{mode:number})
         load();
         
     },[mode]);
-    return <div style={{display:"block",width:"100vw"}}>
+    return <div style={{display:"block",width:"100vw",height:"100%"}}>
         <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
         </div>

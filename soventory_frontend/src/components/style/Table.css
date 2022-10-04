@@ -57,7 +57,6 @@ table {
   height: fit-content;
   cursor: auto;
   border: 1px solid #dee2e6;
-  min-width: 6.2rem;
   width:max-content;
   overflow: hidden;
   text-overflow: ellipsis !important;
