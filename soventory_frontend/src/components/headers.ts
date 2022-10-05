@@ -6,6 +6,7 @@ const headers = [
         mode:HeaderMode.DEFAULT,
         sorting:true,
         canEdit:true,
+        inner:false,
         isDropDownList:false,
         ordering:true,
         order:"asc",
@@ -126,6 +127,15 @@ const headers = [
         canEdit:true,
         inner:false,
         id:13
+    },
+    {
+        key:"archive",
+        labelName:"Archivé",
+        mode:HeaderMode.DEFAULT,
+        canEdit:true,
+        inner:false,
+        show:false,
+        id:14
     }
 ]
 export default headers;

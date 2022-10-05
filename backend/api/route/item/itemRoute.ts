@@ -10,7 +10,7 @@ const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestInte
 
 router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
-    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
              inner join materiel on type_material_FK=materiel.id
              inner join etat on etat_FK=etat.id
@@ -30,7 +30,7 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
     try
     {
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
-                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
                                                 from item inner join section on section_FK=section.id
                                                      inner join materiel on type_material_FK=materiel.id
                                                      inner join etat on etat_FK=etat.id
@@ -120,7 +120,7 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
         whereCondition += "and archive = 0"
     }
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
-    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
              inner join materiel on type_material_FK=materiel.id
              inner join etat on etat_FK=etat.id
@@ -169,7 +169,7 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
         whereCondition += "and archive = 1"
     }
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
-    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
              inner join materiel on type_material_FK=materiel.id
              inner join etat on etat_FK=etat.id
@@ -181,7 +181,7 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
 })
 router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
-    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix
+    etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
              inner join materiel on type_material_FK=materiel.id
              inner join etat on etat_FK=etat.id

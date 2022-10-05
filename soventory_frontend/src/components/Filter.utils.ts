@@ -14,6 +14,7 @@ export interface HeaderType{
     id:number;
     isDropDownList?:boolean,
     canEdit?:boolean,
+    show?:boolean,
     inner?:boolean;
 }
 export interface IFilter{

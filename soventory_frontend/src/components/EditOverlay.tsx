@@ -1,22 +1,23 @@
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
+import Dialog, { DialogProps } from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
+import TextField from "@mui/material/TextField"
+import Headers from "./headers";
 import { Box } from '@mui/system';
 import React,{useEffect, useState} from 'react';
-export default function EditOverlay(props:{id:number|null,onApply:(row:any) => void,deleteFunction:() => void,open:boolean}) 
+export default function EditOverlay(props:{id:number|null,onApply:(row:any) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[]}) 
 {
     const [open,setOpen] = useState(props.open);
     const [deleteOpen,setDeleteOpen] = useState(false);
     const [editRow,setEditRow] = useState<any| null>(null);
+    const [fullWidth, setFullWidth] = React.useState(true);
+  const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('xl');
     const handleClose = () => {
-        setOpen(false);
-    }
-    const handleOpen = () => {
-        setOpen(true);
+        props.onClose();
     }
     const handleDeleteClose = () => {
         setDeleteOpen(false);
@@ -43,33 +44,75 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
     if(open && editRow != null)
     {
         return (
-            <div>
-                <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <div >
+                <Dialog open={open}  fullWidth={fullWidth}
+                                     maxWidth={maxWidth} onClose={handleClose} aria-labelledby="form-dialog-title"  >
                     <DialogTitle id="form-dialog-title">Edit</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             Edit the row
                         </DialogContentText>
-                        <Box sx={{display:'flex',flexDirection:'column'}}>
-                            <Box sx={{display:'flex',flexDirection:'row',justifyContent:'space-between'}}>
-                                <Box sx={{display:'flex',flexDirection:'column',width:'50%'}}>
-                                    <label>Product Name</label>
-                                    <input type="text" value={editRow.id} onChange={(e) => {setEditRow({...editRow,id:e.target.value})}}/>
-                                </Box>
-                                <Box sx={{display:'flex',flexDirection:'column',width:'50%'}}>
-                                    <label>Product Type</label>
-                                    <input type="text" value={editRow.materiel} onChange={(e) => {setEditRow({...editRow,materiel:e.target.value})}}/>
-                                </Box>
-                            </Box>
-                            <Box sx={{display:'flex',flexDirection:'row',justifyContent:'space-between'}}>
-                                <Box sx={{display:'flex',flexDirection:'column',width:'50%'}}>
-                                    <label>Product Price</label>
-                                    <input type="text" value={editRow?.productPrice} onChange={(e) => {setEditRow({...editRow,productPrice:e.target.value})}}/>
-                                </Box>
-                                <Box sx={{display:'flex',flexDirection:'column',width:'50%'}}>
-                                    <label>Product Quantity</label>
-                                    <input type="text" value={editRow.productQuantity} onChange={(e) => {setEditRow({...editRow,productQuantity:e.target.value})}}/>
-                                </Box>
+                        <Box sx={{display:'flex',flexDirection:'row',width:"100%",heigth:"100%"}}>
+                            <Box sx={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:"100%"}}>
+                                {props.headers.map((h:any,key:number) => {
+                                    var index = props.headers.indexOf(h);
+                                    if(index % 2 == 0)
+                                    {
+                                        var which = "textbox";
+                                        if(h.inner == true)
+                                        {
+                                            which = "dropdownlist";
+                                        }
+                                        else if(h.key == "archive")
+                                        {
+                                            which = "checkbox"
+                                        }
+                                        var header = {...h,which:which}
+                                        var nextHeader = props.headers.at(index+1);
+                                        which = "textbox"
+                                        if(nextHeader != undefined)
+                                        {
+                                            if(nextHeader.inner == true)
+                                            {
+                                                which = "dropdownlist";
+                                            }
+                                            else if(nextHeader.key == "archive")
+                                            {
+                                                which = "checkbox"
+                                            }
+                                            nextHeader = {...nextHeader,which:which}
+                                        }
+                                        var width= nextHeader != null ? "100%":"49.5%"
+                                        var margin = nextHeader != null ? "1%" : "2%"
+                                        return (
+                                            <div key={header.id} style={{width:width}}>
+                                            <Box  sx={{display:'flex',flexDirection:'row',width:'100%'}}>
+                                            <div style={{width:"100%"}}>
+                                            <div style={{display:"block"}}>
+                                            <label>{header.labelName}</label>
+                                            {header.which == "textbox" ? <TextField fullWidth value={editRow[h.key]} onChange={(e) => {
+                                                var newEditRow = editRow;
+                                                newEditRow[header.key] = e.target.value;
+                                                setEditRow(newEditRow)
+                                            }}/> : header.which == "dropdownlist" ? <div>dropdown</div> : header.which == "checkbox" ? <div>checkbox</div> : null}
+                                            </div>
+                                            </div>
+                                            {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
+                                            <div style={{display:"block"}}>
+                                            <label>{nextHeader.labelName}</label>
+                                            {nextHeader.which == "textbox" ? <TextField fullWidth value={editRow[h.key]} onChange={(e) => {
+                                                var newEditRow = editRow;
+                                                newEditRow[nextHeader.key] = e.target.value;
+                                                setEditRow(newEditRow)
+                                            }}/> : nextHeader.which == "dropdownlist" ? <div>dropdown</div> : nextHeader.which == "checkbox" ? <div>checkbox</div> : null}
+                                            </div>
+                                            </div> : null}
+                                            </Box>
+                                            </div>
+                                        )
+                                    }
+                                    
+                                })}
                             </Box>
                         </Box>
                     </DialogContent>

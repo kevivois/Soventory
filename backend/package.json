@@ -1,5 +1,6 @@
 {
   "name": "soventory_backend",
+  
   "version": "1.0.0",
   "description": "soventory backend",
   "main": "index.js",

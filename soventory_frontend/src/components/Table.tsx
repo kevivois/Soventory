@@ -329,6 +329,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             <thead>
                 <tr className="columnContainer">
                     {headers.map((header) => {
+                            if(header.show == false)return;
                             if(header.filter !== undefined && header.filter == true)
                             {
                                 return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100%",alignItems:"center"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
@@ -357,6 +358,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             target.style.backgroundColor = "white";
                         }}>
                             {headers.map((header) => {
+                                if(header.show == false)return;
                                 let content = row[header.key];
                                 if(header.key === "date_achat" || header.key === "fin_garantie") {content = new Date(row[header.key]).toLocaleDateString()}
                                 return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
@@ -410,7 +412,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         
         <div className="editOverlay">
-        {openEditPopup ? <EditOverlay open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} onApply={(newRow) => console.log(newRow)} /> : null}
+        {openEditPopup ? <EditOverlay open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => console.log(newRow)} /> : null}
             
         </div>
         </div>
