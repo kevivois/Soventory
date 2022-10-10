@@ -67,6 +67,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                         {
                                             which = "checkbox"
                                         }
+                                        else if(h.key == "fin_garantie" || h.key == "date_achat")
+                                        {
+                                            which = "datepicker"
+                                        }
                                         var header = {...h,which:which}
                                         var nextHeader = props.headers.at(index+1);
                                         which = "textbox"
@@ -80,6 +84,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                             {
                                                 which = "checkbox"
                                             }
+                                            else if(nextHeader.key == "fin_garantie" || nextHeader.key == "date_achat")
+                                            {
+                                                which = "datepicker"
+                                            }
                                             nextHeader = {...nextHeader,which:which}
                                         }
                                         var width= nextHeader != null ? "100%":"49.5%"
@@ -90,21 +98,23 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                             <div style={{width:"100%"}}>
                                             <div style={{display:"block"}}>
                                             <label>{header.labelName}</label>
-                                            {header.which == "textbox" ? <TextField fullWidth value={editRow[h.key]} onChange={(e) => {
+                                            {header.which == "textbox" ? <TextField fullWidth value={editRow[header.key]} onChange={(e) => {
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <div>dropdown</div> : header.which == "checkbox" ? <div>checkbox</div> : null}
+                                            }}/> : header.which == "dropdownlist" ? <div>dropdown</div> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
+                                                                                                                                       <div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div>
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
                                             <div style={{display:"block"}}>
                                             <label>{nextHeader.labelName}</label>
-                                            {nextHeader.which == "textbox" ? <TextField fullWidth value={editRow[h.key]} onChange={(e) => {
+                                            {nextHeader.which == "textbox" ? <TextField fullWidth value={editRow[nextHeader.key]} onChange={(e) => {
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : nextHeader.which == "dropdownlist" ? <div>dropdown</div> : nextHeader.which == "checkbox" ? <div>checkbox</div> : null}
+                                            }}/> : nextHeader.which == "dropdownlist" ? <div>dropdown</div> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
+                                                                                                                                               <div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
                                             </Box>
