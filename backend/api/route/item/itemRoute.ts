@@ -68,7 +68,15 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     try
     {
         var query = await Connection.query(`update item set ${Object.keys(req.body).map((key) => `${key} = "${req.body[key]}"`).join(",")} where id = ${req.params.id}`)
-        return res.status(200).send({ "id": query.insertId })
+        var selectAllQuery = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
+                                                from item inner join section on section_FK=section.id
+                                                     inner join materiel on type_material_FK=materiel.id
+                                                     inner join etat on etat_FK=etat.id
+                                                     inner join marque on marque_FK=marque.id
+                                                     inner join lieu on lieu_FK = lieu.id
+                                                     where item.id=${req.params.id}`)
+        return res.status(200).send({ "data": selectAllQuery })
     }
     catch(e)
     {

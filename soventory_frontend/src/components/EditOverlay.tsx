@@ -8,13 +8,18 @@ import Modal from '@mui/material/Modal';
 import TextField from "@mui/material/TextField"
 import Headers from "./headers";
 import { Box } from '@mui/system';
+import CreatableSelect from './CreatableSelect';
 import React,{useEffect, useState} from 'react';
+//import "./style/EditOverlay.scss";
+import "react-widgets/styles.css";
+import DropdownList from "react-widgets/DropdownList";
 export default function EditOverlay(props:{id:number|null,onApply:(row:any) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[]}) 
 {
     const [open,setOpen] = useState(props.open);
     const [deleteOpen,setDeleteOpen] = useState(false);
     const [editRow,setEditRow] = useState<any| null>(null);
     const [fullWidth, setFullWidth] = React.useState(true);
+    const [dropdownData,setDropdownData] = useState<any>({});
   const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('xl');
     const handleClose = () => {
         props.onClose();
@@ -35,12 +40,33 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
             },
         });
         const data = await response.json();
-        console.log(data)
         setEditRow(data[0]);
     }
     useEffect(() => {
         fetchItem();
+        props.headers.forEach((header) => {
+            if(header.inner === true)
+            {
+                fetchDropDown(header.key);
+            }
+        });
+        
     },[]);
+
+    async function fetchDropDown(key:string){
+        var newDropDownData = dropdownData;
+        if(newDropDownData[key] == undefined){
+            const query = await fetch(`http://localhost:3001/item.${key}/all`,{
+            method: 'GET',
+            credentials: 'include',
+        })
+        const response = await query.json();
+        //create a list with only the name of all the items
+        var list:any[] = [];
+        newDropDownData[key] = response;
+        setDropdownData(newDropDownData);
+        }
+    }
     if(open && editRow != null)
     {
         return (
@@ -102,7 +128,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <div>dropdown</div> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
+                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onChange={(value:any) =>  {
+                                                var newEditRow = editRow;
+                                                newEditRow[header.key] = value;
+                                                setEditRow(newEditRow)}} data={dropdownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
                                                                                                                                        <div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div>
@@ -113,7 +142,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : nextHeader.which == "dropdownlist" ? <div>dropdown</div> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
+                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect onChange={(value:any) =>  {
+                                                var newEditRow = editRow;
+                                                newEditRow[nextHeader.key] = value;
+                                                setEditRow(newEditRow)}} data={dropdownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
                                                                                                                                                <div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
