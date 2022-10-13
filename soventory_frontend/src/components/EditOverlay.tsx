@@ -8,7 +8,8 @@ import Modal from '@mui/material/Modal';
 import TextField from "@mui/material/TextField"
 import Headers from "./headers";
 import { Box } from '@mui/system';
-import CreatableSelect from './CreatableSelect';
+//import CreatableSelect from './Selects/CreatableSelect';
+import { CustomizedSelect as CreatableSelect } from './Selects/CustomizedSelect';
 import React,{useEffect, useState} from 'react';
 //import "./style/EditOverlay.scss";
 import "react-widgets/styles.css";
@@ -128,7 +129,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onChange={(value:any) =>  {
+                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onDelete={() => {}} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = value;
                                                 setEditRow(newEditRow)}} data={dropdownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
@@ -142,9 +143,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect onChange={(value:any) =>  {
+                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect onDelete={() => {}} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = value;
+                                                console.log(newEditRow[nextHeader.key],"a")
                                                 setEditRow(newEditRow)}} data={dropdownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
                                                                                                                                                <div>datepicker</div> : <div>error</div>}
                                             </div>
