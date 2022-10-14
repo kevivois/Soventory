@@ -94,7 +94,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     },[filterList])
 
 
-
     const ApplyFilteringFilter = async (filters:any[])=>
     {
         var checkBoxFilter = checkBoxFilterList;
@@ -301,6 +300,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const addToArchive = (id:number) => {
         console.log(id)
     }
+
 
 
     return (

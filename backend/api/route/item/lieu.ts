@@ -1,11 +1,13 @@
 import express from "express"
 import instance from "../../Connection"
 import { FormatNumberLength } from "../../../utils"
+import { fetchAll } from "../../utils/fetch.utils"
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
+
 
 router.post("/create", [auth, canWrite], async (req: any, res: any) => {
 
@@ -49,7 +51,7 @@ router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
 })
 router.get("/all", [auth, canRead], async (req: any, res: any) => {
 
-    var query = await Connection.query(`select * from lieu`)
+   var query = await fetchAll("lieu");
     return res.status(200).send(query)
 })
 router.get("/lieu/:id", [auth, canRead], async (req: any, res: any) => {
@@ -61,12 +63,12 @@ router.get("/lieu/:id", [auth, canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select * from lieu where id = ${req.params.id}`)
     return res.status(200).send(query)
 })
-router.get("/lieu/all", [auth, canRead], async (req: any, res: any) => {
+router.get("/all", [auth, canRead], async (req: any, res: any) => {
 
     var query = await Connection.query(`select * from lieu`)
     return res.status(200).send(query)
 })
-router.get("/lieu/:id", [auth, canRead], async (req: any, res: any) => {
+router.get("/:id", [auth, canRead], async (req: any, res: any) => {
 
     if (!req.params.id) { return res.status(400).send({ "error": "id is required" }) }
     var Existing = await Connection.query(`select * from lieu where id = ${req.params.id}`)

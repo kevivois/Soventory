@@ -19,8 +19,8 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
     const [open,setOpen] = useState(props.open);
     const [deleteOpen,setDeleteOpen] = useState(false);
     const [editRow,setEditRow] = useState<any| null>(null);
+    const [dropDownData,setDropDownData] = useState<any>({});
     const [fullWidth, setFullWidth] = React.useState(true);
-    const [dropdownData,setDropdownData] = useState<any>({});
   const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('xl');
     const handleClose = () => {
         props.onClose();
@@ -30,6 +30,58 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
     }
     const handleDeleteOpen = () => {
         setDeleteOpen(true);
+    }
+
+    async function createNewInner(key:string,value:string){
+        // var l = [...dropdownData]
+        var newDropDownData = dropDownData;
+        const query = await fetch(`http://localhost:3001/item.${key}/create`,{
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({nom:value})
+        })
+        const queryAll = await fetch(`http://localhost:3001/item.${key}/all`,{
+            method: 'GET',
+            credentials: 'include',
+        })
+        const response = await queryAll.json();
+        newDropDownData[key] = response;
+        setDropDownData({...newDropDownData});
+    }
+    async function deleteOneInner(key:string,id:number){
+        console.log("a")
+        var newDropDownData = dropDownData;
+        const query = await fetch(`http://localhost:3001/item.${key}/${id}/delete`,{
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        const queryAll = await fetch(`http://localhost:3001/item.${key}/all`,{
+            method: 'GET',
+            credentials: 'include',
+        })
+        const response = await queryAll.json();
+        newDropDownData[key] = response;
+        setDropDownData({...newDropDownData});
+    }
+    async function fetchDropDown(key:string){
+        var newDropDownData = dropDownData;
+        if(newDropDownData[key] == undefined){
+            const query = await fetch(`http://localhost:3001/item.${key}/all`,{
+            method: 'GET',
+            credentials: 'include',
+        })
+        const response = await query.json();
+        //create a list with only the name of all the items
+        var list:any[] = [];
+        newDropDownData[key] = response;
+        setDropDownData(newDropDownData);
+        }
     }
     async function fetchItem()
     {
@@ -44,30 +96,18 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
         setEditRow(data[0]);
     }
     useEffect(() => {
-        fetchItem();
         props.headers.forEach((header) => {
-            if(header.inner === true)
-            {
+            if(header.inner === true){
                 fetchDropDown(header.key);
             }
-        });
-        
-    },[]);
-
-    async function fetchDropDown(key:string){
-        var newDropDownData = dropdownData;
-        if(newDropDownData[key] == undefined){
-            const query = await fetch(`http://localhost:3001/item.${key}/all`,{
-            method: 'GET',
-            credentials: 'include',
         })
-        const response = await query.json();
-        //create a list with only the name of all the items
-        var list:any[] = [];
-        newDropDownData[key] = response;
-        setDropdownData(newDropDownData);
+            
+        if(props.id != null)
+        {
+            fetchItem();
         }
-    }
+    },[props.id])
+
     if(open && editRow != null)
     {
         return (
@@ -129,10 +169,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onDelete={() => {}} onChange={(value:any) =>  {
+                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onCreateNewValue={(value:any) => createNewInner(header.key,value)} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = value;
-                                                setEditRow(newEditRow)}} data={dropdownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
+                                                setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
                                                                                                                                        <div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div>
@@ -143,11 +183,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect onDelete={() => {}} onChange={(value:any) =>  {
+                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect onCreateNewValue={(value:any) => createNewInner(nextHeader.key,value)} onDelete={(id:number) => deleteOneInner(nextHeader.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = value;
-                                                console.log(newEditRow[nextHeader.key],"a")
-                                                setEditRow(newEditRow)}} data={dropdownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
+                                                setEditRow(newEditRow)}} data={dropDownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
                                                                                                                                                <div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
@@ -180,7 +219,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                         <Button onClick={handleDeleteClose} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={() => {props.deleteFunction();handleDeleteClose()}} color="primary">
+                        <Button onClick={() => {handleDeleteClose()}} color="primary">
                             Delete
                         </Button>
                     </DialogActions>

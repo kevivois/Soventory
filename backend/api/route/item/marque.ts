@@ -1,5 +1,6 @@
 import express from "express"
 import instance from "../../Connection"
+import { fetchAll } from "../../utils/fetch.utils"
 import { FormatNumberLength } from "../../../utils"
 const Connection = instance.getInstance()
 const router = express.Router()
@@ -9,8 +10,8 @@ const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestInte
 
 router.get("/all", [auth, canRead], async (req: any, res: any) => {
     
-        var query = await Connection.query(`select * from marque`)
-        return res.status(200).send(query)
+    var query = await fetchAll("marque");
+    return res.status(200).send(query)
 })
 router.get("/:id", [auth, canRead], async (req: any, res: any) => {
     var id = req.params.id
@@ -35,5 +36,10 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
 
     var query = await Connection.query(`update marque set nom = "${nom}" where id = ${id}`)
     return res.status(200).send({ "id": query.insertId })
+})
+router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
+    var id = req.params.id
+    var query = await Connection.query(`delete from marque where id = ${id}`)
+    return res.status(200).send({ "id": query.insertId,deleted:true})
 })
 export default router
