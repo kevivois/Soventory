@@ -77,9 +77,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             }
             else
             {
-               fetchItems();
+               //fetchItems();
             }
-            
+            console.log("refreshing data")
+
+    },[filterList])
+
+    useEffect(() => {
         filterList.forEach((filter:Filter)=>{
             if(filter instanceof  Searching)
             {
@@ -90,8 +94,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 ApplySortingFilter(filter);
             }
          })
-
-    },[filterList])
+        },[filteredData,filterList]);
 
 
     const ApplyFilteringFilter = async (filters:any[])=>
@@ -121,7 +124,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         })
         var newData = await query.json();
         setFilteredData(newData);
-        setRenderedData(newData);
+        //setRenderedData(newData);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
@@ -147,6 +150,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     }
     const ApplySearchingFilter = (filter:Searching)=>
     {
+        console.log(filter.value)
         function eachData(filterText:any,data:any) :boolean
         {
             var result = false;
@@ -159,18 +163,18 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             return result;
         }
-        var newData = [...data];
+        var newData = [...filteredData];
         newData = [];
         filteredData.forEach((dt) => {
           if (eachData(filter.value,dt)) {
             newData.push(dt);
           }
         });
-       
+        console.log(filteredData)
         setRenderedData(newData);
     }
     const AddNewFilter = (filter:Filter) => {
-        var newFilterList = [...filteredData];
+        var newFilterList = [...filterList];
 
         if(filter instanceof Searching)
         {
@@ -292,13 +296,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         }
         setFilterList(newFilterList);
         setOpenPopup(false)
-    }
-
-    const editRow = (id:number) => {
-        console.log(id)
-    }
-    const addToArchive = (id:number) => {
-        console.log(id)
     }
 
 

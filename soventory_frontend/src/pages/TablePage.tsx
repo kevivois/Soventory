@@ -1,4 +1,5 @@
 import Table from "../components/Table"
+import React from 'react';
 import { useState,useEffect } from "react";
 export default function  TablePage()
 {

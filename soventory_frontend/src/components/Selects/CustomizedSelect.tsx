@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef  } from 'react';
 import "./style.css"
 export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValue:any,onDelete:Function,onCreateNewValue:Function}){
 
@@ -8,6 +8,8 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
     const [textBoxValue,setTextBoxValue]=useState(props.defaultValue);
     const [creatingNew,setCreatingNew]=useState(false);
     const [creatingValue,setCreatingValue]=useState("");
+    const ref = useRef<HTMLFormElement>();
+
 
     useEffect(()=>{
         console.log(selectedValue)
@@ -15,8 +17,8 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
     function showCheckboxes() {
         setExpanded(!expanded)
       }
-    function onDelete(e:any){
-        props.onDelete(e.target.id);
+    function handleDelete(id:any){
+        props.onDelete(id);
       }
     function handleChange(value:any,close:boolean){
         setSelectedValue(value);
@@ -50,7 +52,6 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
         setCreatingValue('');
     }
 
-
         return (<form>
             <div className="multiselect">
             <div  className="selectBox"  onClick={() => showCheckboxes()}>
@@ -67,7 +68,7 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
                             <div className='selectRowContent' onClick={(e) => {
                                 handleChange(item.nom,true)
                             }}>{item.nom}</div>
-                            <div className='deleteIcon' onClick={() => props.onDelete(item.id)}>X</div>
+                            <div className='deleteIcon' onClick={() => handleDelete(item.id)}>X</div>
                             </div>
                         </label>
                     )
