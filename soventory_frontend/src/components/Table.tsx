@@ -77,7 +77,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             }
             else
             {
-               fetchItems();
+              // fetchItems();
             }
             console.log("refreshing data")
 
@@ -124,7 +124,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         })
         var newData = await query.json();
         setFilteredData(newData);
-        setRenderedData(newData);
+       // setRenderedData(newData);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
@@ -150,7 +150,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     }
     const ApplySearchingFilter = (filter:Searching)=>
     {
-        console.log(filter.value)
         function eachData(filterText:any,data:any) :boolean
         {
             var result = false;
@@ -170,7 +169,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             newData.push(dt);
           }
         });
-        console.log(filteredData)
         setRenderedData(newData);
     }
     const AddNewFilter = (filter:Filter) => {
