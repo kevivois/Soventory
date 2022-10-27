@@ -68,7 +68,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setRenderedData(data);
         setSearchBarValue("")
     }
-
     useEffect(() => {
         
             if(filterList.filter((item:any) => item instanceof Filtering).length > 0)
@@ -295,7 +294,25 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setOpenPopup(false)
     }
 
+    const onApplyExistingRow = async (newRow:any) => {
 
+        if(newRow == null || JSON.stringify(newRow) == JSON.stringify(filteredData.find((item:any) => item.id === newRow.id)))
+        {
+            return
+        }
+        console.log(JSON.stringify(newRow))
+        const query = await fetch(`http://localhost:3001/item/${newRow.id}/update`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newRow),
+        });
+        const response = await query.json()
+        console.log(response);
+        fetchItems();
+    }
 
     return (
         <div className="App" style={{width:"100%",display:"flex",flexDirection:"column"}}>
@@ -354,7 +371,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             {headers.map((header) => {
                                 if(header.show == false)return;
                                 let content = row[header.key];
-                                if(header.key === "date_achat" || header.key === "fin_garantie") {content = new Date(row[header.key]).toLocaleDateString()}
                                 return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
                         </tr>
@@ -406,7 +422,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         
         <div className="editOverlay">
-        {openEditPopup ? <EditOverlay open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => console.log(newRow)} /> : null}
+        {openEditPopup ? <EditOverlay open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => onApplyExistingRow(newRow)} /> : null}
             
         </div>
         </div>

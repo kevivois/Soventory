@@ -8,6 +8,18 @@ const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
+function renderJsDates(query:any){
+    var result = []
+    for(var i = 0; i < query.length; i++)
+    {
+        var item = query[i]
+        // format to yyyy-mm-dd
+        item.date_achat = item.date_achat.toISOString().slice(0, 10)
+        item.fin_garantie = item.fin_garantie.toISOString().slice(0, 10)
+        result.push(item)
+    }
+    return result
+}
 router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
@@ -17,11 +29,13 @@ router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
              where archive=0`)
+    query = renderJsDates(query)
     return res.status(200).send(query)
 
 })
 router.get("/all", [auth,canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select * from item where archive=0`)
+    query = renderJsDates(query)
     return res.status(200).send(query)
 
 })
@@ -37,6 +51,7 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
                                                      inner join marque on marque_FK=marque.id
                                                      inner join lieu on lieu_FK = lieu.id
                                                      where item.id=${req.params.id}`)
+                                                     query = renderJsDates(query)
                                                      return res.status(200).send(query)
     }
     catch(error)
@@ -67,24 +82,52 @@ router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: an
 router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     try
     {
-        var query = await Connection.query(`update item set ${Object.keys(req.body).map((key) => `${key} = "${req.body[key]}"`).join(",")} where id = ${req.params.id}`)
-        var selectAllQuery = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
-                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
-                                                from item inner join section on section_FK=section.id
-                                                     inner join materiel on type_material_FK=materiel.id
-                                                     inner join etat on etat_FK=etat.id
-                                                     inner join marque on marque_FK=marque.id
-                                                     inner join lieu on lieu_FK = lieu.id
-                                                     where item.id=${req.params.id}`)
-        return res.status(200).send({ "data": selectAllQuery })
-    }
-    catch(e)
-    {
-        console.log(e)
-        return res.status(400).send({"error":"invalid request"})
-    }
+                var body = req.body
+                
+                await Object.keys(req.body).forEach(async (key) => {
+                    if(key == "materiel" || key == "marque" || key == "section" || key == "etat" || key == "lieu")
+                    {
+                        var query = await Connection.query(`select id from ${key} where nom = "${req.body[key]}"`)
+                        body[key] = query[0].id
+                    }
+                })
+                console.log(body)
+            
+                var queryCondition = Object.keys(body).map((key) => {
+                    if(key == "materiel" || key == "marque" || key == "section" || key == "etat" || key == "lieu")
+                    {
+                        var id = body[key]
+                        return `${key}.id = "${id}`
+                        
+                    }
+                    else if(key == "modele")
+                    {
+                        return  `item.model = "${body[key]}"`
+                    }
+                    return  `item.${key} = "${body[key]}"`
+
+                }).join(",")
+                var query = await Connection.query(`update item inner join section on section_FK=section.id
+                inner join materiel on type_material_FK=materiel.id
+                inner join etat on etat_FK=etat.id
+                inner join marque on marque_FK=marque.id
+                inner join lieu on lieu_FK = lieu.id
+                set ${queryCondition} where item.id = ${req.params.id}`)
+                return res.status(200).send({ "id": query })
+            }
+        catch(e:any)
+        {
+            console.log(e)
+            return res.status(400).send({"error":"invalid request"})
+        }
 })
 
+async function getIdOfItem(key:any,item:any)
+{
+    var id = await Connection.query(`select id from ${key} where nom = "${item}"`)
+    return id;
+    
+}
 router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
     try
     {
@@ -143,6 +186,7 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
              ${whereCondition}`)
+             query = renderJsDates(query)
     return res.status(200).send(query)
 })
 
@@ -192,7 +236,7 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
              ${whereCondition}`)
-
+             query = renderJsDates(query)
     return res.status(200).send(query)
 })
 router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {
@@ -204,6 +248,7 @@ router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
              where archive = 1`);
+             query = renderJsDates(query)
     return res.status(200).send(query);
 })
 export default router

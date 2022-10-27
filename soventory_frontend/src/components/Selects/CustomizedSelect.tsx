@@ -1,4 +1,5 @@
 import React, { useEffect, useState,useRef  } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
 import "./style.css"
 export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValue:any,onDelete:(value: any) => Promise<any>,onCreateNewValue:(value: any) => Promise<any>}){
 
@@ -40,9 +41,8 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
         }
     }
    async function createNewValue(e:any){
-       // props.onChange(value);
         setSelectedValue(creatingValue);
-       var newData = await  props.onCreateNewValue(creatingValue);
+        var newData = await  props.onCreateNewValue(creatingValue);
         setExpanded(false);
         setCreatingNew(false);
         setCreatingValue('');
@@ -65,7 +65,7 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
                             <div className='selectRowContent' onClick={(e) => {
                                 handleChange(item.nom,true)
                             }}>{item.nom}</div>
-                            <div className='deleteIcon' onClick={() => handleDelete(item.id)}>X</div>
+                            <div className='deleteIcon' onClick={() => handleDelete(item.id)}><DeleteIcon /></div>
                             </div>
                         </label>
                     )
