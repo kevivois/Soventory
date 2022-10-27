@@ -40,14 +40,12 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
 })
 router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
 
-    if (!req.params.id) {
-        return res.status(400).send({ "error": "id is required" })
-    }
-    var Existing = await Connection.query(`select * from lieu where id = ${req.params.id}`)
-    if (!Existing[0]) { return res.status(400).send({ "error": "id doesn't exists" }) }
-    
-    var query = await Connection.query(`delete from lieu where id = ${req.params.id}`)
+   
+try {    var query = await Connection.query(`delete from lieu where id = ${req.params.id}`)
     return res.status(200).send({ "id": query.insertId })
+} catch(e){
+    return console.log("error while deleting lieu "+req.params.id)
+}
 })
 router.get("/all", [auth, canRead], async (req: any, res: any) => {
 

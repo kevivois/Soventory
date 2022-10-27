@@ -50,6 +50,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
         const response = await queryAll.json();
         newDropDownData[key] = response;
         setDropDownData({...newDropDownData});
+        return  response
     }
     async function deleteOneInner(key:string,id:number){
         console.log("a")
@@ -68,6 +69,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
         const response = await queryAll.json();
         newDropDownData[key] = response;
         setDropDownData({...newDropDownData});
+        return  response
     }
     async function fetchDropDown(key:string){
         var newDropDownData = dropDownData;
@@ -169,7 +171,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onCreateNewValue={(value:any) => createNewInner(header.key,value)} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
+                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = value;
                                                 setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 

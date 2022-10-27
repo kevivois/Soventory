@@ -38,8 +38,13 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     return res.status(200).send({ "id": query.insertId })
 })
 router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
+    try{
     var id = req.params.id
     var query = await Connection.query(`delete from marque where id = ${id}`)
     return res.status(200).send({ "id": query.insertId,deleted:true})
+    }
+    catch(e){
+        return console.log(`error while deleting marque ${req.params.id}`)
+    }
 })
 export default router

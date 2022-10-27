@@ -80,9 +80,13 @@ router.post("/:id/update",[auth,isAdmin],async(req:any,res:any) => {
     }
 })
 router.post(":id/delete",[auth,isAdmin],async(req:any,res:any) => {
+  try {
     const {id} = req.params
     const user = await Connection.query(`DELETE FROM utilisateur WHERE id=${id}`)
     return res.status(201).send({user})
+  }catch(e){
+    return console.log("error while deleting user "+req.params.id)
+  }
 })
     
 router.post("/create",async(req:any,res:any) => {

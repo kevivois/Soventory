@@ -37,7 +37,13 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     return res.status(200).send({"id":query.insertId})
 })
 router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
+    try {
+
     var query = await Connection.query(`delete from etat where id = ${req.params.id}`)
-    return res.status(200).send({"id":query.insertId})
+    return res.status(200).send({"id":query.insertId}) 
+    }
+    catch(e){
+        console.log("error while deleting etat " + req.params.id)
+    }
 })
 export default router;

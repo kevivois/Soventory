@@ -1,6 +1,6 @@
 import React, { useEffect, useState,useRef  } from 'react';
 import "./style.css"
-export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValue:any,onDelete:Function,onCreateNewValue:Function}){
+export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValue:any,onDelete:(value: any) => Promise<any>,onCreateNewValue:(value: any) => Promise<any>}){
 
     const [expanded,setExpanded]=useState(false);
     const [data,setData] = useState(props.data);
@@ -9,16 +9,12 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
     const [creatingNew,setCreatingNew]=useState(false);
     const [creatingValue,setCreatingValue]=useState("");
     const ref = useRef<HTMLFormElement>();
-
-
-    useEffect(()=>{
-        console.log(selectedValue)
-    },[selectedValue])
     function showCheckboxes() {
         setExpanded(!expanded)
       }
-    function handleDelete(id:any){
-        props.onDelete(id);
+    async function handleDelete(id:any){
+        var newData = await  props.onDelete(id);
+        setData(newData)
       }
     function handleChange(value:any,close:boolean){
         setSelectedValue(value);
@@ -43,13 +39,14 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
             handleChange(e.target.value,false);
         }
     }
-    function createNewValue(e:any){
+   async function createNewValue(e:any){
        // props.onChange(value);
         setSelectedValue(creatingValue);
-        props.onCreateNewValue(creatingValue);
+       var newData = await  props.onCreateNewValue(creatingValue);
         setExpanded(false);
         setCreatingNew(false);
         setCreatingValue('');
+        setData(newData)
     }
 
         return (<form>

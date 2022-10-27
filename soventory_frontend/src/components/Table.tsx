@@ -77,7 +77,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             }
             else
             {
-              // fetchItems();
+              fetchItems();
             }
             console.log("refreshing data")
 
@@ -124,7 +124,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         })
         var newData = await query.json();
         setFilteredData(newData);
-       // setRenderedData(newData);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
