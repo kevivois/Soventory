@@ -1,9 +1,11 @@
 import Button from '@mui/material/Button';
+import DatePicker from "react-datepicker";
 import Dialog, { DialogProps } from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import Modal from '@mui/material/Modal';
 import TextField from "@mui/material/TextField"
 import Headers from "./headers";
@@ -13,15 +15,16 @@ import { CustomizedSelect as CreatableSelect } from './Selects/CustomizedSelect'
 import React,{useEffect, useState} from 'react';
 //import "./style/EditOverlay.scss";
 import "react-widgets/styles.css";
-import DropdownList from "react-widgets/DropdownList";
-export default function EditOverlay(props:{id:number|null,onApply:(row:any) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[]}) 
+import "react-datepicker/dist/react-datepicker.css";
+export default function EditOverlay(props:{id:number|null,onApply:(row:any) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[],canModify:boolean}) 
 {
     const [open,setOpen] = useState(props.open);
     const [deleteOpen,setDeleteOpen] = useState(false);
     const [editRow,setEditRow] = useState<any| null>(null);
     const [dropDownData,setDropDownData] = useState<any>({});
     const [fullWidth, setFullWidth] = React.useState(true);
-  const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('xl');
+    const [canModify, setCanModify] = React.useState(props.canModify);
+  const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
     const handleClose = () => {
         props.onClose();
     }
@@ -109,6 +112,12 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
             fetchItem();
         }
     },[props.id])
+    
+    function onApply(){
+        if(canModify){
+            props.onApply(editRow);
+        }   handleClose()
+    }
 
     if(open && editRow != null)
     {
@@ -125,6 +134,11 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                             <Box sx={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:"100%"}}>
                                 {props.headers.map((h:any,key:number) => {
                                     var index = props.headers.indexOf(h);
+                                    var modifyingMode = canModify;
+                                    if(h.key == "id")
+                                    {
+                                        modifyingMode = false;
+                                    }
                                     if(index % 2 == 0)
                                     {
                                         var which = "textbox";
@@ -167,29 +181,40 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                             <div style={{width:"100%"}}>
                                             <div style={{display:"block"}}>
                                             <label>{header.labelName}</label>
-                                            {header.which == "textbox" ? <TextField fullWidth value={editRow[header.key]} onChange={(e) => {
+                                            {header.which == "textbox" ? <TextField InputProps={{readOnly:!modifyingMode}}  fullWidth value={editRow[header.key]} onChange={(e) => {
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
+                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect readOnly={!modifyingMode} onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[header.key] = value;
                                                 setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? <div>checkbox</div> : header.which == "datepicker" ? 
-                                                                                                                                       <div>datepicker</div> : <div>error</div>}
+                                                /*<DesktopDatePicker 
+                                                    label="Date desktop"
+                                                    inputFormat="MM/DD/YYYY"
+                                                    value={editRow[header.key]}
+                                                    onChange={(newValue) => {console.log(newValue)}}
+                                                    renderInput={(params:any) => <TextField {...params} />}
+                                                    />*/<div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div>
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
                                             <div style={{display:"block"}}>
                                             <label>{nextHeader.labelName}</label>
-                                            {nextHeader.which == "textbox" ? <TextField fullWidth value={editRow[nextHeader.key]} onChange={(e) => {
+                                            {nextHeader.which == "textbox" ? <TextField fullWidth InputProps={{readOnly:!modifyingMode}} value={editRow[nextHeader.key]} onChange={(e) => {
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = e.target.value;
                                                 setEditRow(newEditRow)
-                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect onCreateNewValue={(value:any) => createNewInner(nextHeader.key,value)} onDelete={(id:number) => deleteOneInner(nextHeader.key,id)} onChange={(value:any) =>  {
+                                            }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect readOnly={!modifyingMode} onCreateNewValue={(value:any) => createNewInner(nextHeader.key,value)} onDelete={(id:number) => deleteOneInner(nextHeader.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = editRow;
                                                 newEditRow[nextHeader.key] = value;
                                                 setEditRow(newEditRow)}} data={dropDownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? <div>checkbox</div> : nextHeader.which == "datepicker" ? 
-                                                                                                                                               <div>datepicker</div> : <div>error</div>}
+                                                /*<DatePicker selected={editRow[nextHeader.key]} onChange={(date:Date) => {
+                                                    var newEditRow = editRow;
+                                                    var formated = date.toISOString().slice(0, 10);
+                                                    newEditRow[nextHeader.key] = formated;
+                                                    setEditRow(newEditRow)
+                                                }} />*/<div>datepicker</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
                                             </Box>
@@ -205,7 +230,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                         <Button onClick={handleClose} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={() => {props.onApply(editRow);handleClose()}} color="primary">
+                        <Button onClick={() => {onApply()}} color="primary">
                             Apply
                         </Button>
                     </DialogActions>

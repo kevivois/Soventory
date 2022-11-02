@@ -24,6 +24,7 @@ const MODE={
 export default function Dashboard(props:{mode:number})
 {
     const [mode,setMode] = useState<number>(props.mode);
+    const [user,setUser] = useState<any>(null);
     const [content,setContent] = useState<JSX.Element | undefined>(<div>loading</div>);
     const naviguate = useNavigate();
     const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[] = [
@@ -79,8 +80,9 @@ export default function Dashboard(props:{mode:number})
         },
     ]
     const renderTable = async () => {
+        console.log(user,"abc")
         return (
-            <TablePage />
+            <TablePage user={user} />
         );
     }
     const renderArchives = async () => {
@@ -139,13 +141,29 @@ export default function Dashboard(props:{mode:number})
         }
     };
     useEffect(() => {
+        async function fetchMe(){
+            const query = await fetch("http://localhost:3001/user/me",{
+                credentials: "include",
+                method: "GET"
+            });
+            const response = await query.json();
+            setUser({id:response.id,username:response.nom_utilisateur,droit:response.droit});
+            console.log("setted user",response)
+        }
         async function load(){
             let content = await renderScreen(mode);
+            console.log("render")
             setContent(content);
         }
-        load();
+        if(user){
+            load();
+        }
+        else
+        {
+            fetchMe();
+        }
         
-    },[mode]);
+    },[mode,user]);
     return <div style={{display:"block",width:"100vw",height:"100%"}}>
         <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>

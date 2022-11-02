@@ -16,7 +16,7 @@ import EditOverlay from "./EditOverlay";
 import {FiFilter} from "react-icons/fi"
 import "./style/Table.css";
 import FilterOverlay from "./FilterOverlay";
-export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[]})
+export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
     const [headers,setHeaders] = useState<typeof Headers>(Headers)
@@ -36,6 +36,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [searchBarValue,setSearchBarValue] = useState<string>("");
     const [openEditPopup,setOpenEditPopup] = useState<boolean>(false);
     const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
+    const readOnly = props.user.droit == "LIRE" ? true : false;
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -78,7 +79,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             {
               fetchItems();
             }
-            console.log("refreshing data")
 
     },[filterList])
 
@@ -93,6 +93,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 ApplySortingFilter(filter);
             }
          })
+         if(filterList.filter((item:any) => item instanceof Searching).length == 0)
+         {
+             setRenderedData(filteredData);
+         }
         },[filteredData,filterList]);
 
 
@@ -122,11 +126,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             body:JSON.stringify(body)
         })
         var newData = await query.json();
+        console.log(newData)
         setFilteredData(newData);
     }
     const ApplySortingFilter = (filter:Sorting)=>
     {
-            const newHeaders = [...headers];
+          /*  const newHeaders = [...headers];
             newHeaders.forEach((h) => {
                 if (h.key === filter.header.key) {
                     h.order = h.order === "asc" ? "desc" : "asc";
@@ -134,7 +139,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             setHeaders(newHeaders);
             const newFilteredData = [...filteredData];
-            const rdtData = [...renderedData];
+            const t = [...renderedData]
             newFilteredData.sort((a, b) => {
                 if (a[filter.header.key] < b[filter.header.key]) {
                     return filter.header.order === "asc" ? -1 : 1;
@@ -144,7 +149,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
                 return 0;
             });
-            setRenderedData(newFilteredData);
+            console.log(newFilteredData)
+            setRenderedData(newFilteredData);*/
     }
     const ApplySearchingFilter = (filter:Searching)=>
     {
@@ -422,7 +428,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         
         <div className="editOverlay">
-        {openEditPopup ? <EditOverlay open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => onApplyExistingRow(newRow)} /> : null}
+        {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => onApplyExistingRow(newRow)} /> : null}
             
         </div>
         </div>

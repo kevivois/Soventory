@@ -1,7 +1,7 @@
 import React, { useEffect, useState,useRef  } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import "./style.css"
-export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValue:any,onDelete:(value: any) => Promise<any>,onCreateNewValue:(value: any) => Promise<any>}){
+export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Function,defaultValue:any,onDelete:(value: any) => Promise<any>,onCreateNewValue:(value: any) => Promise<any>}){
 
     const [expanded,setExpanded]=useState(false);
     const [data,setData] = useState(props.data);
@@ -11,6 +11,9 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
     const [creatingValue,setCreatingValue]=useState("");
     const ref = useRef<HTMLFormElement>();
     function showCheckboxes() {
+        if(props.readOnly){
+            return;
+        }
         setExpanded(!expanded)
       }
     async function handleDelete(id:any){
@@ -52,7 +55,7 @@ export function CustomizedSelect(props:{data:any[],onChange:Function,defaultValu
         return (<form>
             <div className="multiselect">
             <div  className="selectBox"  onClick={() => showCheckboxes()}>
-                <input type="text" name='text' value={textBoxValue} onChange={(e) => handleTextBoxChange(e) } placeholder="Sélectionner" />
+                <input type="text" readOnly={props.readOnly} name='text' value={textBoxValue} onChange={(e) => handleTextBoxChange(e) } placeholder="Sélectionner" />
                 
             </div>
             {expanded ? 

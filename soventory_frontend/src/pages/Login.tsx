@@ -23,6 +23,7 @@ export default function SignIn() {
     const [name, setName] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [receivedData, setReceivedData] = React.useState(null);
+    const [user,setUser] = React.useState(null);
     const [loggedIn, setLoggedIn] = React.useState(false);
 
     useEffect(() => {
@@ -40,6 +41,7 @@ export default function SignIn() {
         console.log(response)
         if(response.logged)
         {
+          setUser(response.user);
           setLoggedIn(true);
         }
       }
@@ -63,13 +65,14 @@ export default function SignIn() {
       if(response.refreshToken)
       {
         setReceivedData(response);
+        setUser(response.user);
         setLoggedIn(true);
       }
     }
   };
   if(loggedIn)
   {
-    return <Navigate to="/dashboard" />
+    return <Navigate to="/dashboard" state={{user:user}}  />
     
   }
   return ( 

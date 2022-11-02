@@ -1,7 +1,7 @@
 import Table from "../components/Table"
 import React from 'react';
 import { useState,useEffect } from "react";
-export default function  TablePage()
+export default function  TablePage(props:{user:any})
 {
     const [data,setData] = useState<any[]>([])
     const [catergories,setCategories] = useState<any[]>([])
@@ -123,7 +123,7 @@ export default function  TablePage()
 
     return (
         <div className="App" style={{width:"100%"}}>
-            {loading ? <div>{loadingMessage}</div> : <Table data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />}
+            {loading ? <div>{loadingMessage}</div> : <Table user={props.user} data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />}
         </div>
     );
 }
