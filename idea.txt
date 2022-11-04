@@ -15,3 +15,10 @@ refreshToken: unlimited time, depends on db if exist or not
 accessToken: between 10-45mn
 
 inspire from https://www.youtube.com/watch?v=XYjOteYbCMo
+
+
+#########################################################################################
+
+datepicker new librairies : https://coreui.io/react/docs/forms/date-picker/
+
+#########################################################################################
