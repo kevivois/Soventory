@@ -52,6 +52,7 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
         setData(newData)
     }
 
+
         return (<form>
             <div className="multiselect">
             <div  className="selectBox"  onClick={() => showCheckboxes()}>

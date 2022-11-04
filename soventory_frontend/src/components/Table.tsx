@@ -12,7 +12,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
-import EditOverlay from "./EditOverlay";
+import EditOverlay from "./EditOverlay/EditOverlay";
 import {FiFilter} from "react-icons/fi"
 import "./style/Table.css";
 import FilterOverlay from "./FilterOverlay";
@@ -36,7 +36,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [searchBarValue,setSearchBarValue] = useState<string>("");
     const [openEditPopup,setOpenEditPopup] = useState<boolean>(false);
     const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
-    const readOnly = props.user.droit == "LIRE" ? true : false;
+    const [readOnly,setReadOnly] = useState<boolean>(true);
+    const [sortingFilter,setSortingFilter] = useState<any|null>(null);
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -45,6 +46,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setRowToEdit(row.id);
         setOpenEditPopup(true);
     };
+
+    useEffect(() => {
+        setReadOnly(props.user.droit == "LIRE" ? true : false)
+    }, [props.user])
 
     async function fetchItems()
         {
@@ -65,6 +70,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     function clearFilters(){
         setFilterList([]);
         setCheckBoxFilterList([]);
+        setHeaders(Headers);
         setFilteredData(data);
         setRenderedData(data);
         setSearchBarValue("")
@@ -77,9 +83,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             }
             else
             {
-              fetchItems();
+                if(filterList.length == 0){
+                    fetchItems();
+                }
+              
             }
-
+            ApplySortingFilter();
     },[filterList])
 
     useEffect(() => {
@@ -87,10 +96,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             if(filter instanceof  Searching)
             {
              ApplySearchingFilter(filter);
-            }
-            else if(filter instanceof Sorting)
-            {
-                ApplySortingFilter(filter);
             }
          })
          if(filterList.filter((item:any) => item instanceof Searching).length == 0)
@@ -100,10 +105,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         },[filteredData,filterList]);
 
 
+        useEffect(() => {
+            if(sortingFilter == null)return;
+            ApplySortingFilter();
+        },[sortingFilter]);
+
+
     const ApplyFilteringFilter = async (filters:any[])=>
     {
         var checkBoxFilter = checkBoxFilterList;
-        console.log("a")
         var body = [...filters.map((filter:Filtering)=>{
             // name : value
             var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
@@ -126,21 +136,26 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             body:JSON.stringify(body)
         })
         var newData = await query.json();
-        console.log(newData)
         setFilteredData(newData);
     }
-    const ApplySortingFilter = (filter:Sorting)=>
-    {
-          /*  const newHeaders = [...headers];
+    const ApplySortingFilter = (data?:any[])=>
+    {       
+            var sortedData = []
+            if(sortingFilter == null) return;
+            if(data == null){
+                sortedData = [...renderedData];
+            }else{
+                sortedData = [...data];
+            }
+            const filter = sortingFilter;
+            const newHeaders = [...headers];
             newHeaders.forEach((h) => {
                 if (h.key === filter.header.key) {
-                    h.order = h.order === "asc" ? "desc" : "asc";
+                    h.order = filter.order
                 }
             });
             setHeaders(newHeaders);
-            const newFilteredData = [...filteredData];
-            const t = [...renderedData]
-            newFilteredData.sort((a, b) => {
+            sortedData.sort((a, b) => {
                 if (a[filter.header.key] < b[filter.header.key]) {
                     return filter.header.order === "asc" ? -1 : 1;
                 }
@@ -149,8 +164,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
                 return 0;
             });
-            console.log(newFilteredData)
-            setRenderedData(newFilteredData);*/
+            if(data != undefined){
+                return sortedData;
+            }else{
+                setRenderedData(sortedData);
+            }
     }
     const ApplySearchingFilter = (filter:Searching)=>
     {
@@ -173,7 +191,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             newData.push(dt);
           }
         });
-        setRenderedData(newData);
+
+        var sorted = ApplySortingFilter(newData);
+        if(sorted == undefined)
+        {
+            return setRenderedData([]);
+        }
+        return setRenderedData(sorted);
     }
     const AddNewFilter = (filter:Filter) => {
         var newFilterList = [...filterList];
@@ -306,17 +330,24 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             return
         }
-        console.log(JSON.stringify(newRow))
+        var formatedRow = {archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+
+        console.log(formatedRow)
         const query = await fetch(`http://localhost:3001/item/${newRow.id}/update`, {
             method: "POST",
             credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(newRow),
+            body: JSON.stringify(formatedRow),
         });
         const response = await query.json()
         console.log(response);
+        if(response.error)
+        {
+            //show in html error message bar at the end of the page
+
+        }
         fetchItems();
     }
 
@@ -353,8 +384,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
-                                const icon = header.order === "asc" ? "▲" : "▼";
-                                return (<th className="tableHeader" onClick={() => AddNewFilter(new Sorting(header,header.order))} key={header.id}>{header.labelName}{icon}</th>)
+                                const order = sortingFilter == null ? "asc" :sortingFilter.order == "asc" ? "desc" : "asc";
+                                const icon = order === "desc" ? "▲" : "▼";
+                                return (<th className="tableHeader" onClick={() => setSortingFilter(new Sorting(header,order))} key={header.id}>{header.labelName}{icon}</th>)
                             }
                             else
                             {

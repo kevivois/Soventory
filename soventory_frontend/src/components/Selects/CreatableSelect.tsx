@@ -1,10 +1,12 @@
 import Creatable, { useCreatable } from 'react-select/creatable';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function  CreatableSelect(props:{data:any[],onChange:Function,defaultValue:any,onDelete:Function}){
     const [value,setValue]=useState(props.defaultValue);
-    console.log(props.data)
+    useEffect(()=>{
+        console.log(props.data)
+        },[props.data])
     const handleChange=(newValue:any,actionMeta:any)=>{
         setValue(newValue);
         props.onChange(newValue);

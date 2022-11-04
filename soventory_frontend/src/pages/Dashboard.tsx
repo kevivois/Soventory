@@ -152,7 +152,6 @@ export default function Dashboard(props:{mode:number})
         }
         async function load(){
             let content = await renderScreen(mode);
-            console.log("render")
             setContent(content);
         }
         if(user){

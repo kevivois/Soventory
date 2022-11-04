@@ -83,27 +83,8 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     try
     {
                 var body = req.body
-                
-                await Object.keys(req.body).forEach(async (key) => {
-                    if(key == "materiel" || key == "marque" || key == "section" || key == "etat" || key == "lieu")
-                    {
-                        var query = await Connection.query(`select id from ${key} where nom = "${req.body[key]}"`)
-                        body[key] = query[0].id
-                    }
-                })
-                console.log(body)
             
                 var queryCondition = Object.keys(body).map((key) => {
-                    if(key == "materiel" || key == "marque" || key == "section" || key == "etat" || key == "lieu")
-                    {
-                        var id = body[key]
-                        return `${key}.id = "${id}`
-                        
-                    }
-                    else if(key == "modele")
-                    {
-                        return  `item.model = "${body[key]}"`
-                    }
                     return  `item.${key} = "${body[key]}"`
 
                 }).join(",")
@@ -113,6 +94,7 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
                 inner join marque on marque_FK=marque.id
                 inner join lieu on lieu_FK = lieu.id
                 set ${queryCondition} where item.id = ${req.params.id}`)
+                console.log("success")
                 return res.status(200).send({ "id": query })
             }
         catch(e:any)
