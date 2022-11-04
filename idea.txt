@@ -19,6 +19,6 @@ inspire from https://www.youtube.com/watch?v=XYjOteYbCMo
 
 #########################################################################################
 
-datepicker new librairies : https://coreui.io/react/docs/forms/date-picker/
+datepicker new librairie : https://coreui.io/react/docs/forms/date-picker/
 
 #########################################################################################
