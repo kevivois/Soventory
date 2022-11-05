@@ -7,6 +7,7 @@ const headers = [
         sorting:true,
         canEdit:true,
         inner:false,
+        number:true,
         isDropDownList:false,
         ordering:true,
         order:"asc",
@@ -108,6 +109,7 @@ const headers = [
         labelName:"Garantie",
         mode:HeaderMode.DEFAULT,
         canEdit:true,
+        number:true,
         inner:false,
         id:11
     },
@@ -125,6 +127,7 @@ const headers = [
         labelName:"Prix",
         mode:HeaderMode.DEFAULT,
         canEdit:true,
+        number:true,
         inner:false,
         id:13
     },

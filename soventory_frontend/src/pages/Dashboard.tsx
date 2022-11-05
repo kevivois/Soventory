@@ -80,7 +80,6 @@ export default function Dashboard(props:{mode:number})
         },
     ]
     const renderTable = async () => {
-        console.log(user,"abc")
         return (
             <TablePage user={user} />
         );

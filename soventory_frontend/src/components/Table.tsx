@@ -16,6 +16,7 @@ import EditOverlay from "./EditOverlay/EditOverlay";
 import {FiFilter} from "react-icons/fi"
 import "./style/Table.css";
 import FilterOverlay from "./FilterOverlay";
+import Warning from "./WarningBar/WarningBar";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -37,7 +38,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [openEditPopup,setOpenEditPopup] = useState<boolean>(false);
     const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
     const [readOnly,setReadOnly] = useState<boolean>(true);
-    const [sortingFilter,setSortingFilter] = useState<any|null>(null);
+    const [sortingFilter,setSortingFilter] = useState<Sorting>();
+    const [openWarning,setOpenWarning] = useState(false);
+    const [error,setError] = useState<string>("");
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -61,9 +64,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 const response = await query.json();
                 setData(response);
             }
-            catch (error)
-            {
-                console.log(error)
+            catch(e:any){
+                setError(e.message)
             }
         }
 
@@ -74,9 +76,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setFilteredData(data);
         setRenderedData(data);
         setSearchBarValue("")
+
+        if(sortingFilter !=undefined){
+            setSortingFilter(new Sorting(sortingFilter.header,"asc"))
+        }
     }
     useEffect(() => {
-        
             if(filterList.filter((item:any) => item instanceof Filtering).length > 0)
             {
                 ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
@@ -84,11 +89,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             else
             {
                 if(filterList.length == 0){
-                    fetchItems();
+                    //fetchItems();
                 }
+                setFilteredData(data);
+                
               
             }
-            ApplySortingFilter();
+            ApplySortingFilter(true);
     },[filterList])
 
     useEffect(() => {
@@ -107,7 +114,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
         useEffect(() => {
             if(sortingFilter == null)return;
-            ApplySortingFilter();
+            ApplySortingFilter(true);
         },[sortingFilter]);
 
 
@@ -138,15 +145,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var newData = await query.json();
         setFilteredData(newData);
     }
-    const ApplySortingFilter = (data?:any[])=>
+    const ApplySortingFilter = (apply:boolean,data?:any[])=>
     {       
             var sortedData = []
-            if(sortingFilter == null) return;
+            
             if(data == null){
                 sortedData = [...renderedData];
             }else{
                 sortedData = [...data];
             }
+            if(sortingFilter == null) return sortedData;
             const filter = sortingFilter;
             const newHeaders = [...headers];
             newHeaders.forEach((h) => {
@@ -164,10 +172,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
                 return 0;
             });
-            if(data != undefined){
-                return sortedData;
-            }else{
-                setRenderedData(sortedData);
+
+            if(apply){
+                setRenderedData(sortedData)
+                return sortedData
+            }
+            else{
+                return sortedData
             }
     }
     const ApplySearchingFilter = (filter:Searching)=>
@@ -192,12 +203,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
           }
         });
 
-        var sorted = ApplySortingFilter(newData);
-        if(sorted == undefined)
-        {
-            return setRenderedData([]);
-        }
-        return setRenderedData(sorted);
+        var sorted = ApplySortingFilter(false,newData);
+        if(sorted != undefined){
+            setRenderedData(sorted);
+        } 
     }
     const AddNewFilter = (filter:Filter) => {
         var newFilterList = [...filterList];
@@ -326,11 +335,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
     const onApplyExistingRow = async (newRow:any) => {
 
-        if(newRow == null || JSON.stringify(newRow) == JSON.stringify(filteredData.find((item:any) => item.id === newRow.id)))
-        {
-            return
-        }
-        var formatedRow = {archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
 
         console.log(formatedRow)
         const query = await fetch(`http://localhost:3001/item/${newRow.id}/update`, {
@@ -348,7 +353,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             //show in html error message bar at the end of the page
 
         }
-        fetchItems();
+        await fetchItems();
+        var newF = [...filterList]
+        setFilterList(newF);
     }
 
     return (
@@ -462,6 +469,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         <div className="editOverlay">
         {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => onApplyExistingRow(newRow)} /> : null}
             
+        </div>
+        <div className="warning-error">
+            <Warning message={error} open={openWarning} />
         </div>
         </div>
     );
