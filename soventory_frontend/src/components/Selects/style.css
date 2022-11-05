@@ -64,7 +64,7 @@
     margin-bottom: 8px;
     margin-top: 8px;
     position: absolute;
-    width: 47.5%;
+    width: 100%;
     z-index: 1;
     box-sizing: border-box;
   }
@@ -94,4 +94,11 @@
   .deleteIcon {
     width: 5%;
     display: block;
+  }
+
+  #checkboxes-container{
+    position: relative;
+    width: 100%;
+    height: max-content;
+
   }

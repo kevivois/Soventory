@@ -9,7 +9,28 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
     const [textBoxValue,setTextBoxValue]=useState(props.defaultValue);
     const [creatingNew,setCreatingNew]=useState(false);
     const [creatingValue,setCreatingValue]=useState("");
-    const ref = useRef<HTMLFormElement>();
+    const ref = useRef(null)
+
+    useEffect(()=> {
+        // add listener for click outside of element
+        document.addEventListener("mousedown", handleClickOut);
+        return () => {
+            // cleanup
+            document.removeEventListener("mousedown", handleClickOut);
+        }
+    },[])
+
+    function handleClickOut(event:any){
+
+        const curr = ref.current as any;        // non c'est trop mdrrrrrr
+        if(curr && !curr.contains(event.target)){
+            setExpanded(false);
+        }else{
+            return;
+        }
+        
+    }
+    
     function showCheckboxes() {
         if(props.readOnly){
             return;
@@ -20,7 +41,7 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
         var newData = await  props.onDelete(id);
         setData(newData)
       }
-    function handleChange(value:any,close:boolean){
+    function handleChange(event:any,value:any,close:boolean){
         setSelectedValue(value);
         setTextBoxValue(value);
         setExpanded(!close)
@@ -40,7 +61,7 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
         else{
             setCreatingValue('');
             setCreatingNew(false);
-            handleChange(e.target.value,false);
+            handleChange(e,e.target.value,false);
         }
     }
    async function createNewValue(e:any){
@@ -53,13 +74,14 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
     }
 
 
-        return (<form>
+        return (<form ref={ref as any}>
             <div className="multiselect">
             <div  className="selectBox"  onClick={() => showCheckboxes()}>
                 <input type="text" readOnly={props.readOnly} name='text' value={textBoxValue} onChange={(e) => handleTextBoxChange(e) } placeholder="Sélectionner" />
                 
             </div>
             {expanded ? 
+            <div id="checkboxes-container">
             <div id="checkboxes">
                 {creatingNew && creatingValue.length > 0 ? <div className="selectRow" onClick={(e) => createNewValue(e)} >Créer {creatingValue}</div> : null}
                 {data != undefined && data.length > 0 ? data.map((item:any) => {
@@ -67,14 +89,14 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
                         <label key={item.id}>
                             <div className='selectRow'>
                             <div className='selectRowContent' onClick={(e) => {
-                                handleChange(item.nom,true)
+                                handleChange(e,item.nom,true)
                             }}>{item.nom}</div>
                             <div className='deleteIcon' onClick={() => handleDelete(item.id)}><DeleteIcon /></div>
                             </div>
                         </label>
                     )
                 }): null}
-            </div> : null }
+            </div></div> : null }
             </div>
         </form>)
 

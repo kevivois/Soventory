@@ -54,6 +54,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setReadOnly(props.user.droit == "LIRE" ? true : false)
     }, [props.user])
 
+    useEffect(() => {
+        if(error == "")return;
+        console.log(error)
+        setOpenWarning(true);
+    }, [error]);
+
     async function fetchItems()
         {
             try
@@ -334,7 +340,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     }
 
     const onApplyExistingRow = async (newRow:any) => {
-
         var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
 
         console.log(formatedRow)
@@ -350,7 +355,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         console.log(response);
         if(response.error)
         {
-            //show in html error message bar at the end of the page
+            setError(String(response.error));
 
         }
         await fetchItems();
@@ -471,7 +476,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             
         </div>
         <div className="warning-error">
-            <Warning message={error} open={openWarning} />
+            {openWarning ?   <Warning message={error} open={openWarning} /> : null}
         </div>
         </div>
     );

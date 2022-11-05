@@ -83,9 +83,9 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     try
     {
                 var body = req.body
-            
                 var queryCondition = Object.keys(body).map((key) => {
-                    return  `item.${key} = "${body[key]}"`
+                    var bd = body[key];
+                    return  `item.${key} = "${bd}"`
 
                 }).join(",")
                 var query = await Connection.query(`update item inner join section on section_FK=section.id

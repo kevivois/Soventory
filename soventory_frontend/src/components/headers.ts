@@ -8,6 +8,7 @@ const headers = [
         canEdit:true,
         inner:false,
         number:true,
+        required:true,
         isDropDownList:false,
         ordering:true,
         order:"asc",
@@ -20,6 +21,7 @@ const headers = [
         canEdit:false,
         isDropDownList:true,
         filter:true,
+        required:true,
         inner:true,
         id:1
     },
@@ -30,6 +32,7 @@ const headers = [
         mode:HeaderMode.DEFAULT,
         canEdit:false,
         isDropDownList:true,
+        required:true,
         inner:true,
         id:2
     },
@@ -39,6 +42,7 @@ const headers = [
         filter:false,
         mode:HeaderMode.DEFAULT,
         canEdit:true,
+        required:true,
         inner:false,
         id:3
     },
@@ -64,6 +68,7 @@ const headers = [
         mode:HeaderMode.DEFAULT,
         canEdit:false,
         isDropDownList:true,
+        required:true,
         filter:true,
         inner:true,
         id:6
@@ -74,6 +79,7 @@ const headers = [
         filter:true,
         mode:HeaderMode.DEFAULT,
         canEdit:false,
+        required:true,
         isDropDownList:true,
         inner:true,
         id:7
@@ -84,6 +90,7 @@ const headers = [
         filter:true,        
         mode:HeaderMode.DEFAULT,
         canEdit:false,
+        required:true,
         isDropDownList:true,
         inner:true,
         id:8
@@ -100,6 +107,7 @@ const headers = [
         key:"date_achat",
         labelName:"Date d'achat",
         canEdit:true,
+        required:true,
         mode:HeaderMode.DEFAULT,
         inner:false,
         id:10
@@ -109,6 +117,7 @@ const headers = [
         labelName:"Garantie",
         mode:HeaderMode.DEFAULT,
         canEdit:true,
+        required:true,
         number:true,
         inner:false,
         id:11
@@ -118,6 +127,7 @@ const headers = [
         labelName:"Fin de garantie",
         mode:HeaderMode.DEFAULT,
         canEdit:true,
+        required:true,
         inner:false,
         id:12
         
@@ -127,6 +137,7 @@ const headers = [
         labelName:"Prix",
         mode:HeaderMode.DEFAULT,
         canEdit:true,
+        required:true,
         number:true,
         inner:false,
         id:13

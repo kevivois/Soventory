@@ -6,6 +6,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import TextField from "@mui/material/TextField"
+import  Checkbox  from '@mui/material/Checkbox';
 import Headers from "../headers";
 import { Box } from '@mui/system';
 //import CreatableSelect from './Selects/CreatableSelect';
@@ -222,22 +223,28 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                             <label>{header.labelName}</label>
                                             {header.which == "textbox" ? <TextField type={type}  fullWidth inputProps={header.number && header.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}} value={editRow[header.key]} onChange={(e) => {
                                                 var newEditRow = {...editRow};
-                                                var value = parseInt(e.target.value);
-                                                if(header.number == true){
-                                                    value = parseFloat(e.target.value);
+
+                                                if(nextHeader.number == true){
+                                                    newEditRow[header.key] = parseFloat(e.target.value);
                                                 }
-                                                newEditRow[header.key] = value;
+                                                else{
+                                                    newEditRow[header.key] = e.target.value;
+                                                }
                                                 if(header.key == "garantie" && e.target.value != ""){
   
                                                     var maxDate = handleDatesChange(parseInt(e.target.value));
                                                     newEditRow["fin_garantie"] = maxDate;
                                                 }
                                                 setEditRow(newEditRow)
-                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect readOnly={!modifyingMode} onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
+                                            }}/> : header.which == "dropdownlist" ? <CreatableSelect  readOnly={!modifyingMode} onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = {...editRow};
                                                 newEditRow[header.key] = value;
                                                 setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? 
-                                                <div>checkbox</div> : 
+                                                <Checkbox value={Boolean(editRow[header.key])} onChange={(e) => {
+                                                    var newEditRow = {...editRow};
+                                                    newEditRow[header.key] = Number(e.target.checked);
+                                                    setEditRow(newEditRow)
+                                                }}/> : 
                                                 header.which == "datepicker" ? 
                                                 <div className="datepicker">{ modifyingMode ? <input required value={editRow[header.key]} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
@@ -258,14 +265,14 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
                                             <div style={{display:"block"}}>
                                             <label>{nextHeader.labelName}</label>
-                                            {nextHeader.which == "textbox" ? <TextField type={nextType}fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}}value={editRow[nextHeader.key]} onChange={(e) => {
+                                            {nextHeader.which == "textbox" ? <TextField   type={nextType} fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}}value={editRow[nextHeader.key]} onChange={(e) => {
                                                 var newEditRow = {...editRow};
-                                                var value = parseInt(e.target.value);
                                                 if(nextHeader.number == true){
-                                                    value = parseFloat(e.target.value);
+                                                    newEditRow[nextHeader.key] = parseFloat(e.target.value);
                                                 }
-                                                console.log(value)
-                                                newEditRow[nextHeader.key] = value;
+                                                else{
+                                                    newEditRow[nextHeader.key] = e.target.value;
+                                                }
                                                 
                                                 if(nextHeader.key == "garantie" && e.target.value != ""){
                                                     var maxDate = handleDatesChange(parseInt(e.target.value));
@@ -283,8 +290,6 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                                         return
                                                     }
                                                     try{
-
-                                                    
                                                         var newEditRow = {...editRow};
                                                         var formatted = new Date(event.target.value).toISOString().slice(0,10);
                                                         newEditRow[nextHeader.key] = formatted;
@@ -298,8 +303,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any) => v
                                             </Box>
                                             </div>
                                         )
-                                    }
-                                    
+                                            }
                                 })}
                             </Box>
                         </Box>
