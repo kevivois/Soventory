@@ -69,6 +69,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 });
                 const response = await query.json();
                 setData(response);
+                console.log("fetched data ",response)
             }
             catch(e:any){
                 setError(e.message)
@@ -339,10 +340,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setOpenPopup(false)
     }
 
-    const onApplyExistingRow = async (newRow:any) => {
-        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+    const onApplyExistingRow = async (newRow:any,changed:boolean) => {
 
-        console.log(formatedRow)
+        if(!changed)return;
+        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+        
         const query = await fetch(`http://localhost:3001/item/${newRow.id}/update`, {
             method: "POST",
             credentials: "include",
@@ -352,7 +354,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             body: JSON.stringify(formatedRow),
         });
         const response = await query.json()
-        console.log(response);
         if(response.error)
         {
             setError(String(response.error));
@@ -472,7 +473,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         
         <div className="editOverlay">
-        {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow) => onApplyExistingRow(newRow)} /> : null}
+        {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow,changed) => onApplyExistingRow(newRow,changed)} /> : null}
             
         </div>
         <div className="warning-error">

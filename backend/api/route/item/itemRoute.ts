@@ -2,22 +2,21 @@
 import express from "express"
 import instance from "../../Connection"
 import { FormatNumberLength } from "../../../utils"
+import { gunzipSync } from "zlib"
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
-function renderJsDates(query:any){
-    var result = []
-    for(var i = 0; i < query.length; i++)
-    {
-        var item = query[i]
-        // format to yyyy-mm-dd
-        item.date_achat = item.date_achat.toISOString().slice(0, 10)
-        item.fin_garantie = item.fin_garantie.toISOString().slice(0, 10)
-        result.push(item)
-    }
+function renderJsDates(query:any[]){
+    var result:any = []
+    query.forEach((element:any) => {
+        var newElement = {...element}
+        newElement.date_achat = element.date_achat.toISOString().slice(0, 10)
+        newElement.fin_garantie = element.fin_garantie.toISOString().slice(0, 10)
+        result.push(newElement)
+    });
     return result
 }
 router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
@@ -66,34 +65,42 @@ router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: an
     let year = new Date().getFullYear().toString().substring(2, 3)
     let dblength = await Connection.query(`select count(*) as count from item`)
     let id = `${year}${FormatNumberLength(dblength[0].count + 1, 4)}`
+    let prix = Math.round(parseFloat(req.body.prix) * 20) / 20.0
     try
     {
         var query = await Connection.query(`insert into item (id,model,num_serie,num_produit,remarque,date_achat,prix,garantie,fin_garantie,type_material_FK,marque_FK,section_FK,etat_FK,lieu_FK) values 
-                                                    ("${id}","${req.body.model}","${req.body.num_serie}","${req.body.num_produit}","${req.body.remarque}","${req.body.date_achat}","${req.body.prix}","${req.body.garantie}","${req.body.fin_garantie}",
+                                                    ("${id}","${req.body.model}","${req.body.num_serie}","${req.body.num_produit}","${req.body.remarque}","${req.body.date_achat}","${prix}","${req.body.garantie}","${req.body.fin_garantie}",
                                                     "${req.body.type_material_FK}","${req.body.marque_FK}","${req.body.section_FK}","${req.body.etat_FK}","${req.body.lieu_FK}")`)
         return res.status(200).send(query)
     }
     catch(error)
     {
         console.log(error)
-        return res.status(500).send({"error":"sever error"})
+        return res.status(500).send({"error":"server error"})
     }
 })
 router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
     try
     {
                 var body = req.body
+                body.prix = Math.round(parseFloat(body.prix) * 20) / 20.0
                 var queryCondition = Object.keys(body).map((key) => {
                     var bd = body[key];
-                    return  `item.${key} = "${bd}"`
+                    if(key == "date_achat" || key == "fin_garantie")
+                    {
+                        return bd = `item.${key} = (select STR_TO_DATE("${bd}","%Y-%m-%d"))`
+                    }
+                    return  `item.${key} = '${bd}'`
 
                 }).join(",")
+                console.log(queryCondition)
                 var query = await Connection.query(`update item inner join section on section_FK=section.id
                 inner join materiel on type_material_FK=materiel.id
                 inner join etat on etat_FK=etat.id
                 inner join marque on marque_FK=marque.id
                 inner join lieu on lieu_FK = lieu.id
                 set ${queryCondition} where item.id = ${req.params.id}`)
+
                 console.log("success")
                 return res.status(200).send({ "id": query })
             }
