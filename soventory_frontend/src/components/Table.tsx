@@ -360,8 +360,51 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
         }
         await fetchItems();
+        await fetchDropDownList();
         var newF = [...filterList]
         setFilterList(newF);
+    }
+    async function fetchDropDownList(){
+
+        headers.forEach(async (header:any) => {
+
+            if(!header.inner)return;
+            const query = await fetch(`http://localhost:3001/${header.key}/all`, {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const response = await query.json()
+            if(response.error)
+            {
+                setError(String(response.error));
+            }
+            else
+            {
+                if(header.key === "materiel")
+                {
+                    setMateriels(response);
+                }
+                else if(header.key === "marque")
+                {
+                    setMarques(response);
+                }
+                else if(header.key === "section")
+                {
+                    setSections(response);
+                }
+                else if(header.key === "etat")
+                {
+                    setEtats(response);
+                }
+                else if(header.key === "lieu")
+                {
+                    setLieux(response);
+                }
+            }
+        });
     }
 
     return (
