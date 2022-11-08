@@ -35,7 +35,8 @@ router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
     var query = await Connection.query(`delete from materiel where id = ${id}`)
     return res.status(200).send({ "id": query.insertId,deleted:true})
     }catch(e){
-        return console.log(`Error while deleting materiel ${req.params.id}`)
+        console.log(`Error while deleting materiel ${req.params.id}`)
+        return res.status(400).send({"error":"cannot delete id "+req.params.id})
     }
 })
 

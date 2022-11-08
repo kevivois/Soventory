@@ -397,8 +397,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
-                                const order = sortingFilter == null ? "asc" :sortingFilter.order == "asc" ? "desc" : "asc";
-                                const icon = order === "desc" ? "▲" : "▼";
+                                var order = "desc"
+                                if(sortingFilter != null){
+                                    order = sortingFilter.order == "asc" ? "desc" : "asc";
+                                }
+                                
+                                const icon = order === "desc" ? "▼" : "▲";
                                 return (<th className="tableHeader" onClick={() => setSortingFilter(new Sorting(header,order))} key={header.id}>{header.labelName}{icon}</th>)
                             }
                             else

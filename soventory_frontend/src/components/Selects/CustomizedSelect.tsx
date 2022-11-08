@@ -71,6 +71,7 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
         setCreatingNew(false);
         setCreatingValue('');
         setData(newData)
+        props.onChange(creatingValue);
     }
 
 
@@ -87,10 +88,10 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
                 {data != undefined && data.length > 0 ? data.map((item:any) => {
                     return (
                         <label key={item.id}>
-                            <div className='selectRow'>
-                            <div className='selectRowContent' onClick={(e) => {
+                            <div className='selectRow' onClick={(e) => {
                                 handleChange(e,item.nom,true)
-                            }}>{item.nom}</div>
+                            }}>
+                            <div className='selectRowContent'>{item.nom}</div>
                             <div className='deleteIcon' onClick={() => handleDelete(item.id)}><DeleteIcon /></div>
                             </div>
                         </label>

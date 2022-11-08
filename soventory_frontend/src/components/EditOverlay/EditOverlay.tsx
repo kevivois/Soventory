@@ -26,6 +26,16 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     const [canModify, setCanModify] = React.useState(props.canModify);
     const [openWarning,setOpenWarning] = React.useState(false);
     const [error,setError] = React.useState<string>("");
+
+    function FormatDate(date:Date)
+    {
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
+        return `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+    }
+
+
   const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
     const handleClose = () => {
         props.onClose();
@@ -47,12 +57,12 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         try{
 
         const maxDate = new Date(editRow["date_achat"]).setFullYear(new Date(editRow["date_achat"]).getFullYear() + year);
-        const formatted = new Date(maxDate).toISOString().slice(0,10);
+        const formatted = FormatDate(new Date(maxDate));
         return formatted
         }
         catch(e:any){
             setError(String(e.message))
-            const normal = new Date(editRow["date_achat"]).toISOString().slice(0,10);
+            const normal = FormatDate(editRow["date_achat"]);
             return normal
         }
     }
@@ -76,7 +86,6 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         return  response
     }
     async function deleteOneInner(key:string,id:number){
-        console.log("a")
         var newDropDownData = dropDownData;
         const query = await fetch(`http://localhost:3001/item.${key}/${id}/delete`,{
             method: 'POST',
@@ -143,7 +152,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                 }
             })
             let changed = JSON.stringify(editRow) !== JSON.stringify(initialRow);
-            console.log(changed);
+            console.log("row changed ? :",changed);
             props.onApply(formattedEditRow,changed);
         }   handleClose()
     }
@@ -234,6 +243,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                 else{
                                                     newEditRow[header.key] = e.target.value;
                                                 }
+
                                                 if(header.key == "garantie" && e.target.value != ""){
   
                                                     var maxDate = handleDatesChange(parseInt(e.target.value));
@@ -247,11 +257,11 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     newEditRow["archive"] = 1;
                                                 }
                                                 setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? 
-                                                <input type="checkbox" readOnly={!modifyingMode} value={editRow[header.key]} onChange={(e) => {
-                                                    var newEditRow = {...editRow};
-                                                    newEditRow[header.key] = e.target.checked ? 1 : 0;
-                                                    setEditRow(newEditRow)
-                                                }}/> : 
+                                               <Checkbox checked={Boolean(editRow[header.key])} inputProps={{readOnly:!modifyingMode}} onChange={(e) => {
+                                                var newEditRow = {...editRow};
+                                                newEditRow[header.key] = e.target.checked ? 1 : 0;
+                                                setEditRow(newEditRow)
+                                               }} /> : 
                                                 header.which == "datepicker" ? 
                                                 <div className="datepicker">{ modifyingMode ? <input required value={editRow[header.key]} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
@@ -259,7 +269,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     }
                                                     try{
                                                         var newEditRow = {...editRow};
-                                                        var formatted = new Date(event.target.value).toISOString().slice(0,10);
+                                                        var formatted = FormatDate(new Date(event.target.value));
                                                         newEditRow[header.key] = formatted;
                                                         setEditRow(newEditRow)
                                                     }
@@ -289,13 +299,16 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                             }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect readOnly={!nextModifyingMode} onCreateNewValue={(value:any) => {return createNewInner(nextHeader.key,value)}} onDelete={(id:number) => deleteOneInner(nextHeader.key,id)} onChange={(value:any) =>  {
                                                 var newEditRow = {...editRow};
                                                 newEditRow[nextHeader.key] = value;
-                                                console.log(value)
                                                 if(nextHeader.key == "etat" && value == "detruit"){
                                                     newEditRow["archive"] = 1;
-                                                    console.log("switched archive to 1")
                                                 }
-                                                setEditRow(newEditRow)}} data={dropDownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? 
-                                                <div>checkbox</div> : 
+                                                setEditRow(newEditRow)
+                                                }} data={dropDownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? 
+                                                <Checkbox checked={Boolean(editRow[nextHeader.key])} inputProps={{readOnly:!modifyingMode}} onChange={(e) => {
+                                                    var newEditRow = {...editRow};
+                                                    newEditRow[nextHeader.key] = e.target.checked ? 1 : 0;
+                                                    setEditRow(newEditRow)
+                                                   }} /> : 
                                                 nextHeader.which == "datepicker" ? 
                                                 <div className="datepicker">{ nextModifyingMode ? <input required  value={editRow[nextHeader.key]} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
@@ -303,7 +316,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     }
                                                     try{
                                                         var newEditRow = {...editRow};
-                                                        var formatted = new Date(event.target.value).toISOString().slice(0,10);
+                                                        var formatted = FormatDate(new Date(event.target.value));
                                                         newEditRow[nextHeader.key] = formatted;
                                                         setEditRow(newEditRow)}
                                                     catch(e:any){

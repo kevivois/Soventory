@@ -1,6 +1,8 @@
 table { 
     width: 100%; 
-    border-collapse: collapse; 
+    border-collapse: collapse;
+    font-family: Roboto, Helvetica, sans-serif;
+    font-size: 15px; 
   }
   td { 
     padding: 6px; 
@@ -9,7 +11,7 @@ table {
   }
 .tableHeader {
     text-align: left; 
-    font-size: 20px;
+    font-size: 17.3px;
     font-weight: bold;
     border-width: 1px 1px 1px 1px;
     padding: 1rem 1rem;
@@ -17,7 +19,6 @@ table {
     display: table-cell;
     vertical-align: inherit;
     font-weight: 500;
-    font-size: 18px;
     box-sizing: border-box;
     color: #343a40;
     background: #f8f9fa;
@@ -86,5 +87,5 @@ table {
     border-radius: 6px;
 }
 .warning-error{
-
+  display: block;
 }

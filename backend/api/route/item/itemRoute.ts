@@ -13,8 +13,12 @@ function renderJsDates(query:any[]){
     var result:any = []
     query.forEach((element:any) => {
         var newElement = {...element}
-        newElement.date_achat = element.date_achat.toISOString().slice(0, 10)
-        newElement.fin_garantie = element.fin_garantie.toISOString().slice(0, 10)
+      //render to DDDD-MM-YY
+        
+        var date_achat = new Date(element.date_achat)
+        var fin_garantie = new Date(element.fin_garantie)
+        newElement.date_achat = `${date_achat.getFullYear()}-${FormatNumberLength(date_achat.getMonth()+1,2)}-${FormatNumberLength(date_achat.getDate(),2)}`
+        newElement.fin_garantie = `${fin_garantie.getFullYear()}-${FormatNumberLength(fin_garantie.getMonth()+1,2)}-${FormatNumberLength(fin_garantie.getDate(),2)}`
         result.push(newElement)
     });
     return result
@@ -88,12 +92,12 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
                     var bd = body[key];
                     if(key == "date_achat" || key == "fin_garantie")
                     {
-                        return bd = `item.${key} = (select STR_TO_DATE("${bd}","%Y-%m-%d"))`
+                       // return bd = `item.${key} = ${bd}`
                     }
                     return  `item.${key} = '${bd}'`
 
                 }).join(",")
-                console.log(queryCondition)
+                //console.log(queryCondition)
                 var query = await Connection.query(`update item inner join section on section_FK=section.id
                 inner join materiel on type_material_FK=materiel.id
                 inner join etat on etat_FK=etat.id
@@ -126,7 +130,8 @@ router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
     return res.status(200).send({ "id": query.insertId })
     }
     catch(e){
-       return console.log(`Error while deleting item ${req.params.id}`)
+    console.log(`Error while deleting item ${req.params.id}`)
+       return res.status(400).send({"error":"cannot delete id "+req.params.id})
     }
 })
 router.post("/byValues", [auth, canRead], async (req: any, res: any) => {

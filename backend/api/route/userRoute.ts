@@ -85,7 +85,8 @@ router.post(":id/delete",[auth,isAdmin],async(req:any,res:any) => {
     const user = await Connection.query(`DELETE FROM utilisateur WHERE id=${id}`)
     return res.status(201).send({user})
   }catch(e){
-    return console.log("error while deleting user "+req.params.id)
+     console.log("error while deleting user "+req.params.id)
+     return res.status(400).send({"error":"cannot delete id "+req.params.id})
   }
 })
     

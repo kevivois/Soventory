@@ -1,7 +1,12 @@
+form{
+  font-family: Roboto, Helvetica, sans-serif;
+  font-size: 15px;
+}
+
+
 .multiselect {
     width: 100%;
     overflow: visible;
-
   }
   
   .selectBox {
@@ -45,7 +50,9 @@
     width: 100%;
     height: 1.4375em;
     padding: 16.5px 14px;
-    border:none
+    border:none;
+    font-family: Roboto, Helvetica, sans-serif;
+    font-size: 15px;
   }
   
   .overSelect {
@@ -84,11 +91,15 @@
     align-items: center;
     padding: 5px;
     border-bottom: 1px solid #dadada;
+    font-family: Roboto, Helvetica, sans-serif;
+    font-size: 14px;
 
   }
   .selectRowContent {
     display:inline-block;
     width: 95%;
+    font-family: Roboto, Helvetica, sans-serif;
+    font-size: 14px;
     
   }
   .deleteIcon {

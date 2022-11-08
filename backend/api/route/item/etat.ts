@@ -44,6 +44,7 @@ router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
     }
     catch(e){
         console.log("error while deleting etat " + req.params.id)
+        return res.status(400).send({"error":"cannot delete id "+req.params.id})
     }
 })
 export default router;

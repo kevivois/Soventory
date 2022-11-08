@@ -26,6 +26,7 @@ export default function Dashboard(props:{mode:number})
     const [mode,setMode] = useState<number>(props.mode);
     const [user,setUser] = useState<any>(null);
     const [content,setContent] = useState<JSX.Element | undefined>(<div>loading</div>);
+    const [errorMessage,setErrorMessage] = useState<string>("");
     const naviguate = useNavigate();
     const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[] = [
         {
@@ -146,6 +147,10 @@ export default function Dashboard(props:{mode:number})
                 method: "GET"
             });
             const response = await query.json();
+            if(response.error){
+               setUser(null);
+               return setErrorMessage(response.error);
+            }
             setUser({id:response.id,username:response.nom_utilisateur,droit:response.droit});
             console.log("setted user",response)
         }
@@ -162,8 +167,9 @@ export default function Dashboard(props:{mode:number})
         }
         
     },[mode,user]);
-    return <div style={{display:"block",width:"100vw",height:"100%"}}>
+    return ( <div style={{display:"block",width:"100vw",height:"100%"}}> 
+        {user != null && errorMessage == ""  ?  <div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
-        </div>
+        </div> : <div>{errorMessage}</div>}</div>); 
 }
