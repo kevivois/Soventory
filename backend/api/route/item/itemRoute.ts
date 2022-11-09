@@ -68,9 +68,9 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
 })
 router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: any) => {
 
-    let year = new Date(Date.now()).getFullYear().toString().substring(2, 3)
-    let dblength = await Connection.query(`select count(*) as count from item`)
-    let id = `${year}${FormatNumberLength(dblength[0].count + 1, 4)}`
+    let year = new Date(Date.now()).getFullYear().toString().substring(2, 4)
+    let dblength = await Connection.query(`select (select SUBSTRING(id,3,5)) as count from item where SUBSTRING(id,3,5) = (select max((select SUBSTRING(id,3,5))) from item)`)
+    let id = `${year}${FormatNumberLength(parseInt(dblength[0].count) + 1, 3)}`
     let prix = Math.round(parseFloat(req.body.prix) * 20) / 20.0
     try
     {

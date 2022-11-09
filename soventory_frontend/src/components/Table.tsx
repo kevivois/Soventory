@@ -46,8 +46,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
+        fetchDropDownList();
     };
     const handleAddPageClose = () => {
+        fetchDropDownList();
         setOpenAddPopup(false)
     };
 

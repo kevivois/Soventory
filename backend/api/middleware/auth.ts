@@ -54,10 +54,14 @@ module.exports = async(req:any,res:any,next:any) => {
                 return res.status(401).send({"error":"Forbidden"})
             }
         }
-        else
+        else if(userAccessToken)
         {
             req.user = {id:userAccessToken.id,droit:droit}
             return next()
+        }
+        else
+        {
+            return res.status(401).send({"error":"Forbidden"})
         }
     }
     else

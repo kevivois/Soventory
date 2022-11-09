@@ -257,7 +257,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     newEditRow["archive"] = 1;
                                                 }
                                                 setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? 
-                                               <Checkbox checked={Boolean(editRow[header.key])} inputProps={{readOnly:!modifyingMode}} onChange={(e) => {
+                                               <Checkbox checked={Boolean(editRow[header.key])} disabled={!modifyingMode} onChange={(e) => {
                                                 var newEditRow = {...editRow};
                                                 newEditRow[header.key] = e.target.checked ? 1 : 0;
                                                 setEditRow(newEditRow)
@@ -304,7 +304,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                 }
                                                 setEditRow(newEditRow)
                                                 }} data={dropDownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? 
-                                                <Checkbox checked={Boolean(editRow[nextHeader.key])} inputProps={{readOnly:!modifyingMode}} onChange={(e) => {
+                                                <Checkbox  checked={Boolean(editRow[nextHeader.key])} disabled={!nextModifyingMode} onChange={(e) => {
                                                     var newEditRow = {...editRow};
                                                     newEditRow[nextHeader.key] = e.target.checked ? 1 : 0;
                                                     setEditRow(newEditRow)
@@ -337,7 +337,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                         <Button onClick={handleClose} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={() => {onApply()}} color="primary">
+                        <Button disabled={!canModify} onClick={() => {onApply()}} color="primary">
                             Apply
                         </Button>
                     </DialogActions>

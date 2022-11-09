@@ -69,8 +69,8 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
     }
             
     function getnewId(){
-        //id : year + increment like 001
-        return (new Date(Date.now()).getFullYear()).toString() + "00x";
+        //id : year + increment like 22001
+        return (new Date(Date.now()).getFullYear().toString().substring(2, 4)).toString() + "xxx";
 
     }
 
