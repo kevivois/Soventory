@@ -9,6 +9,8 @@ const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
+const sortedById = "order by (SELECT SUBSTRING(item.id,3,5))"
+
 function renderJsDates(query:any[]){
     var result:any = []
     query.forEach((element:any) => {
@@ -31,7 +33,7 @@ router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
-             where archive=0`)
+             where archive=0 ${sortedById}`)
     query = renderJsDates(query)
     return res.status(200).send(query)
 
@@ -66,15 +68,15 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
 })
 router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: any) => {
 
-    let year = new Date().getFullYear().toString().substring(2, 3)
+    let year = new Date(Date.now()).getFullYear().toString().substring(2, 3)
     let dblength = await Connection.query(`select count(*) as count from item`)
     let id = `${year}${FormatNumberLength(dblength[0].count + 1, 4)}`
     let prix = Math.round(parseFloat(req.body.prix) * 20) / 20.0
     try
     {
-        var query = await Connection.query(`insert into item (id,model,num_serie,num_produit,remarque,date_achat,prix,garantie,fin_garantie,type_material_FK,marque_FK,section_FK,etat_FK,lieu_FK) values 
+        var query = await Connection.query(`insert into item (id,model,num_serie,num_produit,remarque,date_achat,prix,garantie,fin_garantie,type_material_FK,marque_FK,section_FK,etat_FK,lieu_FK,archive) values 
                                                     ("${id}","${req.body.model}","${req.body.num_serie}","${req.body.num_produit}","${req.body.remarque}","${req.body.date_achat}","${prix}","${req.body.garantie}","${req.body.fin_garantie}",
-                                                    "${req.body.type_material_FK}","${req.body.marque_FK}","${req.body.section_FK}","${req.body.etat_FK}","${req.body.lieu_FK}")`)
+                                                    "${req.body.type_material_FK}","${req.body.marque_FK}","${req.body.section_FK}","${req.body.etat_FK}","${req.body.lieu_FK}","${req.body.archive}")`)
         return res.status(200).send(query)
     }
     catch(error)
@@ -179,7 +181,7 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
-             ${whereCondition}`)
+             ${whereCondition} ${sortedById}`)
              query = renderJsDates(query)
     return res.status(200).send(query)
 })
@@ -241,7 +243,7 @@ router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
-             where archive = 1`);
+             where archive = 1 ${sortedById}`);
              query = renderJsDates(query)
     return res.status(200).send(query);
 })

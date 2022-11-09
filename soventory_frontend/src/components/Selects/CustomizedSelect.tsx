@@ -20,6 +20,10 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
         }
     },[])
 
+    useEffect(()=>{
+        setData(props.data)
+        },[props.data]);
+
     function handleClickOut(event:any){
 
         const curr = ref.current as any;        // non c'est trop mdrrrrrr
@@ -88,11 +92,12 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
                 {data != undefined && data.length > 0 ? data.map((item:any) => {
                     return (
                         <label key={item.id}>
-                            <div className='selectRow' onClick={(e) => {
+                            <div className='selectRow'>
+                            <div className='selectRowContent' onClick={(e) => {
                                 handleChange(e,item.nom,true)
-                            }}>
-                            <div className='selectRowContent'>{item.nom}</div>
-                            <div className='deleteIcon' onClick={() => handleDelete(item.id)}><DeleteIcon /></div>
+                            }}>{item.nom}</div>
+                            <div className='deleteIcon' onClick={(e) => {
+                                handleDelete(item.id)}}><DeleteIcon /></div>
                             </div>
                         </label>
                     )

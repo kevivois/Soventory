@@ -13,9 +13,10 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
 import EditOverlay from "./EditOverlay/EditOverlay";
-import {FiFilter} from "react-icons/fi"
+import {FiFilter,FiPlus} from "react-icons/fi"
 import "./style/Table.css";
 import FilterOverlay from "./FilterOverlay";
+import AddOverlay from "./AddOverlay/AddOverlay";
 import Warning from "./WarningBar/WarningBar";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
@@ -40,11 +41,56 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [readOnly,setReadOnly] = useState<boolean>(true);
     const [sortingFilter,setSortingFilter] = useState<Sorting>();
     const [openWarning,setOpenWarning] = useState(false);
+    const [openAddPopup,setOpenAddPopup] = useState(false);
     const [error,setError] = useState<string>("");
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
     };
+    const handleAddPageClose = () => {
+        setOpenAddPopup(false)
+    };
+
+    const onApplyNewRow = async (newRow:any) => {
+        try
+        {
+            var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+            const query = await fetch("http://localhost:3001/item/create",{
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify(formatedRow)
+            });
+            const response = await query.json();
+            console.log(response)
+            if (response.error)
+            {
+                setError(response.error)
+                setOpenWarning(true)
+                setOpenAddPopup(false)
+            }
+            else
+            {
+                await refreshAll();
+                setOpenAddPopup(false)
+            }
+        }
+        catch (e:any)
+        {
+            setError(e.message)
+            setOpenAddPopup(false)
+        }
+    }
+
+    async function refreshAll(){
+        await fetchItems();
+        await fetchDropDownList();
+        var newF = [...filterList]
+        setFilterList(newF);
+    }
+
     const handleEditPageOpen = (event: React.MouseEvent<HTMLElement>,row:any) => {
         setRowToEdit(row.id);
         setOpenEditPopup(true);
@@ -171,10 +217,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             setHeaders(newHeaders);
             sortedData.sort((a, b) => {
-                if (a[filter.header.key] < b[filter.header.key]) {
+                var aVal = (String(a[filter.header.key]).substring(2,5))
+                var bVal = (String(b[filter.header.key]).substring(2,5))
+                
+                if (aVal < bVal) {
                     return filter.header.order === "asc" ? -1 : 1;
                 }
-                if (a[filter.header.key] > b[filter.header.key]) {
+                if (aVal > bVal) {
                     return filter.header.order === "asc" ? 1 : -1;
                 }
                 return 0;
@@ -359,17 +408,14 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             setError(String(response.error));
 
         }
-        await fetchItems();
-        await fetchDropDownList();
-        var newF = [...filterList]
-        setFilterList(newF);
+        await refreshAll();
     }
     async function fetchDropDownList(){
 
         headers.forEach(async (header:any) => {
 
             if(!header.inner)return;
-            const query = await fetch(`http://localhost:3001/${header.key}/all`, {
+            const query = await fetch(`http://localhost:3001/item.${header.key}/all`, {
                 method: "GET",
                 credentials: "include",
                 headers: {
@@ -476,6 +522,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>No data</td></tr>}
              </tbody>
             </table>
+            <div className="add-button">
+                
+                <Button variant="contained" disabled={readOnly} onClick={() => {
+                    setOpenAddPopup(true);
+                }}><FiPlus style={{marginRight:"5px"}}/>Add</Button>
+            </div>
             </div>
             <div className="FilterPopup">
             <Dialog
@@ -524,7 +576,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             
         </div>
         <div className="warning-error">
-            {openWarning ?   <Warning message={error} open={openWarning} /> : null}
+            {openWarning ?   <Warning message={error} open={openWarning} onClose={() => setError("")} /> : null}
+        </div>
+        <div className="AddPopup">
+            {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={(newRow:any) => onApplyNewRow(newRow)} /> : null}
         </div>
         </div>
     );

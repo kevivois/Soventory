@@ -89,22 +89,30 @@ form{
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 5px;
     border-bottom: 1px solid #dadada;
     font-family: Roboto, Helvetica, sans-serif;
     font-size: 14px;
+    height:100%
 
   }
   .selectRowContent {
-    display:inline-block;
     width: 95%;
+    height: 100%;
+    padding: 5px;
+    
     font-family: Roboto, Helvetica, sans-serif;
     font-size: 14px;
     
   }
+
+  label{
+    font-family: Roboto, Helvetica, sans-serif;
+    font-size: 14px;
+  }
   .deleteIcon {
     width: 5%;
     display: block;
+    padding: 5px;
   }
 
   #checkboxes-container{

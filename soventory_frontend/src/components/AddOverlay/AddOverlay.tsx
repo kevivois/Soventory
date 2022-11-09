@@ -1,3 +1,4 @@
+
 import Button from '@mui/material/Button';
 import Dialog, { DialogProps } from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -12,46 +13,67 @@ import { Box } from '@mui/system';
 //import CreatableSelect from './Selects/CreatableSelect';
 import { CustomizedSelect as CreatableSelect } from '../Selects/CustomizedSelect';
 import React,{useEffect, useState} from 'react';
-import "./EditOverlayStyle.css";
+import "./AddOverlayStyle.css";
 import Warning from '../WarningBar/WarningBar';
-export default function EditOverlay(props:{id:number|null,onApply:(row:any,changed:boolean) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[],canModify:boolean}) 
-{
-    const destructed = "detruit";
-    const [open,setOpen] = useState(props.open);
-    const [deleteOpen,setDeleteOpen] = useState(false);
-    const [editRow,setEditRow] = useState<any| null>(null);
-    const [initialRow,setInitialRow] = useState<any| null>(null);
+
+
+export default function AddOverlay(props:{headers:any[],onApply:(row:any) => void,open:boolean,onClose:() => void,canModify:boolean}){
+    
     const [dropDownData,setDropDownData] = useState<any>({});
+    const [editRow,setEditRow] = useState<any>({});
     const [fullWidth, setFullWidth] = React.useState(true);
+    const [open,setOpen] = useState<boolean>(false);
     const [canModify, setCanModify] = React.useState(props.canModify);
-    const [openWarning,setOpenWarning] = React.useState(false);
+    const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
     const [error,setError] = React.useState<string>("");
-
-    function FormatDate(date:Date)
-    {
-        let day = date.getDate();
-        let month = date.getMonth() + 1;
-        let year = date.getFullYear();
-        return `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
-    }
-
-
-  const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
-    const handleClose = () => {
-        props.onClose();
-    }
-    const handleDeleteClose = () => {
-        setDeleteOpen(false);
-    }
-    const handleDeleteOpen = () => {
-        setDeleteOpen(true);
-    }
+    const [openWarning,setOpenWarning] = React.useState(false);
 
     useEffect(() => {
+        console.log(error);
         if(error !=""){
             setOpenWarning(true);
         }
     },[error])
+
+
+    function onClose(){
+        setOpen(false);
+        props.onClose();
+    }
+    function onApply(){
+        console.log(verifiyRowIntergrity(editRow))
+        if(verifiyRowIntergrity(editRow)){
+            var formattedEditRow = editRow;
+            props.headers.forEach((header) => {
+                if(header.inner === true){
+                    formattedEditRow[header.key] = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id;
+                }
+            })
+            console.log(formattedEditRow);
+            props.onApply(formattedEditRow);
+            onClose();
+        }
+    }
+    function verifiyRowIntergrity(row:any){
+        let newError = "";
+        var returnValue = true;
+        props.headers.forEach((header:any) => {
+            if(header.key == "id")return;
+            if(header.required && (row[header.key] == undefined || row[header.key] == "")){
+                newError = header.labelName + " is required. ";
+                returnValue = false;
+            }
+        });
+        setError(newError);
+        return returnValue;
+    }
+            
+    function getnewId(){
+        //id : year + increment like 001
+        return (new Date(Date.now()).getFullYear()).toString() + "00x";
+
+    }
+
     function handleDatesChange(year:number)
     {
         try{
@@ -66,6 +88,15 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             return normal
         }
     }
+
+    function FormatDate(date:Date)
+    {
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
+        return `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+    }
+
     async function createNewInner(key:string,value:string){
         var newDropDownData = dropDownData;
         const query = await fetch(`http://localhost:3001/item.${key}/create`,{
@@ -85,6 +116,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         setDropDownData({...newDropDownData});
         return  response
     }
+
     async function deleteOneInner(key:string,id:number){
         var newDropDownData = dropDownData;
         const query = await fetch(`http://localhost:3001/item.${key}/${id}/delete`,{
@@ -103,6 +135,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         setDropDownData({...newDropDownData});
         return  response
     }
+
     async function fetchDropDown(key:string){
         var newDropDownData = dropDownData;
         if(newDropDownData[key] == undefined){
@@ -113,56 +146,36 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         const response = await query.json();
         //create a list with only the name of all the items
         newDropDownData[key] = response;
-        setDropDownData(newDropDownData);
+        setDropDownData({...newDropDownData});
         }
     }
-    async function fetchItem()
-    {
-        const response = await fetch('http://localhost:3001/item/'+props.id,{
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        const data = await response.json();
-        setInitialRow(data[0]);
-        setEditRow(data[0]);
-    }
+
     useEffect(() => {
-        props.headers.forEach((header) => {
+        const initialRow = {...editRow};
+        props.headers.forEach((header:any) => {
+
             if(header.inner === true){
                 fetchDropDown(header.key);
             }
+           
+            if(header.number || header.key == "archive"){
+                initialRow[header.key] = 0;
+            }
+            else{
+                initialRow[header.key] = "";
+            }
         })
-            
-        if(props.id != null)
+        setEditRow(initialRow);
+        setOpen(props.open);
+    },[])
+
+
+        if(open == true && dropDownData != undefined &&  Object.keys(dropDownData).every((key:any) => dropDownData[key] != undefined) && Object.keys(dropDownData).every((key:any) => dropDownData[key].length > 0) )
         {
-            fetchItem();
-        }
-    },[props.id])
-
-    
-    function onApply(){
-        if(canModify){
-            var formattedEditRow = editRow;
-            props.headers.forEach((header) => {
-                if(header.inner === true){
-                    formattedEditRow[header.key] = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id;
-                }
-            })
-            let changed = JSON.stringify(editRow) !== JSON.stringify(initialRow);
-            console.log("row changed ? :",changed);
-            props.onApply(formattedEditRow,changed);
-        }   handleClose()
-    }
-
-    if(open && editRow != null)
-    {
         return (
-            <div >
+            <div>
                 <Dialog open={open}  fullWidth={fullWidth}
-                                     maxWidth={maxWidth} onClose={handleClose} aria-labelledby="form-dialog-title"  >
+                                     maxWidth={maxWidth} onClose={onClose} aria-labelledby="form-dialog-title"  >
                     <DialogTitle id="form-dialog-title">Edit</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
@@ -188,6 +201,9 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                         else if(h.key == "fin_garantie" || h.key == "date_achat")
                                         {
                                             which = "datepicker"
+                                        }
+                                        if(h.key == "id"){
+                                            which = "id";
                                         }
                                         var header = {...h,which:which}
                                         var nextHeader = props.headers.at(index+1);
@@ -215,6 +231,9 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                             {
                                                 which = "datepicker"
                                             }
+                                            if(nextHeader.key == "id"){
+                                                which = "id";
+                                            }
                                             nextHeader = {...nextHeader,which:which}
 
                                             if(header.key == "id"){
@@ -224,17 +243,20 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                             else if(nextHeader.key == "id"){
                                                 nextModifyingMode = false;
                                             }
+
+
                                         }
                                         var width= nextHeader != null ? "100%":"49.5%"
                                         var margin = nextHeader != null ? "1%" : "2%"
-
                                         return (
                                             <div key={header.id} style={{width:width}}>
                                             <Box  sx={{display:'flex',flexDirection:'row',width:'100%'}}>
                                             <div style={{width:"100%"}}>
                                             <div style={{display:"block"}}>
                                             <label>{header.labelName}</label>
-                                            {header.which == "textbox" ? <TextField type={type}  fullWidth inputProps={header.number && header.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}} value={editRow[header.key]} onChange={(e) => {
+                                            {header.which === "id" ?  <TextField type={"text"} disabled={true}  fullWidth inputProps={header.number && header.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}} value={getnewId()}/> 
+                                            : 
+                                            header.which == "textbox" ? <TextField type={type}  fullWidth inputProps={header.number && header.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}} value={editRow[header.key]} onChange={(e) => {
                                                 var newEditRow = {...editRow};
 
                                                 if(nextHeader.number == true){
@@ -282,7 +304,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
                                             <div style={{display:"block"}}>
                                             <label>{nextHeader.labelName}</label>
-                                            {nextHeader.which == "textbox" ? <TextField   type={nextType} fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}}value={editRow[nextHeader.key]} onChange={(e) => {
+                                            {nextHeader.which == "id" ? <TextField type={"text"} disabled={true}  fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}} value={getnewId()}/>  : nextHeader.which == "textbox" ? <TextField   type={nextType} fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}}value={editRow[nextHeader.key]} onChange={(e) => {
                                                 var newEditRow = {...editRow};
                                                 if(nextHeader.number == true){
                                                     newEditRow[nextHeader.key] = parseFloat(e.target.value);
@@ -334,37 +356,23 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                         </Box>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleClose} color="primary">
+                        <Button onClick={onClose} color="primary">
                             Cancel
                         </Button>
                         <Button onClick={() => {onApply()}} color="primary">
                             Apply
                         </Button>
                     </DialogActions>
-                    <div>{openWarning ? <Warning message={error} open={openWarning} onClose={() => setError("")}/> : null }</div>
-                </Dialog>
-                <Dialog open={deleteOpen} onClose={handleDeleteClose} aria-labelledby="form-dialog-title">
-                    <DialogTitle id="form-dialog-title">Delete</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            Are you sure you want to delete this row?
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleDeleteClose} color="primary">
-                            Cancel
-                        </Button>
-                        <Button onClick={() => {handleDeleteClose()}} color="primary">
-                            Delete
-                        </Button>
-                    </DialogActions>
+                    <div>{openWarning ? <Warning message={error} open={openWarning} onClose={() => {
+                        setError("")
+                        setOpenWarning(false)
+        }} /> : null}</div>
                 </Dialog>
             </div>
         )
     }
     else 
-    {
-        return <div></div>
+        {
+            return <div></div>
+        }
     }
-
-}

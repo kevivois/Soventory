@@ -6,14 +6,19 @@ import Button from "@mui/material/Button";
 import CloseIcon from "@mui/icons-material/Close"
 import Alert from "@mui/material/Alert";
 
-export default function Warning(props:{message:string,open:boolean}){
+export default function Warning(props:{message:string,open:boolean,onClose:()=>void}){
 
     const [open,setOpen] = useState(props.open)
+
+    function onClose(){
+        setOpen(false);
+        props.onClose();
+    }
 
     return (
     <Box sx={{ width: '100%' }}>
       <Collapse in={open}>
-        <Alert variant="filled" severity="error"
+        <Alert variant="filled" severity="error" onClose={()=>{onClose()}}
           action={
             <IconButton
               aria-label="close"
