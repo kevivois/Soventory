@@ -41,18 +41,29 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
         props.onClose();
     }
     function onApply(){
-        console.log(verifiyRowIntergrity(editRow))
         if(verifiyRowIntergrity(editRow)){
-            var formattedEditRow = editRow;
+            var formattedEditRow = formatedRowWithListId(editRow)
+
+            if(!verifiyRowIntergrity(formattedEditRow) && formattedEditRow == null) return onClose();
+            props.onApply(formattedEditRow);
+            onClose();
+        }
+    }
+    function formatedRowWithListId(row:any){
+        var formattedEditRow = row;
+        try{
             props.headers.forEach((header) => {
                 if(header.inner === true){
                     formattedEditRow[header.key] = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id;
                 }
             })
-            console.log(formattedEditRow);
-            props.onApply(formattedEditRow);
-            onClose();
+            return formattedEditRow;
         }
+        catch(e:any){
+            setError("cannot cast dropdown list to his id ")
+            return null
+        }
+        
     }
     function verifiyRowIntergrity(row:any){
         let newError = "";
