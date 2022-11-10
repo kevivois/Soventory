@@ -465,8 +465,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             label="Search"
             value={searchBarValue}
             onChange={(event) => {
-                setSearchBarValue(event.target.value);
-                AddNewFilter(new Searching(event.target.value))}}/></div>
+                var searchValue = String(event.target.value).trimStart();
+                setSearchBarValue(searchValue);
+                AddNewFilter(new Searching(searchValue))}}/></div>
             <div className="clearFiltersButton">
             <Button variant="outlined" onClick={() => {
                clearFilters();
