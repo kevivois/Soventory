@@ -46,6 +46,7 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
         setData(newData)
       }
     function handleChange(event:any,value:any,close:boolean){
+        setCreatingNew(false);
         setSelectedValue(value);
         setTextBoxValue(value);
         setExpanded(!close)

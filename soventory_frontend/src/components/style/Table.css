@@ -89,3 +89,8 @@ table {
 .warning-error{
   display: block;
 }
+#add-button{
+  margin:2%;
+  float:right;
+
+}

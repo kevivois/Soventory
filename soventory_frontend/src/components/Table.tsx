@@ -525,7 +525,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>No data</td></tr>}
              </tbody>
             </table>
-            <div className="add-button">
+            <div id="add-button">
                 
                 <Button variant="contained" disabled={readOnly} onClick={() => {
                     setOpenAddPopup(true);
