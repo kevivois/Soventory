@@ -5,7 +5,7 @@ table {
     font-size: 15px; 
   }
   td { 
-    padding: 6px; 
+    padding: 5px; 
     border: 1px solid #dee2e6;
     text-align: left; 
   }
@@ -54,11 +54,11 @@ table {
 .tableContent {
   word-wrap: break-word;
   display: table-cell;
-  max-width: 150px;
+  max-width: 180px;
   height: fit-content;
   cursor: auto;
   border: 1px solid #dee2e6;
-  width:max-content;
+  
   overflow: hidden;
   text-overflow: ellipsis !important;
   white-space: nowrap;
@@ -93,4 +93,22 @@ table {
   margin:2%;
   float:right;
 
+}
+#deleteHeader {
+  font-size: 17.3px;
+  font-weight: bold;
+  border-width: 1px 1px 1px 1px;
+  border: 1px solid #dee2e6;
+  display: table-cell;
+  vertical-align: inherit;
+  font-weight: 500;
+  
+  color: #343a40;
+  background: #f8f9fa;
+  width:"100%";
+}
+#deleteIconRow {
+ 
+  color: #343a40;
+  height: 20px;
 }

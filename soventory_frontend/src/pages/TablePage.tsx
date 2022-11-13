@@ -1,7 +1,13 @@
-import Table from "../components/Table"
+import Inventory from "../components/InventoryTable"
+import Archives from "../components/ArchiveTable"
 import React from 'react';
 import { useState,useEffect } from "react";
-export default function  TablePage(props:{user:any})
+const types = {
+    archive: "archive",
+    inventory: "inventory",
+    unknown: "unknown"
+}
+export default function  TablePage(props:{user:any,type:string})
 {
     const [data,setData] = useState<any[]>([])
     const [catergories,setCategories] = useState<any[]>([])
@@ -10,24 +16,55 @@ export default function  TablePage(props:{user:any})
     const [lieux,setLieux] = useState<any[]>([])
     const [sections,setSections] = useState<any[]>([])
     const [loading,setLoading] = useState<boolean>(true)
-    const [loadingMessage,setLoadingMessage] = useState<String>("Loading")
+    const [loadingMessage,setLoadingMessage] = useState<String>("")
+    const [type,setType] = useState<string>(Object.values(types).includes(props.type) ? props.type : types.unknown)
 
-    useEffect(() => {
-        async function fetchItems()
+    async function fetchItems()
+    {
+        try
         {
-            try
+            const query = await fetch("http://localhost:3001/item/inner/all",{
+                credentials: "include"
+            });
+            const response = await query.json();
+            setData(response);
+        }
+        catch (error)
+        {
+            console.log(error)
+        }
+    }
+
+    async function fetchArchivedItems()
+    {
+        try
+        {
+            const query = await fetch("http://localhost:3001/item/archived/inner/all",{
+                credentials: "include"
+            });
+            const response = await query.json();
+            setData(response);
+        }
+        catch (error)
+        {
+            console.log(error)
+        }
+    }    
+
+    useEffect(() =>  {
+        if(data.length == 0)
+        {
+            if(type == types.inventory)
             {
-                const query = await fetch("http://localhost:3001/item/inner/all",{
-                    credentials: "include"
-                });
-                const response = await query.json();
-                setData(response);
+                fetchItems();
             }
-            catch (error)
+            else if(type == types.archive)
             {
-                console.log(error)
+                fetchArchivedItems();
             }
         }
+    },[type])   
+    useEffect(() => {
         async function fetchCategories()
         {
             try
@@ -113,7 +150,6 @@ export default function  TablePage(props:{user:any})
                 setLoading(false);
             }
         }
-        fetchItems();
         fetchCategories();
         fetchMarques();
         fetchEtats();
@@ -121,9 +157,35 @@ export default function  TablePage(props:{user:any})
         fetchSections();
     },[])
 
-    return (
-        <div className="App" style={{width:"100%"}}>
-            {loading ? <div>{loadingMessage}</div> : <Table user={props.user} data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />}
-        </div>
-    );
+   
+    if(loading || type == types.unknown)
+    {
+        return (
+            <div className="App" style={{width:"100%"}}>
+        <div>{loadingMessage}</div>
+        </div>)
+    }
+    else{
+
+        if(type == types.archive){
+
+            return(
+                <div className="App" style={{width:"100%"}}>
+                    <Archives user={props.user} data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />
+                </div>
+            )
+
+        }
+        else if(type == types.inventory){
+            return (<div className="App" style={{width:"100%"}}>
+                <Inventory user={props.user} data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />
+            </div>)
+        }
+        else{
+            return (
+                <div className="App" style={{width:"100%"}}>
+            <div>{loadingMessage}</div>
+            </div>)
+        }
+    }
 }

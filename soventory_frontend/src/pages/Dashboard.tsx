@@ -82,14 +82,14 @@ export default function Dashboard(props:{mode:number})
     ]
     const renderTable = async () => {
         return (
-            <TablePage user={user} />
+            <div style={{width:"100%"}}>
+            <TablePage type={"inventory"} user={user} />
+            </div>
         );
     }
     const renderArchives = async () => {
         return (
-            <div>
-                <h1>Archives</h1>
-            </div>
+                <TablePage type={"archive"} user={user} />
         );
     }
     const renderAccount = async () => {

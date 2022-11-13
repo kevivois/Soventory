@@ -120,6 +120,7 @@ const headers = [
         required:true,
         number:true,
         inner:false,
+        show:false,
         id:11
     },
     {

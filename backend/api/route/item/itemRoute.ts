@@ -117,13 +117,7 @@ router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
         }
 })
 
-async function getIdOfItem(key:any,item:any)
-{
-    var id = await Connection.query(`select id from ${key} where nom = "${item}"`)
-    return id;
-    
-}
-router.post("/:id/delete", [auth, canWrite], async (req: any, res: any) => {
+router.post("/:id/delete", [auth,canWrite], async (req: any, res: any) => {
     try
     {
 
@@ -235,7 +229,7 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
              query = renderJsDates(query)
     return res.status(200).send(query)
 })
-router.get("/archived/all", [auth, canRead], async (req: any, res: any) => {
+router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
