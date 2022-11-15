@@ -32,21 +32,33 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
         console.log(error);
         if(error !=""){
             setOpenWarning(true);
+            console.log(openWarning)
         }
     },[error])
+
+    useEffect(() => {
+        console.log(openWarning)
+    },[openWarning])
 
 
     function onClose(){
         setOpen(false);
         props.onClose();
     }
-    function onApply(){
+    async function onApply(){
         if(verifiyRowIntergrity(editRow)){
             var formattedEditRow = formatedRowWithListId(editRow)
 
             if(!verifiyRowIntergrity(formattedEditRow) && formattedEditRow == null) return onClose();
-            props.onApply(formattedEditRow);
-            onClose();
+            var errors : any = await props.onApply(formattedEditRow);
+            console.log(errors,"errors")
+            if(errors != null && errors.length > 0){
+                setError(errors[0]);
+            }
+            else{
+                onClose();
+            }
+            
         }
     }
     function formatedRowWithListId(row:any){
@@ -54,14 +66,17 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
         try{
             props.headers.forEach((header) => {
                 if(header.inner === true){
-                    formattedEditRow[header.key] = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id;
+                    formattedEditRow[header.key] = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]) != null ? 
+                    dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id : formattedEditRow[header.key] ;
                 }
             })
             return formattedEditRow;
         }
         catch(e:any){
+            console.log(e);
             setError("cannot cast dropdown list to his id ")
-            return null
+            setOpenWarning(true);
+            return row
         }
         
     }
@@ -374,10 +389,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                             Apply
                         </Button>
                     </DialogActions>
-                    <div>{openWarning ? <Warning message={error} open={openWarning} onClose={() => {
-                        setError("")
+                    <div> <Warning message={error} open={openWarning} onClose={() => {
                         setOpenWarning(false)
-        }} /> : null}</div>
+        }}  /></div>
                 </Dialog>
             </div>
         )

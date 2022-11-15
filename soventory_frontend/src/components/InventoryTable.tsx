@@ -54,6 +54,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     };
 
     const onApplyNewRow = async (newRow:any) => {
+        var errors = null
         try
         {
             var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
@@ -67,11 +68,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             const response = await query.json();
             console.log(response)
-            if (response.error)
+            if (response.errors)
             {
-                setError(response.error)
-                setOpenWarning(true)
-                setOpenAddPopup(false)
+                errors = response.errors
+                
+                //setOpenWarning(true)
+                
             }
             else
             {
@@ -82,8 +84,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         catch (e:any)
         {
             setError(e.message)
-            setOpenAddPopup(false)
+            if(errors){
+                errors.push(e.message)
+            }
+           // setOpenAddPopup(false)
         }
+        console.log(errors)
+        return errors;
     }
 
     async function refreshAll(){
@@ -579,10 +586,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             
         </div>
         <div className="warning-error">
-            {openWarning ?   <Warning message={error} open={openWarning} onClose={() => setError("")} /> : null}
+            {openWarning ?   <Warning message={error} open={openWarning} onClose={() => {
+                setOpenAddPopup(false);
+                setError("")}} /> : null}
         </div>
         <div className="AddPopup">
-            {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={(newRow:any) => onApplyNewRow(newRow)} /> : null}
+            {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={onApplyNewRow} /> : null}
         </div>
         </div>
     );

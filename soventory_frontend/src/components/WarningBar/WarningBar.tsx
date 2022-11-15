@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React,{useState,useEffect} from "react";
 import { Collapse } from "@mui/material"; 
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -9,6 +9,7 @@ import Alert from "@mui/material/Alert";
 export default function Warning(props:{message:string,open:boolean,onClose:()=>void}){
 
     const [open,setOpen] = useState(props.open)
+
 
     function onClose(){
         setOpen(false);

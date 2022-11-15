@@ -622,7 +622,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     <DialogTitle id="form-dialog-title">Delete</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete this row?
+                            Are you sure you want to delete this row (id: {deleteId}) ?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
