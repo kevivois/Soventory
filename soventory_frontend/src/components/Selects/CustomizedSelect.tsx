@@ -89,7 +89,7 @@ export function CustomizedSelect(props:{data:any[],readOnly:boolean,onChange:Fun
             {expanded ? 
             <div id="checkboxes-container">
             <div id="checkboxes">
-                {creatingNew && creatingValue.length > 0 ? <div className="selectRow" onClick={(e) => createNewValue(e)} >Créer {creatingValue}</div> : null}
+                {creatingNew && creatingValue.length > 0 ? <div className='selectRow'><div className="selectRowContent" onClick={(e) => createNewValue(e)} >Créer {creatingValue}</div></div> : null}
                 {data != undefined && data.length > 0 ? data.map((item:any) => {
                     return (
                         <label key={item.id}>

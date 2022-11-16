@@ -69,7 +69,7 @@ const Aside = (props:{ image:any, collapsed:any, rtl:any, toggled:any,title:stri
       <SidebarFooter>
       <Menu iconShape="circle">
           <MenuItem icon={<BiLogOut />} onClick={props.disconnectFunction}>
-            Disconnect
+            Déconnexion
           </MenuItem>
         </Menu>
       </SidebarFooter>

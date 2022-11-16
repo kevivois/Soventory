@@ -32,7 +32,7 @@ export default function Dashboard(props:{mode:number})
         {
             id:MODE.TABLE,
             key:"dashboard",
-            labelName:"Dashboard",
+            labelName:"Tableau de bord",
             icon:FaTachometerAlt,
             onClickMenuitem:(which:number) => {
                  naviguate("/dashboard");
@@ -52,7 +52,7 @@ export default function Dashboard(props:{mode:number})
         {
             id:MODE.ACCOUNT,
             key:"account",
-            labelName:"Account",
+            labelName:"Compte",
             icon:VscAccount,
             onClickMenuitem:(which:number) => {
                  naviguate("/account");
@@ -62,21 +62,11 @@ export default function Dashboard(props:{mode:number})
         {
             id:MODE.PARAMETERS,
             key:"parameters",
-            labelName:"Parameters",
+            labelName:"Paramètres",
             icon:CgOptions,
             onClickMenuitem:(which:number) => {
                  naviguate("/parameters");
                  setMode(which);
-            }
-        },
-        {
-            id:MODE.FEEDBACK,
-            key:"feedback",
-            labelName:"Feedback",
-            icon:VscFeedback,
-            onClickMenuitem:(which:number) => {
-                naviguate("/feedback");
-                setMode(which);
             }
         },
     ]
@@ -95,21 +85,14 @@ export default function Dashboard(props:{mode:number})
     const renderAccount = async () => {
         return (
             <div>
-                <h1>Account</h1>
+                <h1>Compte</h1>
             </div>
         );
     }
     const renderParameters = async () => {
         return (
             <div>
-                <h1>Parameters</h1>
-            </div>
-        );
-    }
-    const renderFeedback = async () => {
-        return (
-            <div>
-                <h1>Feedback</h1>
+                <h1>Paramètres</h1>
             </div>
         );
     }
@@ -123,8 +106,6 @@ export default function Dashboard(props:{mode:number})
                     return renderAccount();
                 case MODE.PARAMETERS:
                     return renderParameters();
-                case MODE.FEEDBACK:
-                    return renderFeedback();
                 case MODE.ARCHIVE:
                     return renderArchives();
             }

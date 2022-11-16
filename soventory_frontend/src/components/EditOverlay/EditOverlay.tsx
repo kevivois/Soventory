@@ -166,7 +166,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                     <DialogTitle id="form-dialog-title">Edit</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Edit the row
+                        Modifier l'entrée
                         </DialogContentText>
                         <Box sx={{display:'flex',flexDirection:'row',width:"100%",heigth:"100%"}}>
                             <Box sx={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:"100%"}}>
@@ -335,10 +335,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose} color="primary">
-                            Cancel
+                            Annuler
                         </Button>
                         <Button disabled={!canModify} onClick={() => {onApply()}} color="primary">
-                            Apply
+                            Appliquer
                         </Button>
                     </DialogActions>
                     <div>{openWarning ? <Warning message={error} open={openWarning} onClose={() => setError("")}/> : null }</div>
@@ -347,15 +347,15 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                     <DialogTitle id="form-dialog-title">Delete</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete this row?
+                            Êtes-vous sûr de vouloir supprimer 
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleDeleteClose} color="primary">
-                            Cancel
+                            Annuler
                         </Button>
                         <Button onClick={() => {handleDeleteClose()}} color="primary">
-                            Delete
+                            Supprimer
                         </Button>
                     </DialogActions>
                 </Dialog>

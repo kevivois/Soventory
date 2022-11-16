@@ -469,16 +469,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             <TextField sx={{width:"100%",float:"right"}}
             id="outlined-basic"
             variant="outlined"
-            label="Search"
+            label="Rechercher"
             value={searchBarValue}
             onChange={(event) => {
                 var searchValue = String(event.target.value).trimStart();
                 setSearchBarValue(searchValue);
                 AddNewFilter(new Searching(searchValue))}}/></div>
             <div className="clearFiltersButton">
-            <Button variant="outlined" onClick={() => {
+            <Button style={{color:"#550055",borderColor:"#550055"}} variant="outlined" onClick={() => {
                clearFilters();
-            }}><FiFilter style={{marginRight:"5px"}}/>Clear filters</Button>
+            }}><FiFilter style={{marginRight:"5px"}}/>Effacer les filtres</Button>
             <div>
             </div>
             </div>
@@ -534,9 +534,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             </table>
             <div id="add-button">
                 
-                <Button variant="contained" disabled={readOnly} onClick={() => {
+                <Button style={{backgroundColor:"#550055"}} variant="contained" disabled={readOnly} onClick={() => {
                     setOpenAddPopup(true);
-                }}><FiPlus style={{marginRight:"5px"}}/>Add</Button>
+                }}><FiPlus style={{marginRight:"5px"}}/>Ajouter</Button>
             </div>
             </div>
             <div className="FilterPopup">

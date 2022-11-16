@@ -495,16 +495,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             <TextField sx={{width:"100%",float:"right"}}
             id="outlined-basic"
             variant="outlined"
-            label="Search"
+            label="Rechercher"
             value={searchBarValue}
             onChange={(event) => {
                 var searchValue = String(event.target.value).trimStart();
                 setSearchBarValue(searchValue);
                 AddNewFilter(new Searching(searchValue))}}/></div>
             <div className="clearFiltersButton">
-            <Button variant="outlined" onClick={() => {
+            <Button style={{color:"#550055",borderColor:"#550055"}} variant="outlined" onClick={() => {
                clearFilters();
-            }}><FiFilter style={{marginRight:"5px"}}/>Clear filters</Button>
+            }}><FiFilter style={{marginRight:"5px"}}/>Effacer les filtres</Button>
             <div>
             </div>
             </div>
@@ -622,15 +622,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     <DialogTitle id="form-dialog-title">Delete</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete this row (id: {deleteId}) ?
+                            Êtes-vous sûr de vouloir supprimer cette entrée (id: {deleteId}) ?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setDeleteWarning(false)} color="primary">
-                            Cancel
+                            Annuler
                         </Button>
                         <Button onClick={() => {onDeleteRow(deleteId)}} color="primary">
-                            Delete
+                            Supprimer
                         </Button>
                     </DialogActions>
                 </Dialog> : null}

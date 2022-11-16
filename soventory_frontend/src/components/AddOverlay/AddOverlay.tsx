@@ -205,7 +205,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                     <DialogTitle id="form-dialog-title">Edit</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Edit the row
+                            Modifier l'entrée
                         </DialogContentText>
                         <Box sx={{display:'flex',flexDirection:'row',width:"100%",heigth:"100%"}}>
                             <Box sx={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:"100%"}}>
@@ -383,10 +383,10 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={onClose} color="primary">
-                            Cancel
+                            Annuler
                         </Button>
                         <Button onClick={() => {onApply()}} color="primary">
-                            Apply
+                            Appliquer
                         </Button>
                     </DialogActions>
                     <div> <Warning message={error} open={openWarning} onClose={() => {
