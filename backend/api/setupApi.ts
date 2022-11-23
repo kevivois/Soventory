@@ -11,6 +11,7 @@ import materielRoute  from"./route/item/materiel"
 import sectionRoute from"./route/item/section"
 import {handleCors} from "./middleware/cors"
 import bodyParser from "body-parser"
+import getIp from "../IP"
 const Connection  = ConnClass.getInstance()
 const cors = require("cors")
 const express = require("express")
@@ -22,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cors({
-    origin:"http://localhost:3000", // change after deployment
+    origin:"http://"+getIp()+":3000", // change after deployment
     credentials:true
 }))
 app.use(handleCors)

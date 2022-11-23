@@ -1,11 +1,11 @@
 {
   "name": "soventory_backend",
-  
   "version": "1.0.0",
   "description": "soventory backend",
   "main": "index.js",
   "scripts": {
-    "api": "ts-node --transpile-only api/setupApi.ts"
+    "api": "ts-node --transpile-only api/setupApi.ts",
+    "prodapi": "ts-node -T -P api/setupApi.ts"
   },
   "author": "Kevin Voisin",
   "license": "ISC",
@@ -18,6 +18,7 @@
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
+    "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "tsc": "^2.0.4"
   },
@@ -28,6 +29,7 @@
     "@types/jsonwebtoken": "^8.5.9",
     "@types/mysql": "^2.15.21",
     "@types/node": "^18.7.13",
+    "pm2": "^5.2.2",
     "typescript": "^4.7.4"
   }
 }

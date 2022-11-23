@@ -2,6 +2,7 @@ import Inventory from "../components/InventoryTable"
 import Archives from "../components/ArchiveTable"
 import React from 'react';
 import { useState,useEffect } from "react";
+import getIp from "../IP";
 const types = {
     archive: "archive",
     inventory: "inventory",
@@ -23,7 +24,7 @@ export default function  TablePage(props:{user:any,type:string})
     {
         try
         {
-            const query = await fetch("http://localhost:3001/item/inner/all",{
+            const query = await fetch("http://"+getIp()+":3001/item/inner/all",{
                 credentials: "include"
             });
             const response = await query.json();
@@ -39,7 +40,7 @@ export default function  TablePage(props:{user:any,type:string})
     {
         try
         {
-            const query = await fetch("http://localhost:3001/item/archived/inner/all",{
+            const query = await fetch("http://"+getIp()+":3001/item/archived/inner/all",{
                 credentials: "include"
             });
             const response = await query.json();
@@ -69,7 +70,7 @@ export default function  TablePage(props:{user:any,type:string})
         {
             try
             {
-                const query = await fetch("http://localhost:3001/item.materiel/all",{
+                const query = await fetch("http://"+getIp()+":3001/item.materiel/all",{
                     credentials: "include"
                 });
                 const response = await query.json();
@@ -84,7 +85,7 @@ export default function  TablePage(props:{user:any,type:string})
         {
             try
             {
-                const query = await fetch("http://localhost:3001/item.marque/all",{
+                const query = await fetch("http://"+getIp()+":3001/item.marque/all",{
                     credentials: "include"
                 });
                 const response = await query.json();
@@ -99,7 +100,7 @@ export default function  TablePage(props:{user:any,type:string})
         {
             try
             {
-                const query = await fetch("http://localhost:3001/item.etat/all",{
+                const query = await fetch("http://"+getIp()+":3001/item.etat/all",{
                     credentials: "include"
                 });
                 const response = await query.json();
@@ -114,7 +115,7 @@ export default function  TablePage(props:{user:any,type:string})
         {
             try
             {
-                const query = await fetch("http://localhost:3001/item.lieu/all",{
+                const query = await fetch("http://"+getIp()+":3001/item.lieu/all",{
                     credentials: "include"
                 });
                 const response = await query.json();
@@ -130,7 +131,7 @@ export default function  TablePage(props:{user:any,type:string})
             var status = -1;
             try
             {
-                const query = await fetch("http://localhost:3001/item.section/all",{
+                const query = await fetch("http://"+getIp()+":3001/item.section/all",{
                     credentials: "include"
                 });
                 status = query.status;

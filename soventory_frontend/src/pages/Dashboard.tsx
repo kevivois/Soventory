@@ -14,6 +14,7 @@ import {CgOptions} from "react-icons/cg"
 import {VscAccount,VscFeedback} from "react-icons/vsc"
 import {BsArchive} from "react-icons/bs"
 import ProjectIcon from "../logo/plussegaush.png"
+import getIp from '../IP';
 const MODE={
     TABLE:1,
     ACCOUNT:2,
@@ -111,7 +112,7 @@ export default function Dashboard(props:{mode:number})
             }
         }
     const disconnect = async () => {
-        const query = await fetch("http://localhost:3001/user/logout",{
+        const query = await fetch("http://"+getIp()+":3001/user/logout",{
             credentials: "include",
             method: "POST"
         });
@@ -123,7 +124,7 @@ export default function Dashboard(props:{mode:number})
     };
     useEffect(() => {
         async function fetchMe(){
-            const query = await fetch("http://localhost:3001/user/me",{
+            const query = await fetch("http://"+getIp()+":3001/user/me",{
                 credentials: "include",
                 method: "GET"
             });

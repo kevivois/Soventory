@@ -17,6 +17,7 @@ import SoventoryIcon from "../logo/plussegaush.png"
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { Navigate } from 'react-router-dom';
 import env from "../env.json"
+import getIp from '../IP';
 const theme = createTheme();
 
 export default function SignIn() {
@@ -30,7 +31,7 @@ export default function SignIn() {
      
       async function tryLogin()
       {
-        const query = await fetch("http://localhost:3001/user/tryLogin", {
+        const query = await fetch("http://"+getIp()+":3001/user/tryLogin", {
           method: "GET",
           credentials: "include",
           headers: {
@@ -52,7 +53,7 @@ export default function SignIn() {
     
     if(name && password && name != "" && password != "")
     {
-      const query = await fetch("http://localhost:3001/user/login",{
+      const query = await fetch("http://"+getIp()+":3001/user/login",{
         method: "POST",
         credentials: "include",
         headers: {

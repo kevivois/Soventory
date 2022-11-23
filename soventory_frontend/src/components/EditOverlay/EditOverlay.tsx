@@ -14,6 +14,7 @@ import { CustomizedSelect as CreatableSelect } from '../Selects/CustomizedSelect
 import React,{useEffect, useState} from 'react';
 import "./EditOverlayStyle.css";
 import Warning from '../WarningBar/WarningBar';
+import getIp from '../../IP';
 export default function EditOverlay(props:{id:number|null,onApply:(row:any,changed:boolean) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[],canModify:boolean}) 
 {
     const destructed = "detruit";
@@ -68,7 +69,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     }
     async function createNewInner(key:string,value:string){
         var newDropDownData = dropDownData;
-        const query = await fetch(`http://localhost:3001/item.${key}/create`,{
+        const query = await fetch(`http://${getIp()}:3001/item.${key}/create`,{
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -76,7 +77,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             },
             body: JSON.stringify({nom:value})
         })
-        const queryAll = await fetch(`http://localhost:3001/item.${key}/all`,{
+        const queryAll = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -87,14 +88,14 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     }
     async function deleteOneInner(key:string,id:number){
         var newDropDownData = dropDownData;
-        const query = await fetch(`http://localhost:3001/item.${key}/${id}/delete`,{
+        const query = await fetch(`http://${getIp()}:3001/item.${key}/${id}/delete`,{
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        const queryAll = await fetch(`http://localhost:3001/item.${key}/all`,{
+        const queryAll = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -106,7 +107,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     async function fetchDropDown(key:string){
         var newDropDownData = dropDownData;
         if(newDropDownData[key] == undefined){
-            const query = await fetch(`http://localhost:3001/item.${key}/all`,{
+            const query = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -118,7 +119,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     }
     async function fetchItem()
     {
-        const response = await fetch('http://localhost:3001/item/'+props.id,{
+        const response = await fetch('http://'+getIp()+':3001/item/'+props.id,{
             method: 'GET',
             credentials: 'include',
             headers: {

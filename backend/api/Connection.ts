@@ -1,5 +1,5 @@
 import mysql2 from "mysql2/promise"
-
+import getIp from "../IP"
 export default class Connection {
     private static instance : Connection;
     private dataConnection : any
