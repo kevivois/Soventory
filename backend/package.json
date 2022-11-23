@@ -5,7 +5,7 @@
   "description": "soventory backend",
   "main": "index.js",
   "scripts": {
-    "api": "ts-node-dev api/setupApi.ts"
+    "api": "ts-node --transpile-only api/setupApi.ts"
   },
   "author": "Kevin Voisin",
   "license": "ISC",
