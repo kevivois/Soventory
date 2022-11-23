@@ -5,6 +5,7 @@ module.exports = {
             script:"api/setupApi.ts",
             automation:false,
             exec_mode:"cluster",
+            watch:true,
             env: {
                 PORT:3001,
                 NODE_ENV: "development"
