@@ -1,0 +1,3 @@
+https://stackoverflow.com/questions/44038456/how-to-setup-apache-server-for-react-route
+https://stackoverflow.com/questions/42461279/how-to-deploy-a-react-app-on-apache-web-server
+https://www.appsloveworld.com/reactjs/200/251/how-to-remove-port-from-url-for-node-application-using-nginx
