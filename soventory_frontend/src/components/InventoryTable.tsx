@@ -68,12 +68,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 body: JSON.stringify(formatedRow)
             });
             const response = await query.json();
-            console.log(response)
             if (response.errors)
             {
                 errors = response.errors
                 
-                //setOpenWarning(true)
+                setOpenWarning(true)
                 
             }
             else
@@ -484,8 +483,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             </div>
             </div>
             </div>
-            <div className="table" style={{
-            }}>
+            <div className="table">
         <table>
             <thead>
                 <tr className="columnContainer">
@@ -533,6 +531,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>No data</td></tr>}
              </tbody>
             </table>
+            </div>
+            <div className="bottom-bar">
             <div id="add-button">
                 
                 <Button style={{backgroundColor:"#550055"}} variant="contained" disabled={readOnly} onClick={() => {

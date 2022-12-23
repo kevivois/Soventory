@@ -1,5 +1,5 @@
 
- export default function getIp(){
+export default function getIp(){
     'use strict';
 
     const { networkInterfaces } = require('os');
@@ -20,6 +20,7 @@
             }
         }
     }
-    return results["Principale"][0]
+    var n = Object.keys(results)[0]
+    return results[n][0]
  }
  
