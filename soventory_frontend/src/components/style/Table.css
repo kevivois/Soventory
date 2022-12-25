@@ -90,9 +90,7 @@ table {
   display: block;
 }
 #add-button{
-  margin:2%;
-  float:right;
-
+  margin:2%
 }
 #deleteHeader {
   font-size: 17.3px;
