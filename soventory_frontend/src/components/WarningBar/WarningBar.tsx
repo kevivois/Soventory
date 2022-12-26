@@ -8,17 +8,14 @@ import Alert from "@mui/material/Alert";
 
 export default function Warning(props:{message:string,open:boolean,onClose:()=>void}){
 
-    const [open,setOpen] = useState(props.open)
-
-
     function onClose(){
-        setOpen(false);
+        
         props.onClose();
     }
 
     return (
     <Box sx={{ width: '100%' }}>
-      <Collapse in={open}>
+      <Collapse in={props.open}>
         <Alert variant="filled" severity="error" onClose={()=>{onClose()}}
           action={
             <IconButton
@@ -26,7 +23,7 @@ export default function Warning(props:{message:string,open:boolean,onClose:()=>v
               color="inherit"
               size="small"
               onClick={() => {
-                setOpen(false);
+                onClose();
               }}
             >
               <CloseIcon fontSize="inherit" />

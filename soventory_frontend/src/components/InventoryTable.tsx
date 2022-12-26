@@ -73,7 +73,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             if (response.errors)
             {
                 errors = response.errors
-                
+                setError(response.errors[0])
                 setOpenWarning(true)
                 
             }
@@ -86,6 +86,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         catch (e:any)
         {
             setError(e.message)
+            setOpenWarning(true)
             if(errors){
                 errors.push(e.message)
             }
@@ -129,6 +130,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 console.log("fetched data ",response)
             }
             catch(e:any){
+                setOpenWarning(true)
                 setError(e.message)
             }
         }
@@ -414,10 +416,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             body: JSON.stringify(formatedRow),
         });
         const response = await query.json()
-        if(response.error)
+        if(response.errors)
         {
-            setError(String(response.error));
-
+            return response.errors;
         }
         await refreshAll();
     }
@@ -437,6 +438,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             if(response.error)
             {
                 setError(String(response.error));
+                setOpenWarning(true)
             }
             else
             {
@@ -462,6 +464,25 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
             }
         });
+    }
+    const onImportCsv = async (array:any) => {
+      /*  const query = await fetch(`http://${getIp()}:3001/item/import`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(array),
+        });
+        const response = await query.json()
+        if(response.error)
+        {
+            setError(String(response.error));
+        }
+        else
+        {
+            await refreshAll();
+        }*/
     }
 
     return (
@@ -588,19 +609,19 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         
         <div className="editOverlay">
-        {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow,changed) => onApplyExistingRow(newRow,changed)} /> : null}
+        {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={onApplyExistingRow} /> : null}
             
         </div>
         <div className="warning-error">
-            {openWarning ?   <Warning message={error} open={openWarning} onClose={() => {
-                setOpenAddPopup(false);
-                setError("")}} /> : null}
+            {openWarning && error &&  <Warning message={error} open={true} onClose={() => {
+                setOpenWarning(false)
+                }} />}
         </div>
         <div className="AddPopup">
             {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={onApplyNewRow} /> : null}
         </div>
         <div className="IEOverlay">
-            {openIEO ? <IEOverlay buttonLabel={"test"} dialogTitle={"Import Export"} open={openIEO} onClose={() => setOpenIEO(false)} /> : null}
+            {openIEO ? <IEOverlay buttonLabel={"test"} dialogTitle={"Import Export"} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
         </div>
         </div>
     );

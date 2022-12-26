@@ -127,6 +127,8 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             },
         });
         const data = await response.json();
+        data[0]["date_achat"] = formatToDBDate(data[0]["date_achat"]);
+        data[0]["fin_garantie"] = formatToDBDate(data[0]["fin_garantie"]);
         setInitialRow(data[0]);
         setEditRow(data[0]);
     }
@@ -143,19 +145,48 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         }
     },[props.id])
 
+    function formatToDBDate(date:string){
+        
+        let splitted = date.split('.');
+        if(splitted.length >1){
+        let day = splitted[0];
+        let month = splitted[1];
+        let year = splitted[2];
+        let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
+        console.log(returnContent)
+        return returnContent;
+        }else{
+            return date;
+        }
+        
+    }
     
-    function onApply(){
+    async function onApply(){
         if(canModify){
             var formattedEditRow = editRow;
             props.headers.forEach((header) => {
                 if(header.inner === true){
-                    formattedEditRow[header.key] = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id;
+                    let v = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]) ? dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id : undefined;
+                    if(v == undefined){
+                        setError(`La valeur du champ '${header.labelName}' est incorrecte`);
+                        setOpenWarning(true);
+                        return
+                    }
+                    formattedEditRow[header.key] =  v;
                 }
             })
             let changed = JSON.stringify(editRow) !== JSON.stringify(initialRow);
-            console.log("row changed ? :",changed);
-            props.onApply(formattedEditRow,changed);
-        }   handleClose()
+            let errors:any = await props.onApply(formattedEditRow,changed);
+            console.log(errors)
+            if(!errors ||errors.length == 0){
+                handleClose()
+            }else{
+                setError(errors[0]);
+                setOpenWarning(true);
+            }
+        }       
+
+
     }
 
     if(open && editRow != null)
@@ -167,7 +198,8 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                     <DialogTitle id="form-dialog-title">Edit</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                        Modifier l'entrée
+                        Modifier
+                         l'entrée
                         </DialogContentText>
                         <Box sx={{display:'flex',flexDirection:'row',width:"100%",heigth:"100%"}}>
                             <Box sx={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:"100%"}}>
@@ -264,20 +296,22 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                 setEditRow(newEditRow)
                                                }} /> : 
                                                 header.which == "datepicker" ? 
-                                                <div className="datepicker">{ modifyingMode ? <input required value={editRow[header.key]} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
+                                                <div className="datepicker">{ modifyingMode ? <input required value={formatToDBDate(editRow[header.key])} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
                                                         return
                                                     }
                                                     try{
                                                         var newEditRow = {...editRow};
+                                                        
                                                         var formatted = FormatDate(new Date(event.target.value));
                                                         newEditRow[header.key] = formatted;
                                                         setEditRow(newEditRow)
                                                     }
                                                     catch(e:any){
+                                                        setOpenWarning(true)
                                                         setError(String(e.message))
                                                     }
-                                                }} ></input> : <input required  value={editRow[header.key]} readOnly={!modifyingMode} type="date" ></input>}</div>: <div>error</div>}
+                                                }} ></input> : <input required  value={formatToDBDate(editRow[header.key])} readOnly={!modifyingMode} type="date" ></input>}</div>: <div>error</div>}
                                             </div>
                                             </div>
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
@@ -311,19 +345,21 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     setEditRow(newEditRow)
                                                    }} /> : 
                                                 nextHeader.which == "datepicker" ? 
-                                                <div className="datepicker">{ nextModifyingMode ? <input required  value={editRow[nextHeader.key]} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
+                                                <div className="datepicker">{ nextModifyingMode ? <input required  value={formatToDBDate(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
                                                         return
                                                     }
                                                     try{
                                                         var newEditRow = {...editRow};
                                                         var formatted = FormatDate(new Date(event.target.value));
+                                                        
                                                         newEditRow[nextHeader.key] = formatted;
                                                         setEditRow(newEditRow)}
                                                     catch(e:any){
+                                                        setOpenWarning(true)
                                                         setError(String(e.message))
                                                     }
-                                                }} ></input> : <input required value={editRow[nextHeader.key]} readOnly={!nextModifyingMode} type="date" ></input>}</div> : <div>error</div>}
+                                                }} ></input> : <input required value={formatToDBDate(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" ></input>}</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
                                             </Box>
@@ -342,7 +378,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                             Appliquer
                         </Button>
                     </DialogActions>
-                    <div>{openWarning ? <Warning message={error} open={openWarning} onClose={() => setError("")}/> : null }</div>
+                    <div>{openWarning && error && <Warning message={error} open={openWarning} onClose={() => setOpenWarning(false)}/> }</div>
                 </Dialog>
                 <Dialog open={deleteOpen} onClose={handleDeleteClose} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Delete</DialogTitle>

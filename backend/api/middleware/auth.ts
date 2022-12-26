@@ -9,7 +9,6 @@ import {createCookie} from "../utils/cookie.utils"
 module.exports = async(req:any,res:any,next:any) => {
 
     const { accessToken, refreshToken } = req.cookies
-    console.log(req.cookies)
     if (!accessToken && !refreshToken) {
         return res.status(401).send({"error":"Forbidden"})
     }

@@ -3,6 +3,7 @@ import express from "express"
 import instance from "../../Connection"
 import { FormatNumberLength } from "../../../utils"
 import { gunzipSync } from "zlib"
+import fs from "fs"
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
@@ -15,12 +16,9 @@ function renderJsDates(query:any[]){
     var result:any = []
     query.forEach((element:any) => {
         var newElement = {...element}
-      //render to DDDD-MM-YY
-        
-        var date_achat = new Date(element.date_achat)
-        var fin_garantie = new Date(element.fin_garantie)
-        newElement.date_achat = `${date_achat.getFullYear()}-${FormatNumberLength(date_achat.getMonth()+1,2)}-${FormatNumberLength(date_achat.getDate(),2)}`
-        newElement.fin_garantie = `${fin_garantie.getFullYear()}-${FormatNumberLength(fin_garantie.getMonth()+1,2)}-${FormatNumberLength(fin_garantie.getDate(),2)}`
+      //render to YYYY.MM.DD
+        newElement.date_achat = new Date(element.date_achat).toLocaleDateString()
+        newElement.fin_garantie =  new Date(element.fin_garantie).toLocaleDateString()
         result.push(newElement)
     });
     return result
@@ -85,7 +83,7 @@ router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: an
         return res.status(500).send({"error":"server error"})
     }
 })
-router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
+router.post("/:id/update", [auth, canWrite,ItemIntegrity], async (req: any, res: any) => {
     try
     {
                 var body = req.body
@@ -242,3 +240,37 @@ router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) =>
     return res.status(200).send(query);
 })
 export default router
+
+
+router.post("/verifiy", [auth, canRead,canWrite], async (req: any, res: any) => {
+    try{
+        var file = req.files.file
+        var reader = new FileReader();
+        reader.readAsText(file)
+        // convert to show in table  format
+        var table = []
+        var result = reader.result as string
+        var lines = result.split("\n")
+        for (var i = 0; i < lines.length; i++) {
+            var currentline = lines[i].split(";");
+            table.push(currentline)
+        }
+        // convert to json format
+        var json = []
+        for (var i = 1; i < table.length; i++) {
+            var obj : any= {}
+            for (var j = 0; j < table[0].length; j++) {
+                obj[table[0][j]] = table[i][j]
+            }
+            json.push(obj)
+        }
+        
+        console.log(json,table)
+        return res.status(200).send({file:json,table:table})
+        
+    }
+    catch(err){
+        console.log(err)
+        return res.status(500).send({error:err})
+    }
+})

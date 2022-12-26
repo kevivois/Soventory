@@ -78,7 +78,17 @@ export default function CsvPreview  ({ data }:any) {
     columns,
     data
   });
-
+  if (data[0]) {
+    const csvColumnNames = Object.keys(data[0])
+    const tableColumnNames = columns.map(column => column.accessor);
+    if (!csvColumnNames.every((name:any) => tableColumnNames.includes(name))) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center' ,width:"100%",height:"100%"}}>
+          preview non disponible
+        </div>
+      );
+    }
+  }
   return (
     <table {...getTableProps()}>
       <thead>

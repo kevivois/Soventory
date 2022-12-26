@@ -13,7 +13,7 @@ router.post("/create", [auth, canWrite], async (req: any, res: any) => {
 
 
     if (!req.body.nom || req.body.nom == "") {
-        return res.status(400).send({ "error": "nom is required" })
+        return res.status(400).send({ "error": "nom est requis" })
     }
     var Existing = await Connection.query(`select * from lieu where nom = "${req.body.nom}"`)
 
@@ -27,7 +27,7 @@ router.post("/create", [auth, canWrite], async (req: any, res: any) => {
 router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
 
     if (!req.body.nom || req.body.nom == "") {
-        return res.status(400).send({ "error": "nom is required" })
+        return res.status(400).send({ "error": "nom est requis" })
     }
     var Existing = await Connection.query(`select * from lieu where nom = "${req.body.nom}"`)
 
@@ -55,7 +55,7 @@ router.get("/all", [auth, canRead], async (req: any, res: any) => {
 })
 router.get("/lieu/:id", [auth, canRead], async (req: any, res: any) => {
 
-    if (!req.params.id) { return res.status(400).send({ "error": "id is required" }) }
+    if (!req.params.id) { return res.status(400).send({ "error": "id est requis" }) }
     var Existing = await Connection.query(`select * from lieu where id = ${req.params.id}`)
     if (!Existing[0]) { return res.status(400).send({ "error": "id not found" }) }
 
@@ -69,7 +69,7 @@ router.get("/all", [auth, canRead], async (req: any, res: any) => {
 })
 router.get("/:id", [auth, canRead], async (req: any, res: any) => {
 
-    if (!req.params.id) { return res.status(400).send({ "error": "id is required" }) }
+    if (!req.params.id) { return res.status(400).send({ "error": "id est requis" }) }
     var Existing = await Connection.query(`select * from lieu where id = ${req.params.id}`)
     if (!Existing[0]) { return res.status(400).send({ "error": "id not found" }) }
 

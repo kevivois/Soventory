@@ -17,7 +17,7 @@ router.get("/:id", [auth, canRead], async (req: any, res: any) => {
     return res.status(200).send(query)
 })
 router.post("/create", [auth, canWrite], async (req: any, res: any) => {
-    if(!req.body.nom || req.body.nom == ""){return res.status(400).send({"error":"nom is required"})}
+    if(!req.body.nom || req.body.nom == ""){return res.status(400).send({"error":"le champ 'nom' est requis"})}
 
     var Existing = await Connection.query(`select * from etat where nom = "${req.body.nom}"`)
 
@@ -27,7 +27,7 @@ router.post("/create", [auth, canWrite], async (req: any, res: any) => {
     return res.status(200).send({"id":query.insertId})
 })
 router.post("/:id/update", [auth, canWrite], async (req: any, res: any) => {
-    if(!req.body.nom || req.body.nom == ""){return res.status(400).send({"error":"nom is required"})}
+    if(!req.body.nom || req.body.nom == ""){return res.status(400).send({"error":"le champ 'nom' est requis"})}
 
     var Existing = await Connection.query(`select * from etat where nom = "${req.body.nom}"`)
 

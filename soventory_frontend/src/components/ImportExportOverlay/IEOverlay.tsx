@@ -9,19 +9,25 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
+import Headers from "../headers"
 import {csvToObjectArray} from ".././utils/file.utils"; 
 import CsvPreview	 from './CsvPreview';
+import * as XLSX from 'xlsx';
 import "./IEOverlay.css";
-export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:any,open:boolean,onClose:() => void}) {
+import Warning from '../WarningBar/WarningBar';
+const sizeLimitMB = 3;
+export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:any,open:boolean,onImport:(array:any) => void,onClose:() => void}) {
   const [open, setOpen] = useState(props.open);
   const [activeTab, setActiveTab] = useState(0); // 0 for import tab, 1 for export tab
   const [file, setFile] : any = useState<any>({}); // the selected file
   const [fileSize, setFileSize] = useState(0); // the size of the selected file in bytes
   const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
   const [fullWidth, setFullWidth] = React.useState(true);
-  const [fileSizeInGB,setFileSizeInGB] = useState(0)
-  const [fileArray,setFileArray] = useState<[]>([])
+  const [fileSizeInMB,setFileSizeInMB] = useState(0)
+  const [fileArray,setFileArray] = useState<any[]>([])
   const [csvFile,setCsvFile] = useState<string>("")
+  const [error,setError] = useState<string>("")
+  const [warningBar,setWarningBar] = useState<boolean>(false)
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -37,10 +43,16 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
   };
 
   const handleFileChange = async (event:any) => {
-    const selectedFile = event.target.files[0];
+    let selectedFile = event.target.files[0];
+    //check if file is csv or xlsx
+    let size = selectedFile.size/1000000
+    if(size <= sizeLimitMB){
+    setFileSizeInMB(size);
     setFile(selectedFile);
-    setFileSize(selectedFile.size);
-    setFileSizeInGB(selectedFile.size/1000000000);
+    setFileSize(selectedFile.size)
+  }else{
+    setError("Le fichier est trop volumineux")
+  }
   };
   useEffect(() => {
     async function refresh(){
@@ -50,26 +62,61 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
     }
     refresh();
   }, [file])
+  useEffect(() => {
+    if(error){
+      setWarningBar(true)
+      }
+      }, [error])
   const transformFile = async () =>{
 
         var reader = new FileReader();
-        await reader.readAsText(file, "UTF-8");
         // convert to show in table  format
+        if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
+          await reader.readAsBinaryString(file);
+        }else{
+          await reader.readAsText(file, "UTF-8");
+        }
         reader.onload = (e) => {
-          let csv: string = reader.result as string;
+          let csv = reader.result as any;
+          if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
+            const workbook = XLSX.read(csv, { type: 'binary' });
+            csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+          }
           setCsvFile(csv);
           let result = csvToObjectArray(csv);
+          checkFile(result.data);
           setFileArray(result.data as []);
         }
         
   }
 
+  function checkFile(array:any){
+    let canImport = true;
+    if(array.length > 0){
+      let currentHeaders = Object.keys(array[0]);
+      Headers.forEach((header)=>{
+        if(!currentHeaders.includes(header.key)){
+          canImport = false;
+          setError("Le fichier ne contient pas les bonnes colonnes")
+        }
+      });
+      
+    }else{
+      setError("Le fichier est vide")
+    }
+    return canImport
+  }
   const handleImport = () => {
     // Add code to import data here
     // You can access the file and file size with the file and fileSize state variables
     // You can check the file format and size and add the data to your application here
-    handleClose();
+
+    let canImport = checkFile(fileArray);
+    if(canImport){
+      handleClose();
+      props.onImport(fileArray);
   };
+};
 
   return (
     <div>
@@ -83,11 +130,12 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
       <h1>Import de fichier (csv,xlsx)</h1>
       <div id="form">
         <label>Sélectionne ton fichier</label>
-        <input onChange={handleFileChange}  type="file" id="file" name="file" accept=".csv, .xlsx" />
+        <input onChange={handleFileChange}  type="file" id="file" name="file" accept=".xlsx, .xls, .csv" />
       </div>
       <div id="excel-preview" style={fileArray.length > 0 ? {display:'block'}:{display:"none"}}>
         <CsvPreview data={fileArray} />
       </div>
+      {error && warningBar && <div className='error'><Warning open={warningBar} message={error} onClose={() => {setWarningBar(false)}} /></div> }
     </div>
   </DialogContent>
         <DialogActions>

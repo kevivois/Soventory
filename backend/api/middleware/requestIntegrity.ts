@@ -1,5 +1,6 @@
 import ConnectionInstance from "../Connection"
 const Connection = ConnectionInstance.getInstance()
+import Headers from "../../../soventory_frontend/src/components/headers"
 
 export  function ItemIntegrity(req:any, res:any, next:any) {
 
@@ -8,51 +9,51 @@ export  function ItemIntegrity(req:any, res:any, next:any) {
 
     if(!item.type_material_FK)
     {
-        errors.push("type_material_FK is required")
+        errors.push("le champ 'type_material_FK' est requis")
     }
     if(!item.marque_FK)
     {
-        errors.push("marque_FK is required")
+        errors.push("le champ 'marque_FK' est requis")
     }
     if(!item.model || item.model == "")
     {
-        errors.push("model is required")
+        errors.push("le champ 'model' est requis")
     }
     if(!item.num_serie || item.num_serie == "")
     {
-        errors.push("num_serie is required")
+        errors.push("le champ 'num_serie' est requis")
     }
     if(!item.num_produit)
     {
-        errors.push("num_produit is required")
+        errors.push("le champ 'num_produit' est requis")
     }
     if(!item.section_FK)
     {
-        errors.push("section_FK is required")
+        errors.push("le champ 'section_FK' est requis")
     }
     if(!item.etat_FK)
     {
-        errors.push("etat_FK is required")
+        errors.push("le champ 'etat_FK' est requis")
     }
     if(!item.lieu_FK)
     {
-        errors.push("lieu_FK is required")
+        errors.push("le champ 'lieu_FK' est requis")
     }
     if(!item.date_achat)
     {
-        errors.push("date_achat is required")
+        errors.push("le champ 'date_achat' est requis")
     }
     if(!item.garantie)
     {
-        errors.push("garantie is required")
+        errors.push("le champ 'garantie' est requis")
     }
     if(!item.fin_garantie)
     {
-        errors.push("fin_garantie is required")
+        errors.push("le champ 'fin_garantie' est requis")
     }
-    if(!item.prix)
+    if(!item.prix || item.prix == "" || item.prix == "NaN")
     {
-        errors.push("prix is required")
+        errors.push("le champ 'prix' est requis")
     }
     if(errors.length > 0)
     {

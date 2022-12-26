@@ -30,20 +30,30 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
 
     useEffect(() => {
         console.log(error);
-        if(error !=""){
+        if(error != ""){
+            
             setOpenWarning(true);
-            console.log(openWarning)
         }
     },[error])
-
-    useEffect(() => {
-        console.log(openWarning)
-    },[openWarning])
-
 
     function onClose(){
         setOpen(false);
         props.onClose();
+    }
+    function formatToDBDate(date:string){
+        
+        let splitted = date.split('.');
+        if(splitted.length >1){
+        let day = splitted[0];
+        let month = splitted[1];
+        let year = splitted[2];
+        let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
+        console.log(returnContent)
+        return returnContent;
+        }else{
+            return date;
+        }
+        
     }
     async function onApply(){
         if(verifiyRowIntergrity(editRow)){
@@ -51,9 +61,10 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
 
             if(!verifiyRowIntergrity(formattedEditRow) && formattedEditRow == null) return onClose();
             var errors : any = await props.onApply(formattedEditRow);
-            console.log(errors,"errors")
             if(errors != null && errors.length > 0){
-                setError(errors[0]);
+                
+                setError(errors[errors.length - 1]);
+                setOpenWarning(true)
             }
             else{
                 onClose();
@@ -73,9 +84,8 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
             return formattedEditRow;
         }
         catch(e:any){
-            console.log(e);
             setError("cannot cast dropdown list to his id ")
-            setOpenWarning(true);
+            setOpenWarning(true)
             return row
         }
         
@@ -86,11 +96,15 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
         props.headers.forEach((header:any) => {
             if(header.key == "id")return;
             if(header.required && (row[header.key] == undefined || row[header.key] == "")){
-                newError = header.labelName + " is required. ";
+                newError = `le champ '${header.labelName}' est requis`
                 returnValue = false;
             }
         });
-        setError(newError);
+        if(newError != ""){
+            setOpenWarning(true);
+            setError(newError);
+        }
+        
         return returnValue;
     }
             
@@ -110,6 +124,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
         }
         catch(e:any){
             setError(String(e.message))
+            setOpenWarning(true);
             const normal = FormatDate(editRow["date_achat"]);
             return normal
         }
@@ -311,7 +326,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                 setEditRow(newEditRow)
                                                }} /> : 
                                                 header.which == "datepicker" ? 
-                                                <div className="datepicker">{ modifyingMode ? <input required value={editRow[header.key]} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
+                                                <div className="datepicker">{ modifyingMode ? <input required value={formatToDBDate(editRow[header.key])} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
                                                         return
                                                     }
@@ -323,8 +338,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                     }
                                                     catch(e:any){
                                                         setError(String(e.message))
+                                                        setOpenWarning(true)
                                                     }
-                                                }} ></input> : <input required  value={editRow[header.key]} readOnly={!modifyingMode} type="date" ></input>}</div>: <div>error</div>}
+                                                }} ></input> : <input required  value={formatToDBDate(editRow[header.key])} readOnly={!modifyingMode} type="date" ></input>}</div>: <div>error</div>}
                                             </div>
                                             </div>
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
@@ -358,7 +374,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                     setEditRow(newEditRow)
                                                    }} /> : 
                                                 nextHeader.which == "datepicker" ? 
-                                                <div className="datepicker">{ nextModifyingMode ? <input required  value={editRow[nextHeader.key]} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
+                                                <div className="datepicker">{ nextModifyingMode ? <input required  value={formatToDBDate(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
                                                         return
                                                     }
@@ -369,8 +385,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                         setEditRow(newEditRow)}
                                                     catch(e:any){
                                                         setError(String(e.message))
+                                                        setOpenWarning(true)
                                                     }
-                                                }} ></input> : <input required value={editRow[nextHeader.key]} readOnly={!nextModifyingMode} type="date" ></input>}</div> : <div>error</div>}
+                                                }} ></input> : <input required value={formatToDBDate(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" ></input>}</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
                                             </Box>
@@ -389,9 +406,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                             Appliquer
                         </Button>
                     </DialogActions>
-                    <div> <Warning message={error} open={openWarning} onClose={() => {
+                    <div> { error && openWarning &&  <Warning message={error} open={true} onClose={() => {
                         setOpenWarning(false)
-        }}  /></div>
+        }}  /> }</div>
                 </Dialog>
             </div>
         )

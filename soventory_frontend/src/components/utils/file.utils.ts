@@ -7,7 +7,6 @@ export function csvToObjectArray(csvString:string) {
     dynamicTyping: true,
     complete: function(results:any) {
       const arrayOfObjects = results.data;
-      console.log(arrayOfObjects);
     }
   });
   }
