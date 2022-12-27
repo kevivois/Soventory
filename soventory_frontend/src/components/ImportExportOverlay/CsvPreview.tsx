@@ -5,10 +5,6 @@ export default function CsvPreview  ({ data }:any) {
   const columns = React.useMemo(
     () => [
       {
-        Header: 'ID',
-        accessor: 'id'
-      },
-      {
         Header: 'Materiel',
         accessor: 'materiel'
       },

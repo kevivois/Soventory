@@ -4,6 +4,7 @@ export default class Connection {
     private static instance : Connection;
     private dataConnection : any
     private mysqlConnection : any
+    public performingQuery : boolean = false
     private async init()
     {
         this.mysqlConnection = await mysql2.createConnection({
@@ -51,7 +52,23 @@ export default class Connection {
     }
     public async query(query:string) : Promise<any>
     {
+        /*retrieve the last id in the same query if it's an insert */
+        this.wait();
+        this.performingQuery = true
         var result = await this.getConnection().query(query)
+        // wait for the promise to be resolved
+        this.performingQuery = false
         return result[0]
     }
+    public async wait() {
+        return new Promise((resolve) => {
+         const interval = setInterval(() => {
+           if (!this.performingQuery) {
+             clearInterval(interval);
+             resolve(0);
+           }
+         }, 1);
+       });
+   
+     }
 }

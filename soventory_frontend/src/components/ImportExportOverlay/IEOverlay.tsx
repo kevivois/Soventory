@@ -15,6 +15,7 @@ import CsvPreview	 from './CsvPreview';
 import * as XLSX from 'xlsx';
 import "./IEOverlay.css";
 import Warning from '../WarningBar/WarningBar';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 const sizeLimitMB = 3;
 export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:any,open:boolean,onImport:(array:any) => void,onClose:() => void}) {
   const [open, setOpen] = useState(props.open);
@@ -46,6 +47,9 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
     let selectedFile = event.target.files[0];
     //check if file is csv or xlsx
     let size = selectedFile.size/1000000
+    if(!selectedFile.name.match(/.csv|.xlsx/||/.xls/)){
+      return setError("Le fichier n'est pas au bon format, format accepté : .csv, .xlsx, .xls")
+    }
     if(size <= sizeLimitMB){
     setFileSizeInMB(size);
     setFile(selectedFile);
@@ -95,6 +99,7 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
     if(array.length > 0){
       let currentHeaders = Object.keys(array[0]);
       Headers.forEach((header)=>{
+        if(header.key =="id"){return}
         if(!currentHeaders.includes(header.key)){
           canImport = false;
           setError("Le fichier ne contient pas les bonnes colonnes")
@@ -117,7 +122,24 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
       props.onImport(fileArray);
   };
 };
-
+const downloadExample = (event:any) => {
+  event.preventDefault();
+  const headers = Headers.filter((header) => header.key !== "id").map((header) => header.key);
+  const data = [headers];
+  console.log(data)
+  const csvContent = `data:text/csv;charset=utf-8,${data.map((e) => e.join(";")).join("")}`;
+  // show the good format for é,è,à,ù,ç
+  console.log(csvContent)
+  const encodedUri = encodeURI(csvContent);
+  console.log(encodedUri)
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "Soventory_Example_format.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+}
   return (
     <div>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth={maxWidth} fullWidth={fullWidth}>
@@ -130,7 +152,7 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
       <h1>Import de fichier (csv,xlsx)</h1>
       <div id="form">
         <label>Sélectionne ton fichier</label>
-        <input onChange={handleFileChange}  type="file" id="file" name="file" accept=".xlsx, .xls, .csv" />
+        <div id="div_input_file"><input onChange={handleFileChange}  type="file" id="file" name="file" accept=".xlsx, .xls, .csv" /><Button onClick={downloadExample}><QuestionMarkIcon /></Button></div>
       </div>
       <div id="excel-preview" style={fileArray.length > 0 ? {display:'block'}:{display:"none"}}>
         <CsvPreview data={fileArray} />

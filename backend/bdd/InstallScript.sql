@@ -79,9 +79,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `soventory`.`item` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `type_material_FK` INT NOT NULL,
+  `materiel_FK` INT NOT NULL,
   `marque_FK` INT NOT NULL,
-  `model` VARCHAR(255) NOT NULL,
+  `modele` VARCHAR(255) NOT NULL,
   `num_serie` VARCHAR(255) NOT NULL,
   `num_produit` VARCHAR(255) NULL,
   `section_FK` INT NOT NULL,
@@ -94,13 +94,13 @@ CREATE TABLE IF NOT EXISTS `soventory`.`item` (
   `prix` DECIMAL(10,2) NOT NULL,
   `archive` TINYINT NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_item_type_materiel_idx` (`type_material_FK` ASC) VISIBLE,
+  INDEX `fk_item_type_materiel_idx` (`materiel_FK` ASC) VISIBLE,
   INDEX `fk_item_item_brand1_idx` (`marque_FK` ASC) VISIBLE,
   INDEX `fk_item_section1_idx` (`section_FK` ASC) VISIBLE,
   INDEX `fk_item_etat1_idx` (`etat_FK` ASC) VISIBLE,
   INDEX `fk_item_lieu1_idx` (`lieu_FK` ASC) VISIBLE,
   CONSTRAINT `fk_item_type_materiel`
-    FOREIGN KEY (`type_material_FK`)
+    FOREIGN KEY (`materiel_FK`)
     REFERENCES `soventory`.`materiel` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,

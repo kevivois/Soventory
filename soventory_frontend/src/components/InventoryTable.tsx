@@ -60,7 +60,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var errors = null
         try
         {
-            var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+            var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,materiel_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,modele:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
             const query = await fetch("http://"+getIp()+":3001/item/create",{
                 method: "POST",
                 headers: {
@@ -405,7 +405,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const onApplyExistingRow = async (newRow:any,changed:boolean) => {
 
         if(!changed)return;
-        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,materiel_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,modele:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
         
         const query = await fetch(`http://${getIp()}:3001/item/${newRow.id}/update`, {
             method: "POST",
@@ -466,13 +466,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         });
     }
     const onImportCsv = async (array:any) => {
-      /*  const query = await fetch(`http://${getIp()}:3001/item/import`, {
+        const query = await fetch(`http://${getIp()}:3001/item/import`, {
             method: "POST",
             credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(array),
+            body: JSON.stringify({items:array}),
         });
         const response = await query.json()
         if(response.error)
@@ -482,7 +482,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         else
         {
             await refreshAll();
-        }*/
+        }
     }
 
     return (

@@ -50,3 +50,20 @@ body {
   /*show at the bottom of the parent div*/
 
 }
+#div_input_file{
+  display: inline;
+}
+#div_input_file input{
+  float: left;
+  display: inline;
+  width: 89%;
+}
+#div_input_file Button{
+width: 10%;
+color:black;
+}
+#div_input_file Button:focus{
+  width: 10%;
+  color:black;
+  }
+

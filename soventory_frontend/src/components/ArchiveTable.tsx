@@ -56,11 +56,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         fetchDropDownList();
         setOpenAddPopup(false)
     };
-
+    useEffect(() => {
+        /*add and remove listener on enter touch */
+        if(deleteWarning){
+           document.addEventListener("keydown",keyboardEnventListener)
+        }
+    },[deleteWarning])
     const onApplyNewRow = async (newRow:any) => {
         try
         {
-            var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+            var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,materiel_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,modele:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
             const query = await fetch("http://"+getIp()+":3001/item/create",{
                 method: "POST",
                 headers: {
@@ -70,7 +75,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 body: JSON.stringify(formatedRow)
             });
             const response = await query.json();
-            console.log(response)
             if (response.error)
             {
                 setError(response.error)
@@ -117,8 +121,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         }
 
         setDeleteWarning(false)
-    }
 
+        //remove all event listener
+        document.removeEventListener("keydown",keyboardEnventListener)
+    }
+    function keyboardEnventListener(e:any){
+        if(e.key === "Enter"){
+            onDeleteRow(deleteId)
+            }
+    }
     async function refreshAll(){
         await fetchItems();
         await fetchDropDownList();
@@ -137,7 +148,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
     useEffect(() => {
         if(error == "")return;
-        console.log(error)
         setOpenWarning(true);
     }, [error]);
 
@@ -145,7 +155,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             try
             {
-                console.log("fetching items archive")
                 const query = await fetch("http://"+getIp()+":3001/item/archived/inner/all",{
                     credentials: "include"
                 });
@@ -428,7 +437,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const onApplyExistingRow = async (newRow:any,changed:boolean) => {
 
         if(!changed)return;
-        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,type_material_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,model:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
+        var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,materiel_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,modele:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
         
         const query = await fetch(`http://${getIp()}:3001/item/${newRow.id}/update`, {
             method: "POST",

@@ -3,7 +3,9 @@ import express from "express"
 import instance from "../../Connection"
 import { FormatNumberLength } from "../../../utils"
 import { gunzipSync } from "zlib"
+import { createItem } from "../../utils/DB.utils"
 import fs from "fs"
+import headers from "../../../../soventory_frontend/src/components/headers"
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
@@ -23,11 +25,26 @@ function renderJsDates(query:any[]){
     });
     return result
 }
+function formatToDBDate(date:string){
+        
+    let splitted = date.split('.');
+    if(splitted.length >1){
+    let day = splitted[0];
+    let month = splitted[1];
+    let year = splitted[2];
+    let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
+    console.log(returnContent)
+    return returnContent;
+    }else{
+        return date;
+    }
+    
+}
 router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
-    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
-             inner join materiel on type_material_FK=materiel.id
+             inner join materiel on materiel_FK=materiel.id
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
@@ -46,10 +63,10 @@ router.get("/all", [auth,canRead], async (req: any, res: any) => {
 router.get("/:id", [auth, canRead], async(req: any, res: any) => {
     try
     {
-    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
                                             etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
                                                 from item inner join section on section_FK=section.id
-                                                     inner join materiel on type_material_FK=materiel.id
+                                                     inner join materiel on materiel_FK=materiel.id
                                                      inner join etat on etat_FK=etat.id
                                                      inner join marque on marque_FK=marque.id
                                                      inner join lieu on lieu_FK = lieu.id
@@ -66,20 +83,13 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
 })
 router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: any) => {
 
-    let year = new Date(Date.now()).getFullYear().toString().substring(2, 4)
-    let dblength = await Connection.query(`select (select SUBSTRING(id,3,5)) as count from item where SUBSTRING(id,3,5) = (select max((select SUBSTRING(id,3,5))) from item)`)
-    let id = `${year}${FormatNumberLength(parseInt(dblength[0].count) + 1, 3)}`
-    let prix = Math.round(parseFloat(req.body.prix) * 20) / 20.0
-    try
+    const {success,query} = await createItem(req.body.item);
+    if(success)
     {
-        var query = await Connection.query(`insert into item (id,model,num_serie,num_produit,remarque,date_achat,prix,garantie,fin_garantie,type_material_FK,marque_FK,section_FK,etat_FK,lieu_FK,archive) values 
-                                                    ("${id}","${req.body.model}","${req.body.num_serie}","${req.body.num_produit}","${req.body.remarque}","${req.body.date_achat}","${prix}","${req.body.garantie}","${req.body.fin_garantie}",
-                                                    "${req.body.type_material_FK}","${req.body.marque_FK}","${req.body.section_FK}","${req.body.etat_FK}","${req.body.lieu_FK}","${req.body.archive}")`)
-        return res.status(200).send(query)
+        return res.status(200).send({"id":query})
     }
-    catch(error)
+    else
     {
-        console.log(error)
         return res.status(500).send({"error":"server error"})
     }
 })
@@ -99,7 +109,7 @@ router.post("/:id/update", [auth, canWrite,ItemIntegrity], async (req: any, res:
                 }).join(",")
                 //console.log(queryCondition)
                 var query = await Connection.query(`update item inner join section on section_FK=section.id
-                inner join materiel on type_material_FK=materiel.id
+                inner join materiel on materiel_FK=materiel.id
                 inner join etat on etat_FK=etat.id
                 inner join marque on marque_FK=marque.id
                 inner join lieu on lieu_FK = lieu.id
@@ -166,10 +176,10 @@ router.post("/byValues", [auth, canRead], async (req: any, res: any) => {
     {
         whereCondition += "and archive = 0"
     }
-    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
-             inner join materiel on type_material_FK=materiel.id
+             inner join materiel on materiel_FK=materiel.id
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
@@ -216,10 +226,10 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
     {
         whereCondition += "and archive = 1"
     }
-    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
-             inner join materiel on type_material_FK=materiel.id
+             inner join materiel on materiel_FK=materiel.id
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
@@ -228,10 +238,10 @@ router.post("/archived/byValues", [auth, canRead], async (req: any, res: any) =>
     return res.status(200).send(query)
 })
 router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) => {
-    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.model as modele,item.num_serie,item.num_produit,section.nom as section,
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
     etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
         from item inner join section on section_FK=section.id
-             inner join materiel on type_material_FK=materiel.id
+             inner join materiel on materiel_FK=materiel.id
              inner join etat on etat_FK=etat.id
              inner join marque on marque_FK=marque.id
              inner join lieu on lieu_FK = lieu.id
@@ -241,36 +251,69 @@ router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) =>
 })
 export default router
 
-
-router.post("/verifiy", [auth, canRead,canWrite], async (req: any, res: any) => {
-    try{
-        var file = req.files.file
-        var reader = new FileReader();
-        reader.readAsText(file)
-        // convert to show in table  format
-        var table = []
-        var result = reader.result as string
-        var lines = result.split("\n")
-        for (var i = 0; i < lines.length; i++) {
-            var currentline = lines[i].split(";");
-            table.push(currentline)
-        }
-        // convert to json format
-        var json = []
-        for (var i = 1; i < table.length; i++) {
-            var obj : any= {}
-            for (var j = 0; j < table[0].length; j++) {
-                obj[table[0][j]] = table[i][j]
+router.post("/import", [auth, canWrite], async (req: any, res: any) => {
+    let array:any[] = req.body.items;
+    let sqlArray:any[] = [];
+    let errors:any = []
+    if(!array)
+    {
+        errors.push("pas de liste d'items")
+        return res.status(400).send({errors:errors})
+    }
+    // step 1 : convert all FK to id, if not found, create it
+    const promises : readonly unknown[] = array.map(async (item:any) => {
+        let sqlItem:typeof item = {}
+        const promises : readonly unknown[] =  Object.keys(item).map(async (key) => {
+            if(headers.find((k:any) => k.key == String(key) && k.inner == true && k.required == true) !== undefined)
+            {
+                var query = await Connection.query(`select id from ${key} where nom = "${item[key]}"`)
+                if(query.length == 0)
+                {
+                    var query = await Connection.query("insert into " + key + " (nom) values ('" + item[key] + "')")
+                    var lastId = await Connection.query("select id from " + key + " order by id desc limit 1")
+                    item[`${key}_FK`] = lastId;
+                    sqlItem[`${key}_FK`] = lastId;
+                }
+                else{
+                    item[`${key}_FK`] = query[0].id
+                    sqlItem[`${key}_FK`] = query[0].id
+                }
+            }else if(item[key] === undefined || item[key] === ""){
+                errors.push("l'item " + item.id + " n'a pas de " + key)
             }
-            json.push(obj)
+            else{
+                
+                sqlItem[key] = item[key]
+            }
+        })
+        await Promise.all(promises)
+        sqlArray.push(sqlItem)
+    })
+    await Promise.all(promises)
+
+    // step 2 : insert all items$
+    const insertPromises : readonly unknown[] = sqlArray.map(async (item:any) => {
+        if(item.id !== undefined)
+        {
+            // delete from the item the id
+            delete item.id;
         }
-        
-        console.log(json,table)
-        return res.status(200).send({file:json,table:table})
-        
+            item.date_achat = formatToDBDate(item.date_achat)
+            item.fin_garantie = formatToDBDate(item.fin_garantie)
+            let {success,query,currentId} = await createItem(item)
+            if(!success)
+            {
+                if(currentId){
+                    errors.push("l'item " + currentId + " n'a pas pu être créé")
+                }else{
+                    errors.push("l'item  n'a pas pu être créé")              
+                }
+            }
+    })
+    await Promise.all(insertPromises)
+    if(errors.length == 0)
+    {
+        return res.status(200).send({errors:errors})
     }
-    catch(err){
-        console.log(err)
-        return res.status(500).send({error:err})
-    }
-})
+    return res.status(400).send({errors:errors})
+});

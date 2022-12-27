@@ -7,17 +7,17 @@ export  function ItemIntegrity(req:any, res:any, next:any) {
     let item = req.body
     let errors = []
 
-    if(!item.type_material_FK)
+    if(!item.materiel_FK)
     {
-        errors.push("le champ 'type_material_FK' est requis")
+        errors.push("le champ 'materiel' est requis")
     }
     if(!item.marque_FK)
     {
-        errors.push("le champ 'marque_FK' est requis")
+        errors.push("le champ 'marque' est requis")
     }
-    if(!item.model || item.model == "")
+    if(!item.modele || item.modele == "")
     {
-        errors.push("le champ 'model' est requis")
+        errors.push("le champ 'modele' est requis")
     }
     if(!item.num_serie || item.num_serie == "")
     {
@@ -29,15 +29,15 @@ export  function ItemIntegrity(req:any, res:any, next:any) {
     }
     if(!item.section_FK)
     {
-        errors.push("le champ 'section_FK' est requis")
+        errors.push("le champ 'section' est requis")
     }
     if(!item.etat_FK)
     {
-        errors.push("le champ 'etat_FK' est requis")
+        errors.push("le champ 'etat' est requis")
     }
     if(!item.lieu_FK)
     {
-        errors.push("le champ 'lieu_FK' est requis")
+        errors.push("le champ 'lieu' est requis")
     }
     if(!item.date_achat)
     {
@@ -69,14 +69,14 @@ export async function ItemFKIntegrity(req:any,res:any,next:any)
 {
     let item = req.body
     let errors = []
-    let type_material = await Connection.query(`select * from materiel where id = ${item.type_material_FK}`)
+    let type_material = await Connection.query(`select * from materiel where id = ${item.materiel_FK}`)
     let marque = await Connection.query(`select * from marque where id = ${item.marque_FK}`)
     let section = await Connection.query(`select * from section where id = ${item.section_FK}`)
     let etat = await Connection.query(`select * from etat where id = ${item.etat_FK}`)
     let lieu = await Connection.query(`select * from lieu where id = ${item.lieu_FK}`)
     if(!type_material[0])
     {
-        errors.push("type_material_FK is not valid")
+        errors.push("materiel_FK is not valid")
     }
     if(!marque[0])
     {
@@ -102,4 +102,13 @@ export async function ItemFKIntegrity(req:any,res:any,next:any)
     {
         return next()
     }
+}
+export async function checkDestructedItem(item:any){
+    
+    let FK_destructed:any[] = await Connection.query(`select id from etat where nom = "detruit" or nom = "détruit"`)
+    if(item.etat_FK == FK_destructed[0].id || item.etat == "detruit" || item.etat == "détruit")
+    {
+        item.archive = 1
+    }
+    return;
 }

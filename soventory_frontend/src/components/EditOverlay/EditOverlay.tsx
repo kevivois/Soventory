@@ -153,7 +153,6 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         let month = splitted[1];
         let year = splitted[2];
         let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
-        console.log(returnContent)
         return returnContent;
         }else{
             return date;
@@ -177,7 +176,6 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             })
             let changed = JSON.stringify(editRow) !== JSON.stringify(initialRow);
             let errors:any = await props.onApply(formattedEditRow,changed);
-            console.log(errors)
             if(!errors ||errors.length == 0){
                 handleClose()
             }else{
