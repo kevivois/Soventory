@@ -33,7 +33,6 @@ function formatToDBDate(date:string){
     let month = splitted[1];
     let year = splitted[2];
     let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
-    console.log(returnContent)
     return returnContent;
     }else{
         return date;
@@ -107,7 +106,6 @@ router.post("/:id/update", [auth, canWrite,ItemIntegrity], async (req: any, res:
                     return  `item.${key} = '${bd}'`
 
                 }).join(",")
-                //console.log(queryCondition)
                 var query = await Connection.query(`update item inner join section on section_FK=section.id
                 inner join materiel on materiel_FK=materiel.id
                 inner join etat on etat_FK=etat.id
