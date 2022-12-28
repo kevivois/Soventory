@@ -555,16 +555,17 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
              </tbody>
             </table>
             </div>
+            <div className="bottom-bar">
+            
+            <Button style={{color:"#550055",borderColor:"#550055",height:"80%",marginTop:"0.5%"}} variant="outlined" onClick={() => {
+               setOpenIEO(true)
+            }}>Import/Export</Button>
+            </div>
             <div id="add-button">
                 
                 <Button style={{backgroundColor:"#550055",float:"right"}} variant="contained" disabled={readOnly} onClick={() => {
                     setOpenAddPopup(true);
                 }}><FiPlus style={{marginRight:"5px"}}/>Ajouter</Button>
-            </div>
-            <div className="bottom-bar">
-            <Button style={{color:"#550055",borderColor:"#550055",height:"80%",marginTop:"0.5%"}} variant="outlined" onClick={() => {
-               setOpenIEO(true)
-            }}>Import/Export</Button>
             </div>
             <div className="FilterPopup">
             <Dialog

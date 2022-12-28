@@ -28,6 +28,7 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
   const [fileArray,setFileArray] = useState<any[]>([])
   const [csvFile,setCsvFile] = useState<string>("")
   const [error,setError] = useState<string>("")
+  const [enableImport,setEnableImport] = useState<boolean>(false)
   const [warningBar,setWarningBar] = useState<boolean>(false)
 
   const handleClickOpen = () => {
@@ -88,7 +89,8 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
           }
           setCsvFile(csv);
           let result = csvToObjectArray(csv);
-          checkFile(result.data);
+          let r = checkFile(result.data);
+          setEnableImport(r);
           setFileArray(result.data as []);
         }
         
@@ -107,6 +109,7 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
       });
       
     }else{
+      canImport = false;
       setError("Le fichier est vide")
     }
     return canImport
@@ -154,7 +157,7 @@ const downloadExample = (event:any) => {
         <label>Sélectionne ton fichier</label>
         <div id="div_input_file"><input onChange={handleFileChange}  type="file" id="file" name="file" accept=".xlsx, .xls, .csv" /><Button onClick={downloadExample}><QuestionMarkIcon /></Button></div>
       </div>
-      <div id="excel-preview" style={fileArray.length > 0 ? {display:'block'}:{display:"none"}}>
+      <div id="excel-preview" style={enableImport ? {display:'block'}:{display:"none"}}>
         <CsvPreview data={fileArray} />
       </div>
       {error && warningBar && <div className='error'><Warning open={warningBar} message={error} onClose={() => {setWarningBar(false)}} /></div> }
