@@ -81,8 +81,8 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
     
 })
 router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: any) => {
-
-    const {success,query} = await createItem(req.body.item);
+    let item = {...req.body}
+    const {success,query} = await createItem(item);
     if(success)
     {
         return res.status(200).send({"id":query})

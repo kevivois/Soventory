@@ -1,66 +1,21 @@
 import React from 'react';
 import { useTable } from 'react-table';
+import headers from '../headers';
 
-export default function CsvPreview  ({ data }:any) {
+export default function CsvPreview  ({ data,withId }:any) {
   const columns = React.useMemo(
-    () => [
-      {
-        Header: 'Materiel',
-        accessor: 'materiel'
-      },
-      {
-        Header: 'Marque',
-        accessor: 'marque'
-      },
-      {
-        Header: 'Modele',
-        accessor: 'modele'
-      },
-      {
-        Header: 'Num Serie',
-        accessor: 'num_serie'
-      },
-      {
-        Header: 'Num Produit',
-        accessor: 'num_produit'
-      },
-      {
-        Header: 'Section',
-        accessor: 'section'
-      },
-      {
-        Header: 'Etat',
-        accessor: 'etat'
-      },
-      {
-        Header: 'Lieu',
-        accessor: 'lieu'
-      },
-      {
-        Header: 'Remarque',
-        accessor: 'remarque'
-      },
-      {
-        Header: 'Date Achat',
-        accessor: 'date_achat'
-      },
-      {
-        Header: 'Garantie',
-        accessor: 'garantie'
-      },
-      {
-        Header: 'Fin Garantie',
-        accessor: 'fin_garantie'
-      },
-      {
-        Header: 'Prix',
-        accessor: 'prix'
-      },
-      {
-        Header: 'Archive',
-        accessor: 'archive'
+    () => headers.map((header:any) => {
+      return {
+        Header: header.labelName,
+        accessor: header.key
       }
-    ],
+    }).filter((header:any) => {
+      if(withId === true){
+        return true;
+      }else{
+        return header.accessor !== "id"
+      }
+    }),
     []
   );
 
@@ -86,7 +41,10 @@ export default function CsvPreview  ({ data }:any) {
     }
   }
   return (
-    <table {...getTableProps()}>
+    <table style={{
+      width:"100%",
+      height:"100%"
+    }} {...getTableProps()}>
       <thead>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>

@@ -519,7 +519,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             </div>
             </div>
             </div>
-            <div className="table" style={{
+            <div className="InventoryTable" style={{
             }}>
         <table>
             <thead>
@@ -570,7 +570,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             }}><DeleteIcon /></Button></td>
                         </tr>
                     )
-                }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>No data</td></tr>}
+                }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
             </div>

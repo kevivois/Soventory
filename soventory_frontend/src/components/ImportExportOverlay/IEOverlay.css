@@ -44,6 +44,7 @@ body {
   overflow-x: scroll;
   overflow-y: scroll;
   border: 1px solid #ccc;
+  margin-top: 20px;
 }
 .error{
   margin-top: 50px;
@@ -65,5 +66,12 @@ color:black;
 #div_input_file Button:focus{
   width: 10%;
   color:black;
-  }
+}
+#div_input_ext select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
 

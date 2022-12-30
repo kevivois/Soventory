@@ -506,7 +506,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             </div>
             </div>
             </div>
-            <div className="table">
+            <div className="InventoryTable">
         <table>
             <thead>
                 <tr className="columnContainer">
@@ -551,26 +551,22 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             })}
                         </tr>
                     )
-                }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>No data</td></tr>}
+                }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
             </div>
             <div className="bottom-bar">
-            
-            <Button style={{color:"#550055",borderColor:"#550055",height:"80%",marginTop:"0.5%"}} variant="outlined" onClick={() => {
+            <Button sx={{color:"#550055",borderColor:"#550055",height:"50%",width:"10%",marginTop:"1.5%",marginLeft:"2%"}} variant="outlined" onClick={() => {
                setOpenIEO(true)
             }}>Import/Export</Button>
-            </div>
-            <div id="add-button">
-                
-                <Button style={{backgroundColor:"#550055",float:"right"}} variant="contained" disabled={readOnly} onClick={() => {
+                <Button sx={{backgroundColor:"#550055",color:"white",height:"50%",width:"10%",marginTop:"1.5%",marginRight:"2%"}} variant="contained" disabled={readOnly} onClick={() => {
                     setOpenAddPopup(true);
                 }}><FiPlus style={{marginRight:"5px"}}/>Ajouter</Button>
-            </div>
+                </div>
             <div className="FilterPopup">
             <Dialog
             
-      sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
+      sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435}}}
       maxWidth="xs"
       open={openPopup}
     >
@@ -613,17 +609,17 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={onApplyExistingRow} /> : null}
             
         </div>
-        <div className="warning-error">
-            {openWarning && error &&  <Warning message={error} open={true} onClose={() => {
-                setOpenWarning(false)
-                }} />}
-        </div>
         <div className="AddPopup">
             {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={onApplyNewRow} /> : null}
         </div>
         <div className="IEOverlay">
-            {openIEO ? <IEOverlay buttonLabel={"test"} dialogTitle={"Import Export"} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
+            {openIEO ? <IEOverlay exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
         </div>
+        <div className="warning-error">
+            {openWarning && error &&  <Warning message={error} open={true} onClose={() => {
+                setOpenWarning(false)
+                }} />}
+            </div>
         </div>
     );
 }
