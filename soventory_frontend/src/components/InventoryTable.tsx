@@ -20,6 +20,8 @@ import AddOverlay from "./AddOverlay/AddOverlay";
 import Warning from "./WarningBar/WarningBar";
 import getIp from "../IP";
 import IEOverlay from "./ImportExportOverlay/IEOverlay";
+import Pagination from "./Pagination/Pagination";
+import BottomBar from "./BottomBar/BottomBar";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -46,6 +48,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [openAddPopup,setOpenAddPopup] = useState(false);
     const [error,setError] = useState<string>("");
     const [openIEO,setOpenIEO] = useState(false);
+    const [pageId,setPageId] = useState(1);
+    const [paginateData,setPaginateData] = useState<any[]>([]);
+    const [enablePagination,setEnablePagination] = useState(true);
+    const [rowPerPage,setRowPerPage] = useState(23);
+    const [maxPage,setMaxPage] = useState(Math.round(renderedData.length/rowPerPage));
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -55,7 +62,33 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         fetchDropDownList();
         setOpenAddPopup(false)
     };
+    const handlePagination = () => {
+        if(!enablePagination){
+            const paginateData = [...renderedData];
+            return setPaginateData(paginateData);
+        }
+        const paginateData = renderedData.slice((pageId-1)*rowPerPage,pageId*rowPerPage);
+        setPaginateData(paginateData);
 
+        let mx = Math.round(renderedData.length / rowPerPage)
+        if(mx === 0) mx = 1;
+        setMaxPage(mx);
+
+        if(pageId > mx){
+            setPageId(mx);
+        }
+    };
+    const handlePageChange = (pageId:number) => {
+        if(pageId > 0 && pageId <= maxPage){
+            setPageId(pageId);
+        }else if(pageId > maxPage){
+            setPageId(maxPage);
+        };
+    };
+
+    useEffect(() => {
+        handlePagination();
+    },[renderedData,pageId,enablePagination,rowPerPage]);
     const onApplyNewRow = async (newRow:any) => {
         var errors = null
         try
@@ -534,7 +567,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 </tr>
             </thead>
             <tbody>
-                {renderedData.length > 0 ?  renderedData.map((row) => {
+                {paginateData.length > 0 ?  paginateData.map((row) => {
                     return (
                         <tr key={row.id} onMouseOver={(event) => {
                             // set color of the entire row when mouse over
@@ -555,14 +588,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
              </tbody>
             </table>
             </div>
-            <div className="bottom-bar">
-            <Button sx={{color:"#550055",borderColor:"#550055",height:"50%",width:"10%",marginTop:"1.5%",marginLeft:"2%"}} variant="outlined" onClick={() => {
-               setOpenIEO(true)
-            }}>Import/Export</Button>
-                <Button sx={{backgroundColor:"#550055",color:"white",height:"50%",width:"10%",marginTop:"1.5%",marginRight:"2%"}} variant="contained" disabled={readOnly} onClick={() => {
-                    setOpenAddPopup(true);
-                }}><FiPlus style={{marginRight:"5px"}}/>Ajouter</Button>
-                </div>
+            <BottomBar onOpenIEO={() => setOpenIEO(true)} enablePagination={enablePagination} handlePageChange={handlePageChange} maxPage={maxPage} pageId={pageId} readOnly={readOnly}  setOpenIEO={(open:boolean) => setOpenIEO(open)} setOpenAddPopup={(open:boolean) => setOpenAddPopup(open)} setEnablePagination={() => setEnablePagination(!enablePagination)}   />
             <div className="FilterPopup">
             <Dialog
             

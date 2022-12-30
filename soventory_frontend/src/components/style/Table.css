@@ -12,7 +12,7 @@
   }
   .InventoryTable tbody{
     display: block;
-    max-height: 72vh;
+    max-height: 73vh;
     overflow-y: scroll;
     overflow-x: hidden;
   }
@@ -120,14 +120,4 @@
  
   color: #343a40;
   height: 20px;
-}
-.bottom-bar{
-  width: 85%;
-  height: 11%;
-  position: fixed;
-  bottom: 0;
-  border-top: 1px solid #000000cc;
-  margin: auto;
-  display: flex;
-  justify-content:space-between;
 }

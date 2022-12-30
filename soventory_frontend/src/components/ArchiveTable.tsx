@@ -21,6 +21,9 @@ import Warning from "./WarningBar/WarningBar";
 import DeleteIcon from '@mui/icons-material/Delete';
 import DialogContentText from '@mui/material/DialogContentText';
 import getIp from ".././IP"
+import IEOverlay from "./ImportExportOverlay/IEOverlay";
+import Pagination from "./Pagination/Pagination";
+import BottomBar from "./BottomBar/BottomBar";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -48,6 +51,38 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [error,setError] = useState<string>("");
     const [deleteWarning,setDeleteWarning] = useState(false);
     const [deleteId,setDeleteId] = useState<number | null>(null);
+    const [openIEO,setOpenIEO] = useState(false);
+    const [pageId,setPageId] = useState(1);
+    const [paginateData,setPaginateData] = useState<any[]>([]);
+    const [enablePagination,setEnablePagination] = useState(true);
+    const [rowPerPage,setRowPerPage] = useState(23);
+    const [maxPage,setMaxPage] = useState(Math.round(renderedData.length/rowPerPage));
+    const handlePagination = () => {
+        if(!enablePagination){
+            const paginateData = [...renderedData];
+            return setPaginateData(paginateData);
+        }
+        const paginateData = renderedData.slice((pageId-1)*rowPerPage,pageId*rowPerPage);
+        setPaginateData(paginateData);
+
+        let mx = Math.round(renderedData.length / rowPerPage)
+        if(mx === 0) mx = 1;
+        setMaxPage(mx);
+
+        if(pageId > mx){
+            setPageId(mx);
+        }
+    };
+    const handlePageChange = (pageId:number) => {
+        if(pageId > 0 && pageId <= maxPage){
+            setPageId(pageId);
+        }else if(pageId > maxPage){
+            setPageId(maxPage);
+        };
+    };
+    useEffect(() => {
+        handlePagination();
+    },[renderedData,pageId,enablePagination,rowPerPage]);
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
         fetchDropDownList();
@@ -497,6 +532,25 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             }
         });
     }
+    const onImportCsv = async (array:any) => {
+        const query = await fetch(`http://${getIp()}:3001/item/import`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({items:array}),
+        });
+        const response = await query.json()
+        if(response.error)
+        {
+            setError(String(response.error));
+        }
+        else
+        {
+            await refreshAll();
+        }
+    }
 
     return (
         <div className="App" style={{width:"100%",display:"flex",flexDirection:"column"}}>
@@ -549,7 +603,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 </tr>
             </thead>
             <tbody>
-                {renderedData.length > 0 ?  renderedData.map((row) => {
+                {paginateData.length > 0 ?  paginateData.map((row) => {
                     return (
                         <tr  key={row.id} onMouseOver={(event) => {
                             // set color of the entire row when mouse over
@@ -574,6 +628,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
              </tbody>
             </table>
             </div>
+            <BottomBar onOpenIEO={() => setOpenIEO(true)} enablePagination={enablePagination} handlePageChange={handlePageChange} maxPage={maxPage} pageId={pageId} readOnly={readOnly}  setOpenIEO={(open) => setOpenIEO(open)} setOpenAddPopup={(open) => setOpenAddPopup(open)} setEnablePagination={() => setEnablePagination(!enablePagination)}   />
             <div className="FilterPopup">
             <Dialog
             
@@ -626,6 +681,14 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         <div className="AddPopup">
             {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={(newRow:any) => onApplyNewRow(newRow)} /> : null}
         </div>
+        <div className="IEOverlay">
+            {openIEO ? <IEOverlay exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
+        </div>
+        <div className="warning-error">
+            {openWarning && error &&  <Warning message={error} open={true} onClose={() => {
+                setOpenWarning(false)
+                }} />}
+            </div>
         
         <div className="DeleteWarning">
             {deleteWarning ?  <Dialog open={deleteWarning} onClose={() => setDeleteWarning(false)} aria-labelledby="form-dialog-title">

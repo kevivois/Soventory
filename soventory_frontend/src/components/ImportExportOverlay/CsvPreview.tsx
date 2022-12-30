@@ -43,13 +43,16 @@ export default function CsvPreview  ({ data,withId }:any) {
   return (
     <table style={{
       width:"100%",
-      height:"100%"
+      height:"100%", 
+      borderCollapse: 'collapse',
+      overflow:"auto",
     }} {...getTableProps()}>
       <thead>
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map(column => (
-              <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+              <th {...column.getHeaderProps()} style={{ height:"5%",borderBottom: 'solid 1px black', background: 'aliceblue', color: 'black', fontWeight: 'bold',borderRight: 'solid 1px gray'
+              }}>{column.render('Header')}</th>
             ))}
           </tr>
         ))}
@@ -58,7 +61,9 @@ export default function CsvPreview  ({ data,withId }:any) {
         {rows.map((row, i) => {
           prepareRow(row);
           return (
-            <tr {...row.getRowProps()}>
+            <tr {...row.getRowProps()} style={{
+              borderBottom: 'solid 1px gray',
+            }}>
               {row.cells.map(cell => {
                 return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
               })}
