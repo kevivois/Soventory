@@ -8,6 +8,7 @@ export default function Pagination(props:{onPageChange:(page:number) => void,ena
     function onNext(){
         props.onPageChange(props.page + 1)
     }
+    console.log(props.maxPage)
     if(props.enabled){
         return (<div className="pagination">
             <Button onClick={onPrevious} disabled={props.page === 1 || !props.enabled}>Précedant</Button>

@@ -51,7 +51,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [pageId,setPageId] = useState(1);
     const [paginateData,setPaginateData] = useState<any[]>([]);
     const [enablePagination,setEnablePagination] = useState(true);
-    const [rowPerPage,setRowPerPage] = useState(23);
+    const [rowPerPage,setRowPerPage] = useState(10);
     const [maxPage,setMaxPage] = useState(Math.round(renderedData.length/rowPerPage));
     
     const handleEditPageClose = () => {
