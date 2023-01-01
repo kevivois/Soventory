@@ -14,3 +14,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
 }
+body{
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
