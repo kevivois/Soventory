@@ -52,7 +52,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [paginateData,setPaginateData] = useState<any[]>([]);
     const [enablePagination,setEnablePagination] = useState(true);
     const [rowPerPage,setRowPerPage] = useState(23);
-    const [maxPage,setMaxPage] = useState(Math.round(renderedData.length/rowPerPage));
+    const [maxPage,setMaxPage] = useState(Math.ceil(renderedData.length/rowPerPage));
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -70,7 +70,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         const paginateData = renderedData.slice((pageId-1)*rowPerPage,pageId*rowPerPage);
         setPaginateData(paginateData);
 
-        let mx = Math.round(renderedData.length / rowPerPage)
+        let mx = Math.ceil(renderedData.length / rowPerPage)
         if(mx === 0) mx = 1;
         setMaxPage(mx);
 
@@ -263,13 +263,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             setHeaders(newHeaders);
             sortedData.sort((a, b) => {
-                var aVal = (String(a[filter.header.key]).substring(2,5))
-                var bVal = (String(b[filter.header.key]).substring(2,5))
-                
-                if (aVal < bVal) {
+
+                if (a[filter.header.key] < b[filter.header.key]) {
                     return filter.header.order === "asc" ? -1 : 1;
                 }
-                if (aVal > bVal) {
+                if (a[filter.header.key] > b[filter.header.key]) {
                     return filter.header.order === "asc" ? 1 : -1;
                 }
                 return 0;

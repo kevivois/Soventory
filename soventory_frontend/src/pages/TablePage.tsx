@@ -148,14 +148,13 @@ export default function  TablePage(props:{user:any,type:string})
                 {
                     return setLoadingMessage("You are not allowed to access this page");
                 }
-                setLoading(false);
             }
         }
         fetchCategories();
         fetchMarques();
         fetchEtats();
-        fetchLieux();
-        fetchSections();
+        fetchLieux()
+        fetchSections().then(() => setLoading(false));
     },[])
 
    

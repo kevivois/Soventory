@@ -12,7 +12,7 @@ const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
-const sortedById = "order by (SELECT SUBSTRING(item.id,3,5))"
+const sortedById = "order by item.id asc"
 
 function renderJsDates(query:any[]){
     var result:any = []
