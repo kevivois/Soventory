@@ -104,11 +104,11 @@ export async function ItemFKIntegrity(req:any,res:any,next:any)
     }
 }
 export async function checkDestructedItem(item:any){
-    
     let FK_destructed:any[] = await Connection.query(`select id from etat where nom = "detruit" or nom = "détruit"`)
-    if(item.etat_FK == FK_destructed[0].id || item.etat == "detruit" || item.etat == "détruit")
-    {
-        item.archive = 1
+    if(FK_destructed.length > 0 && FK_destructed[0].id && item &&  item.etat_FK){
+        if(item.etat_FK == FK_destructed[0].id){
+            return item.archive = 1;
+        }
     }
     return;
 }

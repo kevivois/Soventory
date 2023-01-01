@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CloseIcon from "@mui/icons-material/Close"
 import Alert from "@mui/material/Alert";
-
+import "./WarningBar.css"
 export default function Warning(props:{message:string,open:boolean,onClose:()=>void}){
 
     function onClose(){
@@ -14,7 +14,8 @@ export default function Warning(props:{message:string,open:boolean,onClose:()=>v
     }
 
     return (
-    <Box sx={{ width: '100%' }}>
+      <div className="WarningContainer">
+    <Box sx={{ width: '100%'}}>
       <Collapse in={props.open}>
         <Alert variant="filled" severity="error" onClose={()=>{onClose()}}
           action={
@@ -35,5 +36,6 @@ export default function Warning(props:{message:string,open:boolean,onClose:()=>v
         </Alert>
       </Collapse>
     </Box>
+    </div>
     );
 }

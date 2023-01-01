@@ -7,8 +7,14 @@ export async function createItem(item:any){
     await Connection.wait();
     await checkDestructedItem(item);
     let year = new Date(Date.now()).getFullYear().toString().substring(2, 4)
-    let dblength = await Connection.query(`select (select SUBSTRING(id,3,5)) as count from item where SUBSTRING(id,3,5) = (select max((select SUBSTRING(id,3,5))) from item)`)
-    let id = `${year}${FormatNumberLength(parseInt(dblength[0].count) + 1, 3)}`
+    let queryNextId = await Connection.query(`select SUBSTRING(id,3,5) as nextId from item where item.id >= ${parseInt(year)*1000} order by item.id desc limit 1`)
+    let nextId=0;
+    if(queryNextId.length>0)
+    {
+        nextId = parseInt(queryNextId[0].nextId)+1;
+    }
+
+    let id = `${year}${FormatNumberLength(nextId, 3)}`
     let prix = Math.round(parseFloat(item.prix) * 20) / 20.0
     try
     {

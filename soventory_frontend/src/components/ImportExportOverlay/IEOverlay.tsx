@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import  getIp  from '../../IP';
 import Button from '@mui/material/Button';
 import Dialog,{DialogProps} from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import TextField from '@mui/material/TextField';
 import Headers from "../headers"
 import {csvToObjectArray} from ".././utils/file.utils"; 
 import CsvPreview	 from './CsvPreview';
@@ -16,8 +13,9 @@ import * as XLSX from 'xlsx';
 import "./IEOverlay.css";
 import Warning from '../WarningBar/WarningBar';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import {ExportToExcel,exportToCsv,exportToPDF} from "../utils/file.utils"
 const sizeLimitMB = 3;
-export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:any,open:boolean,onImport:(array:any) => void,onClose:() => void}) {
+export default function ImportExportDialog(props:{open:boolean,onImport:(array:any) => void,onClose:() => void,exportArray:any[]}) {
   const [open, setOpen] = useState(props.open);
   const [activeTab, setActiveTab] = useState(0); // 0 for import tab, 1 for export tab
   const [file, setFile] : any = useState<any>({}); // the selected file
@@ -29,11 +27,22 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
   const [csvFile,setCsvFile] = useState<string>("")
   const [error,setError] = useState<string>("")
   const [enableImport,setEnableImport] = useState<boolean>(false)
-  const [warningBar,setWarningBar] = useState<boolean>(false)
+  const [enableExport,setEnableExport] = useState<boolean>(false)
+  const [exportArray,setExportArray] = useState<any[]>(props.exportArray);
+  const [warningBar,setWarningBar] = useState<boolean>(false);
+  const exportOptions = ["csv","xlsx","xls","pdf"];
+  const [exportExt,setExportExt] = useState<string>(exportOptions[0]);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  useEffect(() => {
+    if(activeTab == 1){
+      setEnableExport(checkFile(exportArray));
+    }
+  },[exportArray,activeTab]);
+  function Error(text:string){
+    setError(text);
+    setWarningBar(true);
+
+  }
 
   const handleClose = () => {
     setOpen(false);
@@ -44,19 +53,20 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
     setActiveTab(newValue);
   };
 
+
   const handleFileChange = async (event:any) => {
     let selectedFile = event.target.files[0];
     //check if file is csv or xlsx
     let size = selectedFile.size/1000000
     if(!selectedFile.name.match(/.csv|.xlsx/||/.xls/)){
-      return setError("Le fichier n'est pas au bon format, format accepté : .csv, .xlsx, .xls")
+      return Error("Le fichier n'est pas au bon format, format accepté : .csv, .xlsx, .xls")
     }
     if(size <= sizeLimitMB){
     setFileSizeInMB(size);
     setFile(selectedFile);
     setFileSize(selectedFile.size)
   }else{
-    setError("Le fichier est trop volumineux")
+    Error("Le fichier est trop volumineux")
   }
   };
   useEffect(() => {
@@ -66,12 +76,7 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
       }
     }
     refresh();
-  }, [file])
-  useEffect(() => {
-    if(error){
-      setWarningBar(true)
-      }
-      }, [error])
+  }, [file]);
   const transformFile = async () =>{
 
         var reader = new FileReader();
@@ -97,33 +102,63 @@ export default function ImportExportDialog(props:{buttonLabel:any,dialogTitle:an
   }
 
   function checkFile(array:any){
-    let canImport = true;
+    let ok = true;
     if(array.length > 0){
       let currentHeaders = Object.keys(array[0]);
       Headers.forEach((header)=>{
         if(header.key =="id"){return}
         if(!currentHeaders.includes(header.key)){
-          canImport = false;
-          setError("Le fichier ne contient pas les bonnes colonnes")
+          ok = false;
+          Error("Le fichier ne contient pas les bonnes colonnes")
         }
       });
       
     }else{
-      canImport = false;
-      setError("Le fichier est vide")
+      ok = false;
+      Error("Le fichier est vide")
     }
-    return canImport
+    return ok
   }
-  const handleImport = () => {
-    // Add code to import data here
-    // You can access the file and file size with the file and fileSize state variables
-    // You can check the file format and size and add the data to your application here
 
+const Importing = () => {
     let canImport = checkFile(fileArray);
     if(canImport){
       handleClose();
       props.onImport(fileArray);
   };
+}
+const Exporting = () => {
+  
+  if(exportArray.length == 0){return Error("Aucune donnée à exporter")}
+
+
+  switch(exportExt){
+    case "csv":
+      exportToCsv(exportArray);
+    break;
+    case "xlsx":
+      ExportToExcel(exportArray,"xlsx");
+    break;
+    case "xls":
+      ExportToExcel(exportArray,"xls");
+    break;
+    case "pdf":
+      exportToPDF(exportArray);
+    break;
+  };
+}
+
+const handleImportOrExport = () => {
+    
+  switch(activeTab){
+    case 0:
+      Importing();
+    break;
+    case 1:
+      Exporting();
+    break;
+    
+  }
 };
 const downloadExample = (event:any) => {
   event.preventDefault();
@@ -146,11 +181,13 @@ const downloadExample = (event:any) => {
   return (
     <div>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth={maxWidth} fullWidth={fullWidth}>
-        <DialogTitle id="form-dialog-title">{props.dialogTitle}</DialogTitle>
+        <DialogTitle id="form-dialog-title">Import & Exportation</DialogTitle>
         <Tabs value={activeTab} onChange={handleTabChange}>
           <Tab label="Import" />
+          <Tab label="Export" />
         </Tabs>
         <DialogContent className="root">
+          {activeTab === 0 && 
           <div className="container">
       <h1>Import de fichier (csv,xlsx)</h1>
       <div id="form">
@@ -158,17 +195,34 @@ const downloadExample = (event:any) => {
         <div id="div_input_file"><input onChange={handleFileChange}  type="file" id="file" name="file" accept=".xlsx, .xls, .csv" /><Button onClick={downloadExample}><QuestionMarkIcon /></Button></div>
       </div>
       <div id="excel-preview" style={enableImport ? {display:'block'}:{display:"none"}}>
-        <CsvPreview data={fileArray} />
+        <CsvPreview withId={false} data={fileArray} />
       </div>
-      {error && warningBar && <div className='error'><Warning open={warningBar} message={error} onClose={() => {setWarningBar(false)}} /></div> }
-    </div>
+    </div>}
+          {activeTab === 1 && <div className="container">
+        <h1>Export de fichier </h1>
+        <div id="form">
+          <label>Sélectionne l'extension</label>
+          <div id="div_input_ext">
+            <select  onChange={(v:any) => {
+                setExportExt(v.target.value)
+            } } value={exportExt} >
+               {exportOptions.map((ext) => {
+                return <option key={ext} value={ext}>{ext}</option>
+              })}</select>
+            </div>
+            <div id="excel-preview" style={enableExport ? {display:'block'}:{display:"none"}}>
+        <CsvPreview withId={true} data={exportArray} />
+      </div>
+        </div>
+            </div>}
+            {error && warningBar && <div className='error'><Warning open={warningBar} message={error} onClose={() => {setWarningBar(false)}} /></div> }
   </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleImport} color="primary">
-            Import
+          <Button onClick={handleImportOrExport} color="primary">
+            {activeTab === 0 ? "Import" : "Export"}
           </Button>
         </DialogActions>
       </Dialog>

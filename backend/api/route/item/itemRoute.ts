@@ -12,7 +12,7 @@ const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 
-const sortedById = "order by (SELECT SUBSTRING(item.id,3,5))"
+const sortedById = "order by item.id asc"
 
 function renderJsDates(query:any[]){
     var result:any = []
@@ -25,9 +25,8 @@ function renderJsDates(query:any[]){
     });
     return result
 }
-function formatToDBDate(date:string){
-        
-    let splitted = date.split('.');
+function formatToDBDate(date:any){
+    let splitted = String(date).split('.');
     if(splitted.length >1){
     let day = splitted[0];
     let month = splitted[1];
@@ -81,8 +80,8 @@ router.get("/:id", [auth, canRead], async(req: any, res: any) => {
     
 })
 router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: any) => {
-
-    const {success,query} = await createItem(req.body.item);
+    let item = {...req.body}
+    const {success,query} = await createItem(item);
     if(success)
     {
         return res.status(200).send({"id":query})
@@ -259,38 +258,50 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
         return res.status(400).send({errors:errors})
     }
     // step 1 : convert all FK to id, if not found, create it
+    
     const promises : readonly unknown[] = array.map(async (item:any) => {
         let sqlItem:typeof item = {}
-        const promises : readonly unknown[] =  Object.keys(item).map(async (key) => {
-            if(headers.find((k:any) => k.key == String(key) && k.inner == true && k.required == true) !== undefined)
+        let enable = true;
+        const Itempromise : readonly unknown[] =  Object.keys(item).map(async (key) => {
+            let header = headers.find((k:any) => k.key == String(key) );
+            
+            if(header !== undefined && header.required)
             {
-                var query = await Connection.query(`select id from ${key} where nom = "${item[key]}"`)
-                if(query.length == 0)
-                {
-                    var query = await Connection.query("insert into " + key + " (nom) values ('" + item[key] + "')")
-                    var lastId = await Connection.query("select id from " + key + " order by id desc limit 1")
-                    item[`${key}_FK`] = lastId;
-                    sqlItem[`${key}_FK`] = lastId;
+                if(item[key] === undefined || item[key] == null || item[key] == ""){
+                    return enable = false;
                 }
-                else{
-                    item[`${key}_FK`] = query[0].id
-                    sqlItem[`${key}_FK`] = query[0].id
-                }
-            }else if(item[key] === undefined || item[key] === ""){
-                errors.push("l'item " + item.id + " n'a pas de " + key)
-            }
-            else{
-                
-                sqlItem[key] = item[key]
+                if(header.inner == true){
+                    var query = await Connection.query(`select id from ${key} where nom = "${item[key]}"`)
+                    if(query.length == 0)
+                    {   try{
+                            var query = await Connection.query("insert into " + key + " (nom) values ('" + item[key] + "')")
+                    }catch(e){}
+                        var lastId = await Connection.query("select id from " + key + " order by id desc limit 1")
+                        item[`${key}_FK`] = lastId[0].id;
+                        sqlItem[`${key}_FK`] = lastId[0].id;
+                    }
+                    else{
+                        item[`${key}_FK`] = query[0].id
+                        sqlItem[`${key}_FK`] = query[0].id
+                    }
+                }else{
+                    sqlItem[key] = item[key];
+                } 
+            }else{
+                sqlItem[key] = item[key];
             }
         })
-        await Promise.all(promises)
-        sqlArray.push(sqlItem)
+        await Promise.all(Itempromise).then(() => {
+            if(enable == true){
+                sqlArray.push(sqlItem);
+            };
+        })
     })
     await Promise.all(promises)
 
     // step 2 : insert all items$
     const insertPromises : readonly unknown[] = sqlArray.map(async (item:any) => {
+        if(!item)return;
         if(item.id !== undefined)
         {
             // delete from the item the id
