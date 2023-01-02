@@ -8,7 +8,6 @@ export default function BottomBar(props:{onOpenIEO:()=>void,pageId:number,handle
                props.onOpenIEO();
             }}>Import/Export</Button>
             <Pagination  page={props.pageId} onPageChange={props.handlePageChange} enabled={props.enablePagination} maxPage={props.maxPage} />
-            <Button onClick={() => props.setEnablePagination()} sx={{color:"#550055",borderColor:"#550055",height:"50%",width:"10%",marginTop:"1.5%",marginRight:"2%"}} variant="outlined">{props.enablePagination ? "Désactiver" : "Activer"} la pagination</Button>
                 <Button sx={{backgroundColor:"#550055",color:"white",height:"50%",width:"10%",marginTop:"1.5%",marginRight:"2%"}} variant="contained" disabled={props.readOnly} onClick={() => {
                     props.setOpenAddPopup(true);
                 }}><FiPlus style={{marginRight:"5px"}}/>Ajouter</Button>

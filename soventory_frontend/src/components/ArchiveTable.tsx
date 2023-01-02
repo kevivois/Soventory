@@ -57,6 +57,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [enablePagination,setEnablePagination] = useState(true);
     const [rowPerPage,setRowPerPage] = useState(23);
     const [maxPage,setMaxPage] = useState(Math.ceil(renderedData.length/rowPerPage));
+    let timer : ReturnType<typeof setTimeout> | null = null;
     const handlePagination = () => {
         if(!enablePagination){
             const paginateData = [...renderedData];
@@ -80,6 +81,35 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             setPageId(maxPage);
         };
     };
+    function determineRowPerPage(){
+        if(!enablePagination) return;
+        try{
+            let rowHeight = document.querySelectorAll(".InventoryTable tbody tr")[0].clientHeight;
+            let headersHeight = document.querySelector(".InventoryTable thead")?.clientHeight;
+            let searchDivHeight = document.querySelector(".SearchDiv")?.clientHeight;
+            let BottomBarHeight = document.querySelector(".bottom-bar")?.clientHeight;
+            let maxHeightInPx = window.innerHeight - (headersHeight as number) - (searchDivHeight as number) - (BottomBarHeight as number);
+            let rowPerPage = Math.floor((maxHeightInPx)/rowHeight);
+            setRowPerPage(rowPerPage);
+        }
+        catch(e){
+            console.log("error",e);
+        }
+
+    }
+    function handleResizing(){
+        timer = setTimeout(()=> {
+            determineRowPerPage();
+            clearTimeout(timer as ReturnType<typeof setTimeout>);
+        },1000);
+        
+    }
+    useEffect(() => {
+        determineRowPerPage();
+        window.addEventListener("resize",handleResizing);
+        return () => {
+            window.removeEventListener("resize",handleResizing);
+        }},[]);
     useEffect(() => {
         handlePagination();
     },[renderedData,pageId,enablePagination,rowPerPage]);
@@ -209,6 +239,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setFilteredData(data);
         setRenderedData(data);
         setSearchBarValue("")
+        setPageId(1);
 
         if(sortingFilter !=undefined){
             setSortingFilter(new Sorting(sortingFilter.header,"asc"))
@@ -240,7 +271,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
          })
          if(filterList.filter((item:any) => item instanceof Searching).length == 0)
          {
+            if(filterList.filter((item:any) => item instanceof Filtering).length == 0)
+            {
+                setEnablePagination(true);
+            }else{
+               setEnablePagination(false);
+            }
              setRenderedData(filteredData);
+         }else{
+                setEnablePagination(false);
          }
         },[filteredData,filterList]);
 

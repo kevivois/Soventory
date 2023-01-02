@@ -101,6 +101,7 @@ const headers = [
         mode:HeaderMode.DEFAULT,
         canEdit:true,
         inner:false,
+        show:false,        
         id:9
     },
     {

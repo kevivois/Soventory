@@ -16,12 +16,12 @@ import EditOverlay from "./EditOverlay/EditOverlay";
 import {FiFilter,FiPlus} from "react-icons/fi"
 import "./style/Table.css";
 import FilterOverlay from "./FilterOverlay";
+import BottomBar from "./BottomBar/BottomBar";
 import AddOverlay from "./AddOverlay/AddOverlay";
 import Warning from "./WarningBar/WarningBar";
 import getIp from "../IP";
 import IEOverlay from "./ImportExportOverlay/IEOverlay";
 import Pagination from "./Pagination/Pagination";
-import BottomBar from "./BottomBar/BottomBar";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -51,9 +51,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [pageId,setPageId] = useState(1);
     const [paginateData,setPaginateData] = useState<any[]>([]);
     const [enablePagination,setEnablePagination] = useState(true);
-    const [rowPerPage,setRowPerPage] = useState(23);
+    const [rowPerPage,setRowPerPage] = useState(0);
     const [maxPage,setMaxPage] = useState(Math.ceil(renderedData.length/rowPerPage));
-
+    let timer : ReturnType<typeof setTimeout> | null = null;
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -79,6 +79,22 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             setPageId(mx);
         }
     };
+    function determineRowPerPage(){
+        if(!enablePagination) return;
+        try{
+            let rowHeight = document.querySelectorAll(".InventoryTable tbody tr")[0].clientHeight;
+            let headersHeight = document.querySelector(".InventoryTable thead")?.clientHeight;
+            let searchDivHeight = document.querySelector(".SearchDiv")?.clientHeight;
+            let BottomBarHeight = document.querySelector(".bottom-bar")?.clientHeight;
+            let maxHeightInPx = window.innerHeight - (headersHeight as number) - (searchDivHeight as number) - (BottomBarHeight as number);
+            let rowPerPage = Math.floor((maxHeightInPx)/rowHeight);
+            setRowPerPage(rowPerPage);
+        }
+        catch(e){
+            console.log("error",e);
+        }
+
+    }
     const handlePageChange = (pageId:number) => {
         if(pageId > 0 && pageId <= maxPage){
             setPageId(pageId);
@@ -86,10 +102,22 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             setPageId(maxPage);
         };
     };
-
+    function handleResizing(){
+        timer = setTimeout(()=> {
+            determineRowPerPage();
+            clearTimeout(timer as ReturnType<typeof setTimeout>);
+        },1000);
+        
+    }
     useEffect(() => {
         handlePagination();
     },[renderedData,pageId,enablePagination,rowPerPage]);
+    useEffect(() => {
+        determineRowPerPage();
+        window.addEventListener("resize",handleResizing);
+        return () => {
+            window.removeEventListener("resize",handleResizing);
+        }},[]);
     const onApplyNewRow = async (newRow:any) => {
         var errors = null
         try
@@ -176,6 +204,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setFilteredData(data);
         setRenderedData(data);
         setSearchBarValue("")
+        setPageId(1);
 
         if(sortingFilter !=undefined){
             setSortingFilter(new Sorting(sortingFilter.header,"asc"))
@@ -192,7 +221,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     //fetchItems();
                 }
                 setFilteredData(data);
-                
               
             }
             ApplySortingFilter(true);
@@ -208,7 +236,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
          if(filterList.filter((item:any) => item instanceof Searching).length == 0)
          {
              setRenderedData(filteredData);
+             if(filterList.filter((item:any) => item instanceof Filtering).length == 0)
+             {
+                 setEnablePagination(true);
+             }else{
+                setEnablePagination(false);
+             }
+         }else{
+            setEnablePagination(false);
          }
+
         },[filteredData,filterList]);
 
 
@@ -219,7 +256,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
 
     const ApplyFilteringFilter = async (filters:any[])=>
-    {
+    {   
         var checkBoxFilter = checkBoxFilterList;
         var body = [...filters.map((filter:Filtering)=>{
             // name : value
@@ -316,13 +353,21 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             //check if there is a filtering filter with the same header
             var index = newFilterList.findIndex((flt:Filter)=>flt instanceof Searching);
-            if(index !== -1)
-            {
-                newFilterList[index] = filter;
-            }
-            else
-            {
-                newFilterList.push(filter);
+            if(filter.value == ""){
+                
+                if(index !== -1)
+                {
+                    newFilterList.splice(index,1);
+                }
+            }else{
+                if(index !== -1)
+                {
+                    newFilterList[index] = filter;
+                }
+                else
+                {
+                    newFilterList.push(filter);
+                }
             }
 
         }

@@ -1,3 +1,7 @@
+body{
+  overflow-x: hidden;
+  overflow-y: hidden; /*TODO : REMOVE*/
+}
 .InventoryTable table { 
     width: 100%; 
     border-collapse: collapse;
