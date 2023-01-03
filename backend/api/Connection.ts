@@ -12,7 +12,7 @@ export default class Connection {
             connectionLimit: 1, // Only allow a single connection in the pool
             host: "localhost",
             user: "root",
-            password: "password",
+            password: "Pa$$w0rd",
             database: "soventory",
             port: 3306
         });
@@ -43,7 +43,7 @@ export default class Connection {
         return this.mysqlConnectionPool.getConnection() // Get a connection from the pool
     }
 
-    public async query(query: string): Promise<any> {
+    private async __query(query: string): Promise<any> {
         await this.wait();
         this.connCount++;
         const connection = await this.getConnection() // Get a connection from the pool
@@ -58,6 +58,15 @@ export default class Connection {
             console.log(error);
             return []
             
+        }
+    }
+    public async query(query: string): Promise<any> {
+        try{
+            return await this.__query(query)
+        }
+        catch(error){
+            console.log(error)
+            return []
         }
     }
     public async wait() {

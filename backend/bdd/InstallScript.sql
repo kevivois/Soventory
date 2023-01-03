@@ -160,9 +160,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `soventory`.`refreshToken`
+-- Table `soventory`.`refreshtoken`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `soventory`.`refreshToken` (
+CREATE TABLE IF NOT EXISTS `soventory`.`refreshtoken` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `token` VARCHAR(512) NOT NULL,
   `utilisateur_FK` INT NOT NULL,

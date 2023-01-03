@@ -24,6 +24,7 @@ import IEOverlay from "./ImportExportOverlay/IEOverlay";
 import Pagination from "./Pagination/Pagination";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
+    console.log(props.marques)
     const [data, setData] = useState<any[]>(props.data);
     const [headers,setHeaders] = useState<typeof Headers>(Headers)
     const [filteredData,setFilteredData] = useState<any[]>(data);
