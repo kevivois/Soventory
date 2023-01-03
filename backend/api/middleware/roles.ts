@@ -12,7 +12,7 @@ export function isAdmin(req:any,res:any,next:any) : void
     }
     else
     {
-        res.status(401).send({"error":"you are not allowed to do this action"})
+        res.status(401).send({"error":"tu n'as pas la permission d'effecteur cette action"})
     }
 }
 export function canRead(req:any,res:any,next:any) : void
@@ -25,7 +25,7 @@ export function canRead(req:any,res:any,next:any) : void
     }
     else
     {
-        return res.status(401).send({"error":"you are not allowed to do this action"})
+        return res.status(401).send({"error":"tu n'as pas la permission d'effecteur cette action"})
     }
 }
 export function canWrite(req:any,res:any,next:any) : void
@@ -39,6 +39,6 @@ export function canWrite(req:any,res:any,next:any) : void
     }
     else
     {
-        return res.status(401).send({"error":"you are not allowed to do this action"})
+        return res.status(401).send({"error":"tu n'as pas la permission d'effecteur cette action"})
     }
 }

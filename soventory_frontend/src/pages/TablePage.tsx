@@ -10,14 +10,14 @@ const types = {
 }
 export default function  TablePage(props:{user:any,type:string})
 {
-    const [data,setData] = useState<any[]>([])
+    const [data,setData] = useState<any[] | null>(null)
     const [catergories,setCategories] = useState<any[]>([])
     const [marques,setMarques] = useState<any[]>([])
     const [etats,setEtats] = useState<any[]>([])
     const [lieux,setLieux] = useState<any[]>([])
     const [sections,setSections] = useState<any[]>([])
     const [loading,setLoading] = useState<boolean>(true)
-    const [loadingMessage,setLoadingMessage] = useState<String>("")
+    const [loadingMessage,setLoadingMessage] = useState<String>("loading")
     const [type,setType] = useState<string>(Object.values(types).includes(props.type) ? props.type : types.unknown)
 
     async function fetchItems()
@@ -53,7 +53,7 @@ export default function  TablePage(props:{user:any,type:string})
     }    
 
     useEffect(() =>  {
-        if(data.length == 0)
+        if(data == null)
         {
             if(type == types.inventory)
             {
@@ -66,98 +66,35 @@ export default function  TablePage(props:{user:any,type:string})
         }
     },[type])   
     useEffect(() => {
-        async function fetchCategories()
-        {
+        async function fetchInnerData(){
             try
             {
-                const query = await fetch("http://"+getIp()+":3001/item.materiel/all",{
+                const query = await fetch("http://"+getIp()+":3001/item/FK/all",{
                     credentials: "include"
                 });
                 const response = await query.json();
-                setCategories(response);
+                
+                let categories = response.find((element:any) => element.key == "materiel") ? response.find((element:any) => element.key == "materiel").values : [];
+                let marques = response.find((element:any) => element.key == "marque") ? response.find((element:any) => element.key == "marque").values : [];
+                let etats = response.find((element:any) => element.key == "etat") ? response.find((element:any) => element.key == "etat").values : [];
+                let lieux = response.find((element:any) => element.key == "lieu") ? response.find((element:any) => element.key == "lieu").values : [];
+                let sections = response.find((element:any) => element.key == "section") ? response.find((element:any) => element.key == "section").values : [];
+                setCategories(categories);
+                setMarques(marques);
+                setEtats(etats);
+                setLieux(lieux);
+                setSections(sections);
+                setLoading(false);
+                
             }
             catch (error)
             {
                 console.log(error)
             }
         }
-        async function fetchMarques()
-        {
-            try
-            {
-                const query = await fetch("http://"+getIp()+":3001/item.marque/all",{
-                    credentials: "include"
-                });
-                const response = await query.json();
-                setMarques(response);
-            }
-            catch (error)
-            {
-                console.log(error)
-            }
-        }
-        async function fetchEtats()
-        {
-            try
-            {
-                const query = await fetch("http://"+getIp()+":3001/item.etat/all",{
-                    credentials: "include"
-                });
-                const response = await query.json();
-                setEtats(response);
-            }
-            catch (error)
-            {
-                console.log(error)
-            }
-        }
-        async function fetchLieux()
-        {
-            try
-            {
-                const query = await fetch("http://"+getIp()+":3001/item.lieu/all",{
-                    credentials: "include"
-                });
-                const response = await query.json();
-                setLieux(response);
-            }
-            catch (error)
-            {
-                console.log(error)
-            }
-        }
-        async function fetchSections()
-        {
-            var status = -1;
-            try
-            {
-                const query = await fetch("http://"+getIp()+":3001/item.section/all",{
-                    credentials: "include"
-                });
-                status = query.status;
-                const response = await query.json();
-                setSections(response);
-            }
-            catch (error)
-            {
-                console.log(error)
-            }
-            finally
-            {
-                if(String(status).startsWith("4"))
-                {
-                    return setLoadingMessage("You are not allowed to access this page");
-                }
-            }
-        }
-        fetchCategories();
-        fetchMarques();
-        fetchEtats();
-        fetchLieux()
-        fetchSections().then(() => setLoading(false));
+        fetchInnerData();
     },[])
 
-   
     if(loading || type == types.unknown)
     {
         return (
@@ -171,14 +108,14 @@ export default function  TablePage(props:{user:any,type:string})
 
             return(
                 <div className="App" style={{width:"100%"}}>
-                    <Archives user={props.user} data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />
+                    <Archives user={props.user} data={data != null ? data :  [] } etats={etats } lieux={lieux } marques={marques } materiels={catergories } sections={sections } />
                 </div>
             )
 
         }
         else if(type == types.inventory){
             return (<div className="App" style={{width:"100%"}}>
-                <Inventory user={props.user} data={data} etats={etats} lieux={lieux} marques={marques} materiels={catergories} sections={sections} />
+                <Inventory user={props.user} data={data != null ? data :  []} etats={etats } lieux={lieux } marques={marques } materiels={catergories } sections={sections } />
             </div>)
         }
         else{

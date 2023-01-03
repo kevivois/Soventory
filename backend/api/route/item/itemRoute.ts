@@ -326,3 +326,19 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
     }
     return res.status(400).send({errors:errors})
 });
+
+
+router.get("/FK/all", [auth, canRead], async (req: any, res: any) => {
+    let data: any[] = [];
+
+    
+    const requestPromises : readonly unknown[] = headers.map(async (header:any) => {
+        if(header.inner == true){
+            var query = await Connection.query(`select id,nom from ${header.key}`)
+            data.push({key:header.key,values:query})
+        }
+    })
+    
+    await Promise.all(requestPromises)
+    return res.status(200).send(data)
+})
