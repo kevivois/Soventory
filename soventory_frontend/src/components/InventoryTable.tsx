@@ -176,7 +176,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
     useEffect(() => {
         if(error == "")return;
-        console.log(error)
         setOpenWarning(true);
     }, [error]);
 
@@ -189,7 +188,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 });
                 const response = await query.json();
                 setData(response);
-                console.log("fetched data ",response)
             }
             catch(e:any){
                 setOpenWarning(true)
@@ -262,7 +260,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var body = [...filters.map((filter:Filtering)=>{
             // name : value
             var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
-            console.log(selectedValues,"a")
             if(selectedValues.length == 0) {return null}
             if(filter.header.inner)
             {
@@ -322,7 +319,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     }
     const ApplySearchingFilter = (filter:Searching)=>
     {
-        console.log("searching")
         function eachData(filterText:any,data:any) :boolean
         {
             var result = false;
@@ -468,7 +464,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     newFilter.selectedValues.push(item);
                 }
             });
-            console.log(newFilter.selectedValues)
             if(newFilter.selectedValues.find((item:any) => item.checked === true) === undefined ){
                 newFilterList.splice(index,1);
             }else{
