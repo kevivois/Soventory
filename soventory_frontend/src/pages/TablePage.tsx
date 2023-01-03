@@ -79,7 +79,6 @@ export default function  TablePage(props:{user:any,type:string})
                 let etats = response.find((element:any) => element.key == "etat") ? response.find((element:any) => element.key == "etat").values : [];
                 let lieux = response.find((element:any) => element.key == "lieu") ? response.find((element:any) => element.key == "lieu").values : [];
                 let sections = response.find((element:any) => element.key == "section") ? response.find((element:any) => element.key == "section").values : [];
-                console.log(categories,marques,etats,lieux,sections)
                 setCategories(categories);
                 setMarques(marques);
                 setEtats(etats);

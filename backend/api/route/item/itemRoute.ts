@@ -334,12 +334,11 @@ router.get("/FK/all", [auth, canRead], async (req: any, res: any) => {
     
     const requestPromises : readonly unknown[] = headers.map(async (header:any) => {
         if(header.inner == true){
-            var query = await Connection.query(`select nom from ${header.key}`)
+            var query = await Connection.query(`select id,nom from ${header.key}`)
             data.push({key:header.key,values:query})
         }
     })
     
     await Promise.all(requestPromises)
-    console.log(data)
     return res.status(200).send(data)
 })

@@ -45,7 +45,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [openEditPopup,setOpenEditPopup] = useState<boolean>(false);
     const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
     const [readOnly,setReadOnly] = useState<boolean>(true);
-    const [sortingFilter,setSortingFilter] = useState<Sorting>();
+    const [sortingFilter,setSortingFilter] = useState<Sorting>(new Sorting(Headers[0],"asc"));
     const [openWarning,setOpenWarning] = useState(false);
     const [openAddPopup,setOpenAddPopup] = useState(false);
     const [error,setError] = useState<string>("");
@@ -225,7 +225,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 });
                 const response = await query.json();
                 setData(response);
-                console.log("fetched data ",response)
             }
             catch(e:any){
                 setError(e.message)
@@ -259,7 +258,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 
               
             }
-            ApplySortingFilter(true);
     },[filterList])
 
     useEffect(() => {
@@ -271,13 +269,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
          })
          if(filterList.filter((item:any) => item instanceof Searching).length == 0)
          {
+            ApplySortingFilter(true,filteredData);
             if(filterList.filter((item:any) => item instanceof Filtering).length == 0)
             {
                 setEnablePagination(true);
             }else{
                setEnablePagination(false);
             }
-             setRenderedData(filteredData);
          }else{
                 setEnablePagination(false);
          }
@@ -285,8 +283,10 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
 
 
         useEffect(() => {
-            if(sortingFilter == null)return;
-            ApplySortingFilter(true);
+            if(sortingFilter != undefined)
+            {
+                ApplySortingFilter(true);
+            }
         },[sortingFilter]);
 
 
@@ -317,14 +317,14 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var newData = await query.json();
         setFilteredData(newData);
     }
-    const ApplySortingFilter = (apply:boolean,data?:any[])=>
+    const ApplySortingFilter = (apply:boolean,array?:any[])=>
     {       
             var sortedData = []
             
-            if(data == null){
+            if(array == null){
                 sortedData = [...renderedData];
             }else{
-                sortedData = [...data];
+                sortedData = [...array];
             }
             if(sortingFilter == null) return sortedData;
             const filter = sortingFilter;
@@ -336,13 +336,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             });
             setHeaders(newHeaders);
             sortedData.sort((a, b) => {
-                var aVal = (String(a[filter.header.key]))
-                var bVal = (String(b[filter.header.key]))
-                
-                if (aVal < bVal) {
+
+                if (a[filter.header.key] < b[filter.header.key]) {
                     return filter.header.order === "asc" ? -1 : 1;
                 }
-                if (aVal > bVal) {
+                if (a[filter.header.key] > b[filter.header.key]) {
                     return filter.header.order === "asc" ? 1 : -1;
                 }
                 return 0;
@@ -378,10 +376,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
           }
         });
 
-        var sorted = ApplySortingFilter(false,newData);
-        if(sorted != undefined){
-            setRenderedData(sorted);
-        } 
+        var sorted = ApplySortingFilter(true,newData);
     }
     const AddNewFilter = (filter:Filter) => {
         var newFilterList = [...filterList];
@@ -498,7 +493,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                     newFilter.selectedValues.push(item);
                 }
             });
-            newFilterList[index] = newFilter;
+            if(newFilter.selectedValues.find((item:any) => item.checked === true) === undefined){
+                newFilterList.splice(index,1);
+            }else{
+                newFilterList[index] = newFilter;
+            }
         }
         else
         {
@@ -612,8 +611,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             </div>
             </div>
             </div>
-            <div className="InventoryTable" style={{
-            }}>
+            <div className="InventoryTable">
         <table>
             <thead>
                 <tr className="columnContainer">
