@@ -6,6 +6,7 @@ import { gunzipSync } from "zlib"
 import { createItem } from "../../utils/DB.utils"
 import fs from "fs"
 import headers from "../../../../soventory_frontend/src/components/headers"
+import Moment from "moment"
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
@@ -18,12 +19,11 @@ function renderJsDates(query:any[]){
     var result:any = []
     query.forEach((element:any) => {
         var newElement = {...element}
-      //render to YYYY.MM.DD
-        newElement.date_achat = new Date(element.date_achat).toLocaleDateString()
-        newElement.fin_garantie =  new Date(element.fin_garantie).toLocaleDateString()
+        newElement.date_achat = Moment(element.date_achat).format("DD/MM/yyyy")
+        newElement.fin_garantie =  Moment(element.fin_garantie).format("DD/MM/yyyy")
         result.push(newElement)
     });
-    return result
+    return query
 }
 function formatToDBDate(date:any){
     let splitted = String(date).split('.');

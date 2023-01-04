@@ -15,6 +15,7 @@ import React,{useEffect, useState} from 'react';
 import "./EditOverlayStyle.css";
 import Warning from '../WarningBar/WarningBar';
 import getIp from '../../IP';
+import {formatToDB,formatToUI,addYear} from '../utils/date.utils';
 export default function EditOverlay(props:{id:number|null,onApply:(row:any,changed:boolean) => void,deleteFunction:() => void,open:boolean,onClose:() => void,headers:any[],canModify:boolean}) 
 {
     const destructed = "detruit";
@@ -27,14 +28,6 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     const [canModify, setCanModify] = React.useState(props.canModify);
     const [openWarning,setOpenWarning] = React.useState(false);
     const [error,setError] = React.useState<string>("");
-
-    function FormatDate(date:Date)
-    {
-        let day = date.getDate();
-        let month = date.getMonth() + 1;
-        let year = date.getFullYear();
-        return `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
-    }
 
 
   const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
@@ -53,19 +46,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             setOpenWarning(true);
         }
     },[error])
-    function handleDatesChange(year:number)
+    function addYear(year:number,date:Date)
     {
-        try{
-
-        const maxDate = new Date(editRow["date_achat"]).setFullYear(new Date(editRow["date_achat"]).getFullYear() + year);
-        const formatted = FormatDate(new Date(maxDate));
-        return formatted
-        }
-        catch(e:any){
-            setError(String(e.message))
-            const normal = FormatDate(editRow["date_achat"]);
-            return normal
-        }
+        let d = new Date(date.setFullYear(date.getFullYear() + year));
+        let newEditRow= {...editRow};
     }
     async function createNewInner(key:string,value:string){
         var newDropDownData = dropDownData;
@@ -127,8 +111,8 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             },
         });
         const data = await response.json();
-        data[0]["date_achat"] = formatToDBDate(data[0]["date_achat"]);
-        data[0]["fin_garantie"] = formatToDBDate(data[0]["fin_garantie"]);
+        data[0]["date_achat"] = formatToUI(data[0]["date_achat"]);
+        data[0]["fin_garantie"] = formatToUI(data[0]["fin_garantie"]);
         setInitialRow(data[0]);
         setEditRow(data[0]);
     }
@@ -144,25 +128,12 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             fetchItem();
         }
     },[props.id])
-
-    function formatToDBDate(date:string){
-        
-        let splitted = date.split('.');
-        if(splitted.length >1){
-        let day = splitted[0];
-        let month = splitted[1];
-        let year = splitted[2];
-        let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
-        return returnContent;
-        }else{
-            return date;
-        }
-        
-    }
     
     async function onApply(){
         if(canModify){
             var formattedEditRow = editRow;
+            formattedEditRow["date_achat"] = formatToDB(editRow["date_achat"]);
+            formattedEditRow["fin_garantie"] = formatToDB(editRow["fin_garantie"]);
             props.headers.forEach((header) => {
                 if(header.inner === true){
                     let v = dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]) ? dropDownData[header.key].find((item:any) => item.nom === editRow[header.key]).id : undefined;
@@ -277,7 +248,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
 
                                                 if(header.key == "garantie" && e.target.value != ""){
   
-                                                    var maxDate = handleDatesChange(parseInt(e.target.value));
+                                                    var maxDate = addYear(parseInt(e.target.value),editRow["date_achat"]);
                                                     newEditRow["fin_garantie"] = maxDate;
                                                 }
                                                 setEditRow(newEditRow)
@@ -294,14 +265,14 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                 setEditRow(newEditRow)
                                                }} /> : 
                                                 header.which == "datepicker" ? 
-                                                <div className="datepicker">{ modifyingMode ? <input required value={formatToDBDate(editRow[header.key])} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
+                                                <div className="datepicker">{ modifyingMode ? <input required value={(editRow[header.key])} readOnly={!modifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
                                                         return
                                                     }
                                                     try{
                                                         var newEditRow = {...editRow};
                                                         
-                                                        var formatted = FormatDate(new Date(event.target.value));
+                                                        var formatted = formatToUI(event.target.value);
                                                         newEditRow[header.key] = formatted;
                                                         setEditRow(newEditRow)
                                                     }
@@ -309,7 +280,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                         setOpenWarning(true)
                                                         setError(String(e.message))
                                                     }
-                                                }} ></input> : <input required  value={formatToDBDate(editRow[header.key])} readOnly={!modifyingMode} type="date" ></input>}</div>: <div>error</div>}
+                                                }} ></input> : <input required  value={(editRow[header.key])} readOnly={!modifyingMode} type="date" ></input>}</div>: <div>error</div>}
                                             </div>
                                             </div>
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
@@ -325,7 +296,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                 }
                                                 
                                                 if(nextHeader.key == "garantie" && e.target.value != ""){
-                                                    var maxDate = handleDatesChange(parseInt(e.target.value));
+                                                    var maxDate = addYear(parseInt(e.target.value),editRow["date_achat"]);
                                                     newEditRow["fin_garantie"] = maxDate;
                                                 }
                                                 setEditRow(newEditRow)
@@ -343,13 +314,13 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     setEditRow(newEditRow)
                                                    }} /> : 
                                                 nextHeader.which == "datepicker" ? 
-                                                <div className="datepicker">{ nextModifyingMode ? <input required  value={formatToDBDate(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
+                                                <div className="datepicker">{ nextModifyingMode ? <input required  value={(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" onChange={(event:any) => {
                                                     if(event.target.value == ""){
                                                         return
                                                     }
                                                     try{
                                                         var newEditRow = {...editRow};
-                                                        var formatted = FormatDate(new Date(event.target.value));
+                                                        var formatted = formatToUI(event.target.value);
                                                         
                                                         newEditRow[nextHeader.key] = formatted;
                                                         setEditRow(newEditRow)}
@@ -357,7 +328,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                         setOpenWarning(true)
                                                         setError(String(e.message))
                                                     }
-                                                }} ></input> : <input required value={formatToDBDate(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" ></input>}</div> : <div>error</div>}
+                                                }} ></input> : <input required value={(editRow[nextHeader.key])} readOnly={!nextModifyingMode} type="date" ></input>}</div> : <div>error</div>}
                                             </div>
                                             </div> : null}
                                             </Box>
