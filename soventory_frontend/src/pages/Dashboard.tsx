@@ -134,7 +134,6 @@ export default function Dashboard(props:{mode:number})
                return setErrorMessage(response.error);
             }
             setUser({id:response.id,username:response.nom_utilisateur,droit:response.droit});
-            console.log("setted user",response)
         }
         async function load(){
             let content = await renderScreen(mode);
@@ -147,11 +146,23 @@ export default function Dashboard(props:{mode:number})
         {
             fetchMe();
         }
-        
+        getUserFormats();
     },[mode,user]);
+    function getUserFormats(){
+        // get navigator language
+        let dateTimeFormat = new Intl.DateTimeFormat();
+        let language = dateTimeFormat.resolvedOptions().locale;
+        if(!language.includes("fr")){
+            console.warn(`Language '${language}' is not supported, please change to 'fr-FR' in your browser settings.`);
+        }
+    }
+
+    const onIconClick = () => {
+        window.location.reload();
+    }
     return ( <div style={{display:"block",width:"100vw",height:"100%"}}> 
         {user != null && errorMessage == ""  ?  <div>
-        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} /></div>
+        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} onIconClick={onIconClick} /></div>
         <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
         </div> : <div>{errorMessage}</div>}</div>); 
 }

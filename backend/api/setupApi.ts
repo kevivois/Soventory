@@ -1,4 +1,3 @@
-
 import ConnClass from "./Connection"
 import cookieParser from "cookie-parser"
 import userRoute from "./route/userRoute"
@@ -27,6 +26,16 @@ app.use(cors({
     credentials:true
 }))
 app.use(handleCors)
+
+
+// get system language to determinate date format
+let dateTimeFormat = new Intl.DateTimeFormat();
+let language = dateTimeFormat.resolvedOptions().locale;
+if(!language.includes("fr")){
+    throw new Error("System language is not french")
+}
+
+
 app.use("/user",userRoute)
 app.use("/item",itemRoute)
 
