@@ -15,7 +15,7 @@ import Warning from '../WarningBar/WarningBar';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import {ExportToExcel,exportToCsv,exportToPDF} from "../utils/file.utils"
 const sizeLimitMB = 3;
-export default function ImportExportDialog(props:{open:boolean,onImport:(array:any) => void,onClose:() => void,exportArray:any[]}) {
+export default function ImportExportDialog(props:{open:boolean,onImport:(array:any) => void,onClose:() => void,exportArray:any[],enable:boolean}) {
   const [open, setOpen] = useState(props.open);
   const [activeTab, setActiveTab] = useState(0); // 0 for import tab, 1 for export tab
   const [file, setFile] : any = useState<any>({}); // the selected file
@@ -164,12 +164,9 @@ const downloadExample = (event:any) => {
   event.preventDefault();
   const headers = Headers.filter((header) => header.key !== "id").map((header) => header.key);
   const data = [headers];
-  console.log(data)
   const csvContent = `data:text/csv;charset=utf-8,${data.map((e) => e.join(";")).join("")}`;
   // show the good format for é,è,à,ù,ç
-  console.log(csvContent)
   const encodedUri = encodeURI(csvContent);
-  console.log(encodedUri)
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
   link.setAttribute("download", "Soventory_Example_format.csv");
@@ -221,7 +218,7 @@ const downloadExample = (event:any) => {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleImportOrExport} color="primary">
+          <Button onClick={handleImportOrExport} disabled={activeTab === 0 ? props.enable ? false : true : false} color="primary">
             {activeTab === 0 ? "Import" : "Export"}
           </Button>
         </DialogActions>

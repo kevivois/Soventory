@@ -208,7 +208,17 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     };
 
     useEffect(() => {
-       setReadOnly(props.user.droit == "LIRE" ? true : false)
+        
+        if(props.user){
+            if(props.user.droit == "LIRE"){
+                setReadOnly(true);
+            }
+            else if (props.user.droit == "ECRIRE" || props.user.droit == "ADMINISTRATEUR"){
+                setReadOnly(false);
+            }
+        }else{
+            setReadOnly(true);
+        }
     }, [props.user])
 
     useEffect(() => {
@@ -719,7 +729,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={(newRow:any) => onApplyNewRow(newRow)} /> : null}
         </div>
         <div className="IEOverlay">
-            {openIEO ? <IEOverlay exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
+            {openIEO ? <IEOverlay enable={!readOnly} exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
         </div>
         <div className="warning-error">
             {openWarning && error &&  <Warning message={error} open={true} onClose={() => {
