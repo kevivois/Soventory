@@ -32,7 +32,7 @@ app.use(handleCors)
 let dateTimeFormat = new Intl.DateTimeFormat();
 let language = dateTimeFormat.resolvedOptions().locale;
 if(!language.includes("fr")){
-    throw new Error("System language is not french")
+    console.error("System language is not french")
 }
 
 

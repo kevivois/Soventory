@@ -148,15 +148,24 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     function formatToDBDate(date:string){
         
         let splitted = date.split('.');
+        let splitted2 = date.split('/');
+        let data = [];
         if(splitted.length >1){
-        let day = splitted[0];
-        let month = splitted[1];
-        let year = splitted[2];
-        let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
-        return returnContent;
-        }else{
+            data = splitted;
+        }
+        else if(splitted2.length >1){
+            data = splitted2;
+        }
+        else{
             return date;
         }
+        
+        let day = data[0];
+        let month = data[1];
+        let year = data[2];
+        let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
+        return returnContent
+        
         
     }
     

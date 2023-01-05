@@ -6,11 +6,13 @@ import { gunzipSync } from "zlib"
 import { createItem } from "../../utils/DB.utils"
 import fs from "fs"
 import headers from "../../../../soventory_frontend/src/components/headers"
+import Moment from 'moment'
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
+import {formatToDBDate,updateItem} from "../../utils/DB.utils"
 
 const sortedById = "order by item.id asc"
 
@@ -18,25 +20,12 @@ function renderJsDates(query:any[]){
     var result:any = []
     query.forEach((element:any) => {
         var newElement = {...element}
-      //render to YYYY.MM.DD
-        newElement.date_achat = new Date(element.date_achat).toLocaleDateString()
-        newElement.fin_garantie =  new Date(element.fin_garantie).toLocaleDateString()
+      //render to local date
+        newElement.date_achat = new Date(element.date_achat).toLocaleDateString("fr-FR")
+        newElement.fin_garantie =  new Date(element.fin_garantie).toLocaleDateString("fr-FR")
         result.push(newElement)
     });
     return result
-}
-function formatToDBDate(date:any){
-    let splitted = String(date).split('.');
-    if(splitted.length >1){
-    let day = splitted[0];
-    let month = splitted[1];
-    let year = splitted[2];
-    let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
-    return returnContent;
-    }else{
-        return date;
-    }
-    
 }
 router.get("/inner/all", [auth,canRead], async (req: any, res: any) => {
     var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
@@ -96,30 +85,20 @@ router.post("/:id/update", [auth, canWrite,ItemIntegrity], async (req: any, res:
     {
                 var body = req.body
                 body.prix = Math.round(parseFloat(body.prix) * 20) / 20.0
-                var queryCondition = Object.keys(body).map((key) => {
-                    var bd = body[key];
-                    if(key == "date_achat" || key == "fin_garantie")
-                    {
-                       // return bd = `item.${key} = ${bd}`
-                    }
-                    return  `item.${key} = '${bd}'`
-
-                }).join(",")
-                var query = await Connection.query(`update item inner join section on section_FK=section.id
-                inner join materiel on materiel_FK=materiel.id
-                inner join etat on etat_FK=etat.id
-                inner join marque on marque_FK=marque.id
-                inner join lieu on lieu_FK = lieu.id
-                set ${queryCondition} where item.id = ${req.params.id}`)
-
-                console.log("success")
-                return res.status(200).send({ "id": query })
-            }
-        catch(e:any)
-        {
-            console.log(e)
-            return res.status(400).send({"error":"invalid request"})
-        }
+                let item = {...body}
+                item.id = req.params.id
+                let {success,query,errors} = await updateItem(item);
+                let code = success ? 200 : 500
+                if(errors){
+                    return res.status(code).send({"errors":errors})
+                }else{
+                    return res.status(code).send({ "id": query})
+                }
+    }
+    catch(e)
+    {
+        return res.status(500).send({"error":"server error"})
+    }
 })
 
 router.post("/:id/delete", [auth,canWrite], async (req: any, res: any) => {

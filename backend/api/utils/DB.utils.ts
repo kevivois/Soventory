@@ -16,6 +16,8 @@ export async function createItem(item:any){
 
     let id = `${year}${FormatNumberLength(nextId, 3)}`
     let prix = Math.round(parseFloat(item.prix) * 20) / 20.0
+    item.date_achat = formatToDBDate(item.date_achat)
+    item.fin_garantie = formatToDBDate(item.fin_garantie)
     try
     {
         var query = await Connection.query(`insert into item (id,modele,num_serie,num_produit,remarque,date_achat,prix,garantie,fin_garantie,materiel_FK,marque_FK,section_FK,etat_FK,lieu_FK,archive) values 
@@ -29,4 +31,46 @@ export async function createItem(item:any){
         return {success:false,query:query,currentId:id}
     }
 
+}
+export async function updateItem(item:any){
+
+    var queryCondition = Object.keys(item).map((key) => {
+        var bd = item[key];
+        if(key == "date_achat" || key == "fin_garantie")
+        {
+           return `item.${key} = '${formatToDBDate(bd)}'`
+        }else{
+        return  `item.${key} = '${bd}'`
+        }
+
+    }).join(",")
+    try{
+    var query = await Connection.query(`update item inner join section on section_FK=section.id
+    inner join materiel on materiel_FK=materiel.id
+    inner join etat on etat_FK=etat.id
+    inner join marque on marque_FK=marque.id
+    inner join lieu on lieu_FK = lieu.id
+    set ${queryCondition} where item.id = ${item.id}`)
+
+    return{success:true,query:query}
+    }
+    catch(error)
+    {
+        console.log(error)
+        return{success:false,query:query,errors:[error]}
+    }
+
+}
+export function formatToDBDate(date:any){
+    let splitted = String(date).split('.');
+    if(splitted.length >1){
+    let day = splitted[0];
+    let month = splitted[1];
+    let year = splitted[2];
+    let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
+    return returnContent;
+    }else{
+        return date;
+    }
+    
 }
