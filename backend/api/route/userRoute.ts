@@ -173,5 +173,14 @@ router.get("/get/:id",[auth,isAdmin],async(req:any,res:any) => {
 router.get("/tryLogin",[auth],async(req:any,res:any) => {
   return res.status(200).send({"message":"Logged in","logged":true})})
 
-
+router.post("/:id/delete",[auth,isAdmin],async(req:any,res:any) => {
+  try {
+    const {id} = req.params
+    const user = await Connection.query(`DELETE FROM utilisateur WHERE id=${id}`)
+    return res.status(201).send({user})
+  }catch(e){
+      console.log("error while deleting user "+req.params.id)
+      return res.status(400).send({"error":"cannot delete id "+req.params.id})
+  }
+})
 export default router;
