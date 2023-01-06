@@ -1,0 +1,33 @@
+.users-list {
+    margin: 32px;
+}
+  
+.users-list table {
+      width: 100%;
+      border-collapse: collapse;
+}
+.users-list table th, .users-list table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+}
+.users-list table tr:nth-child(even) {
+        background-color: #f2f2f2;
+}
+.users-list table th {
+        background-color: #4caf50;
+        color: white;
+}
+  
+.users-list button {
+      margin: 0 8px;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      border-radius: 5px;
+}

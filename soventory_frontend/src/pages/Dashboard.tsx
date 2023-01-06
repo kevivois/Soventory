@@ -15,6 +15,7 @@ import {VscAccount,VscFeedback} from "react-icons/vsc"
 import {BsArchive} from "react-icons/bs"
 import ProjectIcon from "../logo/plussegaush.png"
 import getIp from '../IP';
+import Parameters from "./Params";
 const MODE={
     TABLE:1,
     ACCOUNT:2,
@@ -29,6 +30,12 @@ export default function Dashboard(props:{mode:number})
     const [content,setContent] = useState<JSX.Element | undefined>(<div>loading</div>);
     const [errorMessage,setErrorMessage] = useState<string>("");
     const naviguate = useNavigate();
+
+    const isAdmin = (user:any) => {
+        if(!user) return false;
+        return user.droit == "ADMINISTRATEUR";
+    }
+
     const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[] = [
         {
             id:MODE.TABLE,
@@ -93,7 +100,7 @@ export default function Dashboard(props:{mode:number})
     const renderParameters = async () => {
         return (
             <div>
-                <h1>Paramètres</h1>
+                <Parameters user={user} allow={isAdmin(user)} />
             </div>
         );
     }

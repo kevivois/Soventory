@@ -17,6 +17,10 @@ router.get("/me",[auth],async (req:any,res:any)=>{
     const user = await Connection.query(`SELECT utilisateur.id,nom_utilisateur,mot_de_passe,name as droit FROM utilisateur inner join droit on droit_FK=droit.id WHERE utilisateur.id = ${id}`)
     res.send(user[0])
 })
+router.get("/all",[auth,isAdmin],async (req:any,res:any)=>{
+    const users = await Connection.query(`SELECT utilisateur.id as id,nom_utilisateur,mot_de_passe,name as droit FROM utilisateur inner join droit on droit_FK=droit.id`)
+    res.send({users:users})
+})
 router.post("/me/update",[auth],async(req:any,res:any) => {
     const {id} = req.user
     const {nom_utilisateur,mot_de_passe} = req.body
