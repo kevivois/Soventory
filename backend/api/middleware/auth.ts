@@ -29,7 +29,7 @@ module.exports = async(req:any,res:any,next:any) => {
                 {
                     droit = await getRightOfUser(user.id)
                 }
-                if (expired) {
+                if (expired || droit=="") {
                     return res.status(401).send({"error":"Forbidden"})
                 }
                 else
@@ -53,7 +53,7 @@ module.exports = async(req:any,res:any,next:any) => {
             } else {
                 return res.status(401).send({"error":"Forbidden"})
             }
-        }
+        }   
         else if(userAccessToken)
         {
             req.user = {id:userAccessToken.id,droit:droit}

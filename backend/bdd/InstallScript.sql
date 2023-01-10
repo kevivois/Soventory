@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `soventory`.`refreshtoken` (
   CONSTRAINT `fk_session_utilisateur1`
     FOREIGN KEY (`utilisateur_FK`)
     REFERENCES `soventory`.`utilisateur` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 

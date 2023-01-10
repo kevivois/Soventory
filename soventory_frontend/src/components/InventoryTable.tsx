@@ -22,6 +22,7 @@ import Warning from "./WarningBar/WarningBar";
 import getIp from "../IP";
 import IEOverlay from "./ImportExportOverlay/IEOverlay";
 import Pagination from "./Pagination/Pagination";
+import {H_DetermineRowPerPage} from "./utils/data.utils";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -72,7 +73,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setPaginateData(paginateData);
 
         let mx = Math.ceil(renderedData.length / rowPerPage)
-        if(mx === 0) mx = 1;
+        if(mx <= 0) mx = 1;
         setMaxPage(mx);
 
         if(pageId > mx){
@@ -82,13 +83,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     function determineRowPerPage(){
         if(!enablePagination) return;
         try{
-            let rowHeight = document.querySelectorAll(".InventoryTable tbody tr")[0].clientHeight;
-            let headersHeight = document.querySelector(".InventoryTable thead")?.clientHeight;
-            let searchDivHeight = document.querySelector(".SearchDiv")?.clientHeight;
-            let BottomBarHeight = document.querySelector(".bottom-bar")?.clientHeight;
-            let maxHeightInPx = window.innerHeight - (headersHeight as number) - (searchDivHeight as number) - (BottomBarHeight as number);
-            let rowPerPage = Math.floor((maxHeightInPx)/rowHeight);
-            setRowPerPage(rowPerPage);
+            let rowPP = H_DetermineRowPerPage(window.innerHeight);
+            setRowPerPage(rowPP);
         }
         catch(e){
             console.log("error",e);
@@ -107,13 +103,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             determineRowPerPage();
             clearTimeout(timer as ReturnType<typeof setTimeout>);
         },1000);
-        
     }
     useEffect(() => {
         handlePagination();
     },[renderedData,pageId,enablePagination,rowPerPage]);
     useEffect(() => {
-        determineRowPerPage();
+        determineRowPerPage()
         window.addEventListener("resize",handleResizing);
         return () => {
             window.removeEventListener("resize",handleResizing);
@@ -164,7 +159,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var newF = [...filterList]
         setFilterList(newF);
     }
-
     const handleEditPageOpen = (event: React.MouseEvent<HTMLElement>,row:any) => {
         setRowToEdit(row.id);
         setOpenEditPopup(true);
@@ -600,7 +594,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             if(header.show == false)return;
                             if(header.filter !== undefined && header.filter == true)
                             {
-                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100%",alignItems:"center"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
+                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" style={{width:"100%"}} onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {

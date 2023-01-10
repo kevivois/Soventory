@@ -60,10 +60,12 @@ export default function Parameters(props:{user:any,allow:boolean}) {
       .then(res => res.json())
       .then(() => {
         setUsers(users.filter((user:any) => user.id !== userToDelete));
+        setDeleteWarning(false);
         setUserToDelete(-1);
       })
       .catch(err => {
         setError(err.message);
+        setDeleteWarning(false);
         setUserToDelete(-1);
       });
   };

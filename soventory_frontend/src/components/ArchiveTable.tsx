@@ -24,6 +24,7 @@ import getIp from ".././IP"
 import IEOverlay from "./ImportExportOverlay/IEOverlay";
 import Pagination from "./Pagination/Pagination";
 import BottomBar from "./BottomBar/BottomBar";
+import {H_DetermineRowPerPage} from "./utils/data.utils";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -84,13 +85,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     function determineRowPerPage(){
         if(!enablePagination) return;
         try{
-            let rowHeight = document.querySelectorAll(".InventoryTable tbody tr")[0].clientHeight;
-            let headersHeight = document.querySelector(".InventoryTable thead")?.clientHeight;
-            let searchDivHeight = document.querySelector(".SearchDiv")?.clientHeight;
-            let BottomBarHeight = document.querySelector(".bottom-bar")?.clientHeight;
-            let maxHeightInPx = window.innerHeight - (headersHeight as number) - (searchDivHeight as number) - (BottomBarHeight as number);
-            let rowPerPage = Math.floor((maxHeightInPx)/rowHeight);
-            setRowPerPage(rowPerPage);
+            let rowPP = H_DetermineRowPerPage(window.innerHeight);
+            setRowPerPage(rowPP);
         }
         catch(e){
             console.log("error",e);
@@ -646,7 +642,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 return (<th className="tableHeader" key={header.id}>{header.labelName}</th>)
                             }
                         })}
-                        <th id="deleteHeader"><DeleteIcon /></th>
+                        
                 </tr>
             </thead>
             <tbody>
@@ -665,10 +661,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 let content = row[header.key];
                                 return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
-                            <td style={{textAlign:"center"}} ><Button id="deleteIconRow"  disabled={readOnly} onClick={() => {
+                            {/*
+                            <td className="tableContent" ><Button id="deleteIconRow"  disabled={readOnly} onClick={() => {
                                 setDeleteId(row.id);
                                 setDeleteWarning(true);
-                            }}><DeleteIcon /></Button></td>
+                            }}><DeleteIcon style={{border:"none"}} /></Button></td>*/}
                         </tr>
                     )
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}

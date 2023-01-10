@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
 import Main from './pages/Main';
+import "./css/scrollbar.css";
 
 const rootElement = document.getElementById("root") as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
