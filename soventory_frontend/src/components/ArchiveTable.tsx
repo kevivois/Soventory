@@ -661,11 +661,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 let content = row[header.key];
                                 return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
-                            {/*
+                            {
                             <td className="tableContent" ><Button id="deleteIconRow"  disabled={readOnly} onClick={() => {
                                 setDeleteId(row.id);
                                 setDeleteWarning(true);
-                            }}><DeleteIcon style={{border:"none"}} /></Button></td>*/}
+                            }}><DeleteIcon style={{border:"none"}} /></Button></td>}
                         </tr>
                     )
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
