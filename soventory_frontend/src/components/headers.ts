@@ -82,7 +82,7 @@ const headers = [
         required:true,
         isDropDownList:true,
         inner:true,
-        id:7
+        id:7,
     },
     {
         key:"lieu",

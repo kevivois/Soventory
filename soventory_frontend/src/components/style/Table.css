@@ -1,50 +1,59 @@
 body{
   overflow-x: hidden;
-  overflow-y: hidden; /*TODO : REMOVE*/
+}
+.App Button{
+  border-radius: 15px;
+}
+.App {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
 }
 .InventoryTable table { 
-    width: 100%; 
+    
     border-collapse: collapse;
-    font-family: Roboto, Helvetica, sans-serif;
+    font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-size: 15px;
     overflow-x: hidden;
-  }
-  .InventoryTable td { 
-    padding: 5px; 
-    border: 1px solid #dee2e6;
-    text-align: left; 
+    margin: 1%;
+    margin-bottom: none;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius:15px;
+    border-bottom-left-radius:15px;
+    scrollbar-width:none;
   }
   .InventoryTable tbody{
     display: block;
-    max-height: 73vh;
+    height: 50vh;
+    max-height: 50vh;
     overflow-y: scroll;
     overflow-x: hidden;
+
   }
   .InventoryTable thead, .InventoryTable table tbody tr {
     display: table;
     width: 100%;
     table-layout: fixed;
-    overflow-x: hidden
-  }
-  .InventoryTable table thead {
-    width: calc(100% - 1.1em);
   }
 .tableHeader {
-    text-align: left; 
+    text-align: center; 
     font-size: 17.3px;
     font-weight: bold;
-    border-width: 1px 1px 1px 1px;
-    padding: 1rem 1rem;
-    border: 1px solid #dee2e6;
     font-weight: 500;
-    box-sizing: border-box;
     color: #343a40;
-    background: #f8f9fa;
-    width:"100%";
+    word-wrap: break-word;
+    display: table-cell;
+    /*max-width: 250px;*/
+    word-break: keep-all;
 }
 .columnContainer
 {
   height:70px;
+  display:table-header-group;
 }
 .FilterIcon{
     display: inline-flex;
@@ -65,30 +74,38 @@ body{
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    
     width: 100%;
     height: 100%;
 }
 .tableContent {
+  padding:0.4rem;
   word-wrap: break-word;
   display: table-cell;
-  max-width: 180px;
+  max-width: 250px;
+  width: 100%;
   height: fit-content;
   cursor: auto;
   border: 1px solid #dee2e6;
-  
+  vertical-align: middle;
   overflow: hidden;
   text-overflow: ellipsis !important;
   white-space: nowrap;
   cursor: pointer;
+  text-align: center;
+  border:none;
 }
 .SearchDiv{
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: 98%;
   height: 100%;
+  margin:1%;
+  margin-bottom: none;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  border-radius:15px;
+  border-bottom-left-radius:15px;
 }
 .SearchBar {
   width: 50%;
@@ -110,8 +127,6 @@ body{
 #deleteHeader {
   font-size: 17.3px;
   font-weight: bold;
-  border-width: 1px 1px 1px 1px;
-  border: 1px solid #dee2e6;
   display: table-cell;
   vertical-align: inherit;
   font-weight: 500;
@@ -123,5 +138,8 @@ body{
 #deleteIconRow {
  
   color: #343a40;
-  height: 20px;
+}
+#deleteIconRow Button {
+  border:none
+
 }

@@ -17,6 +17,10 @@ router.get("/me",[auth],async (req:any,res:any)=>{
     const user = await Connection.query(`SELECT utilisateur.id,nom_utilisateur,mot_de_passe,name as droit FROM utilisateur inner join droit on droit_FK=droit.id WHERE utilisateur.id = ${id}`)
     res.send(user[0])
 })
+router.get("/all",[auth,isAdmin],async (req:any,res:any)=>{
+    const users = await Connection.query(`SELECT utilisateur.id as id,nom_utilisateur,mot_de_passe,name as droit FROM utilisateur inner join droit on droit_FK=droit.id`)
+    res.send({users:users})
+})
 router.post("/me/update",[auth],async(req:any,res:any) => {
     const {id} = req.user
     const {nom_utilisateur,mot_de_passe} = req.body
@@ -169,5 +173,14 @@ router.get("/get/:id",[auth,isAdmin],async(req:any,res:any) => {
 router.get("/tryLogin",[auth],async(req:any,res:any) => {
   return res.status(200).send({"message":"Logged in","logged":true})})
 
-
+router.post("/:id/delete",[auth,isAdmin],async(req:any,res:any) => {
+  try {
+    const {id} = req.params
+    const user = await Connection.query(`DELETE FROM utilisateur WHERE id=${id}`)
+    return res.status(201).send({user})
+  }catch(e){
+      console.log("error while deleting user "+req.params.id)
+      return res.status(400).send({"error":"cannot delete id "+req.params.id})
+  }
+})
 export default router;
