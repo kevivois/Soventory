@@ -634,8 +634,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
-            </div>
             <BottomBar onOpenIEO={() => setOpenIEO(true)} enablePagination={enablePagination} handlePageChange={handlePageChange} maxPage={maxPage} pageId={pageId} readOnly={readOnly}  setOpenIEO={(open:boolean) => setOpenIEO(open)} setOpenAddPopup={(open:boolean) => setOpenAddPopup(open)} setEnablePagination={() => setEnablePagination(!enablePagination)}   />
+            </div>
             <div className="FilterPopup">
             <Dialog
             

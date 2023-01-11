@@ -1,7 +1,7 @@
 body{
   overflow-x: hidden;
 }
-.App Button{
+.App Button, .App TextField{
   border-radius: 15px;
 }
 .App {
@@ -13,17 +13,19 @@ body{
   justify-content: center;
 
 }
+.InventoryTable{
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  border-radius:15px;
+  border-bottom-left-radius:15px;
+  margin: 1%;
+  font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
+}
 .InventoryTable table { 
     
     border-collapse: collapse;
-    font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 15px;
     overflow-x: hidden;
-    margin: 1%;
     margin-bottom: none;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    border-radius:15px;
-    border-bottom-left-radius:15px;
     scrollbar-width:none;
   }
   .InventoryTable tbody{
@@ -105,21 +107,21 @@ body{
   margin-bottom: none;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   border-radius:15px;
-  border-bottom-left-radius:15px;
 }
 .SearchBar {
   width: 50%;
-  padding: 0.75rem 0.75rem;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-    border-radius: 6px;
+  margin: 0.75rem 0.75rem;
+  appearance: none;
+}
+.SearchBar .MuiOutlinedInput-root {
+  border-radius: 15px;
 }
 .clearFiltersButton{
   width: 10%;
   padding: 0.75rem 0.75rem;
   font-size: 1rem;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    border-radius: 6px;
+    border-radius: 15px;
 }
 .warning-error{
   display: block;

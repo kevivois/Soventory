@@ -1,11 +1,8 @@
 .bottom-bar{
-    width: 85%;
-    height: 10.3vh;
-    position: fixed;
-    bottom: 0;
-    border-top: 1px solid #000000cc;
-    margin: auto;
+    width: 100%;
+    padding-bottom: 1%;
     display: flex;
-    justify-content:space-between;
-    background-color: white;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
