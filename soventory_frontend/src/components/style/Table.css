@@ -18,7 +18,7 @@ body{
   border-radius:15px;
   border-bottom-left-radius:15px;
   margin: 1%;
-  font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family:"Segoe Ui";
   font-size: 15px;
 }
 .InventoryTable table { 

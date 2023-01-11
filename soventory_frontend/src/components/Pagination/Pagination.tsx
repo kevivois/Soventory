@@ -10,11 +10,11 @@ export default function Pagination(props:{onPageChange:(page:number) => void,ena
     }
     if(props.enabled){
         return (<div className="pagination">
-            <Button onClick={onPrevious} disabled={props.page === 1 || !props.enabled}>Précedant</Button>
+            <Button className="pageButton" sx={{color:"#f13dbe"}} onClick={onPrevious} disabled={props.page === 1 || !props.enabled}>Précedent</Button>
             <span>{props.page}</span>
             <span> sur </span>
             <span>{isFinite(props.maxPage) ? props.maxPage : 0 }</span>
-            <Button onClick={onNext} disabled={props.page >= props.maxPage|| !props.enabled}>Suivant</Button>
+            <Button className="pageButton" sx={{color:"#f13dbe"}} onClick={onNext} disabled={props.page >= props.maxPage|| !props.enabled}>Suivant</Button>
         </div>)
         }
     else{
