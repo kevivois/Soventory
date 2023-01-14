@@ -635,7 +635,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 let content = row[header.key];
                                 if(header.key == "prix"){
                                     // format to price with swiss currency 
-                                    content = new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(content);
+                                    content =   new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(content);
                                 }
                                 return (<td className="tableContent" style={header.inner ? {textAlign:"left"}:{textAlign:"center"}}  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}

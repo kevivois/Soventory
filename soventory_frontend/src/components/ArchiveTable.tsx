@@ -627,7 +627,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             if(header.show == false)return;
                             if(header.filter !== undefined && header.filter == true)
                             {
-                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter style={{width:"100%"}} className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
+                                return (<th className="tableHeader" key={header.id} style={{textAlign:"center"}} ><div style={{display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter style={{width:"100%"}} className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
@@ -644,7 +644,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 return (<th className="tableHeader" key={header.id}>{header.labelName}</th>)
                             }
                         })}
-                        
+                        <td className="tableHeader" style={{textAlign:"center",paddingRight:"2%"}}><DeleteIcon /></td>
                 </tr>
             </thead>
             <tbody>
@@ -668,7 +668,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 return (<td className="tableContent" style={header.inner ? {textAlign:"left"}:{textAlign:"center"}}  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
                             {
-                            <td className="tableContent" ><Button id="deleteButton"  disabled={readOnly} onClick={() => {
+                            <td className="tableContent" style={{textAlign:"center"}} ><Button id="deleteButton" style={{padding:"0px",margin:"0px",height:"10px"}}  disabled={readOnly} onClick={() => {
                                 setDeleteId(row.id);
                                 setDeleteWarning(true);
                             }}><DeleteIcon /></Button></td>}
