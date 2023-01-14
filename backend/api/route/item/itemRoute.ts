@@ -1,12 +1,8 @@
 
 import express from "express"
 import instance from "../../Connection"
-import { FormatNumberLength } from "../../../utils"
-import { gunzipSync } from "zlib"
 import { createItem } from "../../utils/DB.utils"
-import fs from "fs"
 import headers from "../../../../soventory_frontend/src/components/headers"
-import Moment from 'moment'
 const Connection = instance.getInstance()
 const router = express.Router()
 const auth = require("../../middleware/auth")
@@ -242,8 +238,8 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
         let sqlItem:typeof item = {}
         let enable = true;
         const Itempromise : readonly unknown[] =  Object.keys(item).map(async (key) => {
+            await Connection.wait();
             let header = headers.find((k:any) => k.key == String(key) );
-            
             if(header !== undefined && header.required)
             {
                 if(item[key] === undefined || item[key] == null || item[key] == ""){

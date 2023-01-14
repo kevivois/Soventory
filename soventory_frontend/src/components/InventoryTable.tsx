@@ -264,7 +264,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var body = [...filters.map((filter:Filtering)=>{
             // name : value
             var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
-            if(selectedValues.length == 0) {return null}
+            if(selectedValues.length == 0) {
+                let newFilterList = {...filterList};
+                newFilterList.splice(newFilterList.indexOf(filter),1);
+                setFilterList(newFilterList);
+                return
+            }
             if(filter.header.inner)
             {
                 return {name:`${filter.header.key}.nom`,values:selectedValues}
@@ -457,7 +462,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var newFilter = new Filtering(headerFiltering, checkBoxFilterList);
         setCheckBoxFilterList([])
         var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
-        
+        if(newFilter.selectedValues.length === 0){
+            return setOpenPopup(false);
+        }
         if(index !== -1)
         {
 
@@ -602,7 +609,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                 if(sortingFilter != null){
                                     order = sortingFilter.order == "asc" ? "desc" : "asc";
                                 }
-                                
                                 const icon = order === "desc" ? "▼" : "▲";
                                 return (<th className="tableHeader" onClick={() => setSortingFilter(new Sorting(header,order))} key={header.id}>{header.labelName}{icon}</th>)
                             }
@@ -627,7 +633,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             {headers.map((header) => {
                                 if(header.show == false)return;
                                 let content = row[header.key];
-                                return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
+                                if(header.key == "prix"){
+                                    // format to price with swiss currency 
+                                    content = new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(content);
+                                }
+                                return (<td className="tableContent" style={header.inner ? {textAlign:"left"}:{textAlign:"center"}}  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
                         </tr>
                     )
@@ -643,8 +653,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
       maxWidth="xs"
       open={openPopup}
     >
-      <DialogTitle>Filters</DialogTitle>
-      <DialogContent dividers>
+      <DialogTitle>Filtres</DialogTitle>
+      <DialogContent dividers style={{overflow:"auto"}}>
           {filterDataList.map((dt) => {
                 var checked = false
                 filterList.forEach((flt) => {

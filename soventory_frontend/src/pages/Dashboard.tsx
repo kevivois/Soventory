@@ -15,7 +15,6 @@ import {VscAccount,VscFeedback} from "react-icons/vsc"
 import {BsArchive} from "react-icons/bs"
 import ProjectIcon from "../logo/plussegaush.png"
 import getIp from '../IP';
-import Parameters from "./Params";
 const MODE={
     TABLE:1,
     ACCOUNT:2,
@@ -36,11 +35,12 @@ export default function Dashboard(props:{mode:number})
         return user.droit == "ADMINISTRATEUR";
     }
 
-    const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[] = [
+    const menuOptions : {id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void,active:boolean,}[] = [
         {
             id:MODE.TABLE,
             key:"dashboard",
             labelName:"Tableau de bord",
+            active:true,
             icon:FaTachometerAlt,
             onClickMenuitem:(which:number) => {
                  naviguate("/dashboard");
@@ -51,6 +51,7 @@ export default function Dashboard(props:{mode:number})
             id:MODE.ARCHIVE,
             key:"archives",
             labelName:"Archives",
+            active:true,
             icon:BsArchive,
             onClickMenuitem:(which:number) => {
                  naviguate("/archives");
@@ -61,6 +62,7 @@ export default function Dashboard(props:{mode:number})
             id:MODE.ACCOUNT,
             key:"account",
             labelName:"Compte",
+            active:false,
             icon:VscAccount,
             onClickMenuitem:(which:number) => {
                  naviguate("/account");
@@ -71,6 +73,7 @@ export default function Dashboard(props:{mode:number})
             id:MODE.PARAMETERS,
             key:"parameters",
             labelName:"Paramètres",
+            active:false,
             icon:CgOptions,
             onClickMenuitem:(which:number) => {
                  naviguate("/parameters");
@@ -100,7 +103,7 @@ export default function Dashboard(props:{mode:number})
     const renderParameters = async () => {
         return (
             <div>
-                <Parameters user={user} allow={isAdmin(user)} />
+                <h1>Paramètres</h1>
             </div>
         );
     }
@@ -165,7 +168,7 @@ export default function Dashboard(props:{mode:number})
     }
 
     const onIconClick = () => {
-        window.location.reload();
+        window.location.replace("/dashboard");
     }
     return ( <div style={{display:"block",width:"100vw",height:"100%"}}> 
         {user != null && errorMessage == ""  ?  <div>

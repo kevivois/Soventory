@@ -21,7 +21,7 @@ import {
 } from "react-icons/bi";
 import { IconType } from "react-icons/lib";
 import { Link } from "react-router-dom";
-const Aside = (props:{ onIconClick:()=> void,image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void}[],disconnectFunction:() => Promise<void>,menuIcon:string}) => {
+const Aside = (props:{ onIconClick:()=> void,image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void,active:boolean}[],disconnectFunction:() => Promise<void>,menuIcon:string}) => {
   return (
     <ProSidebar
     style={{height:"100vh",width:"100%"}}
@@ -54,6 +54,7 @@ const Aside = (props:{ onIconClick:()=> void,image:any, collapsed:any, rtl:any, 
       <SidebarContent>
         <Menu iconShape="circle">
           {props.options.map((option) => {
+            if(!option.active) return
             return (
               <MenuItem
                 key={option.key}

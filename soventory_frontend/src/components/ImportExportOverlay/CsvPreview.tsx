@@ -1,8 +1,12 @@
-import React from 'react';
+import React,{useEffect}from 'react';
 import { useTable } from 'react-table';
 import headers from '../headers';
 
 export default function CsvPreview  ({ data,withId }:any) {
+  const [previewData, setPreviewData] = React.useState<any[]>(data.slice(0,50))
+  useEffect(() => {
+    setPreviewData(data.slice(0,50))
+  }, [data])
   const columns = React.useMemo(
     () => headers.map((header:any) => {
       return {
@@ -27,12 +31,12 @@ export default function CsvPreview  ({ data,withId }:any) {
     prepareRow
   } = useTable({
     columns,
-    data
+    data:previewData
   });
-  if (data[0]) {
-    const csvColumnNames = Object.keys(data[0])
+  if (previewData[0]) {
+    const csvColumnNames = Object.keys(previewData[0])
     const tableColumnNames = columns.map(column => column.accessor);
-    if (!csvColumnNames.every((name:any) => tableColumnNames.includes(name))) {
+    if (!csvColumnNames.every((name:any) => tableColumnNames.includes(name)) || previewData.length < 1) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center' ,width:"100%",height:"100%"}}>
           preview non disponible

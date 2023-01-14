@@ -1,6 +1,4 @@
-body{
-  overflow-x: hidden;
-}
+
 .App Button, .App TextField{
   border-radius: 15px;
 }
@@ -20,6 +18,9 @@ body{
   margin: 1%;
   font-family:"Segoe Ui";
   font-size: 15px;
+}
+.InventoryTable::-webkit-scrollbar,.InventoryTable::-moz-scrollbar{
+  display: none;
 }
 .InventoryTable table { 
     
@@ -137,11 +138,10 @@ body{
   background: #f8f9fa;
   width:"100%";
 }
-#deleteIconRow {
+#deleteButton {
  
   color: #343a40;
-}
-#deleteIconRow Button {
-  border:none
-
+  border:0px;
+  margin:0px;
+  padding:0px;
 }

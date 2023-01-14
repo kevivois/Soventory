@@ -488,7 +488,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var newFilter = new Filtering(headerFiltering, checkBoxFilterList);
         setCheckBoxFilterList([])
         var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
-        
+        if(newFilter.selectedValues.length === 0){
+            return setOpenPopup(false);
+        }
         if(index !== -1)
         {
 
@@ -625,7 +627,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             if(header.show == false)return;
                             if(header.filter !== undefined && header.filter == true)
                             {
-                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100%",alignItems:"center"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
+                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter style={{width:"100%"}} className="FilterIcon" onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
@@ -659,20 +661,24 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             {headers.map((header) => {
                                 if(header.show == false)return;
                                 let content = row[header.key];
-                                return (<td className="tableContent"  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
+                                if(header.key == "prix"){
+                                    // format to price with swiss currency 
+                                    content = new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(content);
+                                }
+                                return (<td className="tableContent" style={header.inner ? {textAlign:"left"}:{textAlign:"center"}}  key={header.id} onClick={(event) => onRowClick(event,row)} >{content}</td>)
                             })}
                             {
-                            <td className="tableContent" ><Button id="deleteIconRow"  disabled={readOnly} onClick={() => {
+                            <td className="tableContent" ><Button id="deleteButton"  disabled={readOnly} onClick={() => {
                                 setDeleteId(row.id);
                                 setDeleteWarning(true);
-                            }}><DeleteIcon style={{border:"none"}} /></Button></td>}
+                            }}><DeleteIcon /></Button></td>}
                         </tr>
                     )
                 }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
-            </div>
             <BottomBar onOpenIEO={() => setOpenIEO(true)} enablePagination={enablePagination} handlePageChange={handlePageChange} maxPage={maxPage} pageId={pageId} readOnly={readOnly}  setOpenIEO={(open) => setOpenIEO(open)} setOpenAddPopup={(open) => setOpenAddPopup(open)} setEnablePagination={() => setEnablePagination(!enablePagination)}   />
+            </div>
             <div className="FilterPopup">
             <Dialog
             
@@ -680,8 +686,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
       maxWidth="xs"
       open={openPopup}
     >
-      <DialogTitle>Filters</DialogTitle>
-      <DialogContent dividers>
+      <DialogTitle>Filtres</DialogTitle>
+      <DialogContent dividers style={{overflow:"auto"}}>
           {filterDataList.map((dt) => {
                 var checked = false
                 filterList.forEach((flt) => {

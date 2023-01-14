@@ -109,6 +109,9 @@ export async function checkDestructedItem(item:any){
         if(item.etat_FK == FK_destructed[0].id){
             return item.archive = 1;
         }
+        else{
+            return item.archive = 0;
+        }
     }
     return;
 }

@@ -27,7 +27,6 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
     const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
     const [error,setError] = React.useState<string>("");
     const [openWarning,setOpenWarning] = React.useState(false);
-
     useEffect(() => {
         console.log(error);
         if(error != ""){
@@ -188,6 +187,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
         //create a list with only the name of all the items
         newDropDownData[key] = response;
         setDropDownData({...newDropDownData});
+        console.log(newDropDownData)
         }
     }
 
@@ -211,7 +211,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
     },[])
 
 
-        if(open == true && dropDownData != undefined &&  Object.keys(dropDownData).every((key:any) => dropDownData[key] != undefined) && Object.keys(dropDownData).every((key:any) => dropDownData[key].length > 0) )
+        if(open == true && dropDownData != undefined && Object.keys(dropDownData).every((key:any) => dropDownData[key].length >= 0) )
         {
         return (
             <div>
