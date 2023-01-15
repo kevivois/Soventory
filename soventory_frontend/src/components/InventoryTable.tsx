@@ -71,11 +71,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         }
         const paginateData = renderedData.slice((pageId-1)*rowPerPage,pageId*rowPerPage);
         setPaginateData(paginateData);
-
         let mx = Math.ceil(renderedData.length / rowPerPage)
         if(mx <= 0) mx = 1;
         setMaxPage(mx);
-
         if(pageId > mx){
             setPageId(mx);
         }
@@ -265,7 +263,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             // name : value
             var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
             if(selectedValues.length == 0) {
-                let newFilterList = {...filterList};
+                let newFilterList = [...filterList];
                 newFilterList.splice(newFilterList.indexOf(filter),1);
                 setFilterList(newFilterList);
                 return
@@ -476,7 +474,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 }
             });
             if(newFilter.selectedValues.find((item:any) => item.checked === true) === undefined ){
+                console.log(newFilterList)
                 newFilterList.splice(index,1);
+                console.log(newFilterList)
             }else{
                 newFilterList[index] = newFilter;
             }

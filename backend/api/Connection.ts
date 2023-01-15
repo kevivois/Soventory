@@ -1,18 +1,19 @@
 import mysql2 from "mysql2/promise"
 import getIp from "../IP"
+import fs from "fs"
 
 export default class Connection {
     private static instance: Connection;
     private dataConnection: any
     private mysqlConnectionPool: any
     private connCount: number = 0
-
+    private file: any;
     private async init() {
         this.mysqlConnectionPool = mysql2.createPool({
             connectionLimit: 1, // Only allow a single connection in the pool
             host: "localhost",
             user: "root",
-            password: "Pa$$w0rd",
+            password: "password",
             database: "soventory",
             port: 3306
         });
@@ -55,10 +56,20 @@ export default class Connection {
         } catch (error) {
             connection.release() // Release the connection back to the pool in case of error
             this.connCount--;
-            console.log(error);
+            await this.__log(String(error))
             return []
             
         }
+        
+    }
+    private async __log(text:string){ // TODO REMOVE THIS FUNCTION IN PRODUCTION
+        // show date like hh:mm:ss:zzz
+        const date = new Date();
+        const time = date.toISOString();
+        text = `${time} : ${text} \n`
+        this.file = fs.createWriteStream("log.txt", {flags:'a'});
+        this.file.write(text);
+        this.file.end();
     }
     public async query(query: string): Promise<any> {
         try{
@@ -77,7 +88,7 @@ export default class Connection {
                     clearInterval(interval);
                     resolve(0);
                 }
-            }, 1);
+            }, 5);
         });
     }
 }

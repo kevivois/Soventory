@@ -238,7 +238,6 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
         let sqlItem:typeof item = {}
         let enable = true;
         const Itempromise : readonly unknown[] =  Object.keys(item).map(async (key) => {
-            await Connection.wait();
             let header = headers.find((k:any) => k.key == String(key) );
             if(header !== undefined && header.required)
             {
@@ -246,12 +245,13 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
                     return enable = false;
                 }
                 if(header.inner == true){
+                    await Connection.wait();
                     var query = await Connection.query(`select id from ${key} where nom = "${item[key]}"`)
                     if(query.length == 0)
                     {   try{
                             var query = await Connection.query("insert into " + key + " (nom) values ('" + item[key] + "')")
                     }catch(e){}
-                        var lastId = await Connection.query("select id from " + key + " order by id desc limit 1")
+                        var lastId = await Connection.query("select id from " + key + " where nom = '" + item[key] + "'")
                         item[`${key}_FK`] = lastId[0].id;
                         sqlItem[`${key}_FK`] = lastId[0].id;
                     }
@@ -269,7 +269,9 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
         await Promise.all(Itempromise).then(() => {
             if(enable == true){
                 sqlArray.push(sqlItem);
-            };
+            }else{
+                errors.push("l'item " + array.indexOf(item)  + " n'a pas pu être créé")
+            }
         })
     })
     await Promise.all(promises)

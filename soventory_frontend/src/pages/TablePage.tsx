@@ -17,8 +17,8 @@ export default function  TablePage(props:{user:any,type:string})
     const [lieux,setLieux] = useState<any[]>([])
     const [sections,setSections] = useState<any[]>([])
     const [loading,setLoading] = useState<boolean>(true)
-    const [loadingMessage,setLoadingMessage] = useState<String>("loading")
     const [type,setType] = useState<string>(Object.values(types).includes(props.type) ? props.type : types.unknown)
+    const [table,setTable] = useState<any>(<div></div>)
 
     async function fetchItems()
     {
@@ -94,35 +94,22 @@ export default function  TablePage(props:{user:any,type:string})
         }
         fetchInnerData();
     },[])
-
-    if(loading || type == types.unknown)
-    {
-        return (
-            <div className="App" style={{width:"100%"}}>
-        <div>{loadingMessage}</div>
-        </div>)
-    }
-    else{
-
+    useEffect(() => {
+        if(loading || data == null) return;
         if(type == types.archive){
-
-            return(
-                <div className="App" style={{width:"100%"}}>
-                    <Archives user={props.user} data={data != null ? data :  [] } etats={etats } lieux={lieux } marques={marques } materiels={catergories } sections={sections } />
-                </div>
-            )
-
+            setTable(<Archives user={props.user} data={data} etats={etats } lieux={lieux } marques={marques } materiels={catergories } sections={sections } />)
         }
         else if(type == types.inventory){
-            return (<div className="App" style={{width:"100%"}}>
-                <Inventory user={props.user} data={data != null ? data :  []} etats={etats } lieux={lieux } marques={marques } materiels={catergories } sections={sections } />
-            </div>)
+            setTable(<Inventory user={props.user} data={data} etats={etats } lieux={lieux } marques={marques } materiels={catergories } sections={sections } />)
         }
         else{
-            return (
-                <div className="App" style={{width:"100%"}}>
-            <div>{loadingMessage}</div>
-            </div>)
+            setTable(<div></div>)
         }
-    }
+    },[loading,type,data]);
+
+    return (
+        <div style={{width:"100%",height:"100%"}}>
+            {table}
+        </div>
+    )
 }

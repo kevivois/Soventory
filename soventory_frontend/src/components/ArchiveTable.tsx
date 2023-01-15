@@ -302,7 +302,12 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         var body = [...filters.map((filter:Filtering)=>{
             // name : value
             var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
-            if(selectedValues.length == 0) {return null}
+            if(selectedValues.length == 0) {
+                let newFilterList = [...filterList];
+                newFilterList.splice(newFilterList.indexOf(filter),1);
+                setFilterList(newFilterList);
+                return
+            }
             if(filter.header.inner)
             {
                 return {name:`${filter.header.key}.nom`,values:selectedValues}
@@ -391,13 +396,21 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             //check if there is a filtering filter with the same header
             var index = newFilterList.findIndex((flt:Filter)=>flt instanceof Searching);
-            if(index !== -1)
-            {
-                newFilterList[index] = filter;
-            }
-            else
-            {
-                newFilterList.push(filter);
+            if(filter.value == ""){
+                
+                if(index !== -1)
+                {
+                    newFilterList.splice(index,1);
+                }
+            }else {
+                if(index !== -1)
+                {
+                    newFilterList[index] = filter;
+                }
+                else
+                {
+                    newFilterList.push(filter);
+                }
             }
 
         }
