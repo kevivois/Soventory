@@ -33,8 +33,8 @@
   }
   .InventoryTable tbody{
     display: block;
-    height: 50vh;
-    max-height: 50vh;
+    height: 55vh;
+    max-height: 55vh;
     overflow-y: scroll;
     overflow-x: hidden;
 
@@ -126,7 +126,9 @@
     border-radius: 15px;
 }
 .warning-error{
-  display: block;
+  display: relative;
+  bottom: 0.5rem;
+  right: 0.5rem;
 }
 #deleteHeader {
   font-size: 17.3px;
