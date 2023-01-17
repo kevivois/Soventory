@@ -42,28 +42,15 @@ router.get("/all", [auth,canRead], async (req: any, res: any) => {
     return res.status(200).send(query)
 
 })
-
-router.get("/:id", [auth, canRead], async(req: any, res: any) => {
-    try
-    {
-    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
-                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
-                                                from item inner join section on section_FK=section.id
-                                                     inner join materiel on materiel_FK=materiel.id
-                                                     inner join etat on etat_FK=etat.id
-                                                     inner join marque on marque_FK=marque.id
-                                                     inner join lieu on lieu_FK = lieu.id
-                                                     where item.id=${req.params.id}`)
-                                                     query = renderJsDates(query)
-                                                     return res.status(200).send(query)
-    }
-    catch(error)
-    {
-        return res.status(500).send({"error":"unvalid id"})
-    }
-
-    
+router.get("/totalprice/archived", [auth,canRead], async (req: any, res: any) => {
+    var query = await Connection.query(`select sum(prix) as total from item where archive=1`)
+    return res.status(200).send(query)
+    })
+router.get("/totalprice", [auth,canRead], async (req: any, res: any) => {
+    var query = await Connection.query(`select sum(prix) as total from item where archive=0`)
+    return res.status(200).send(query)
 })
+
 router.post("/create", [auth, canWrite, ItemIntegrity], async (req: any, res: any) => {
     let item = {...req.body}
     const {success,query} = await createItem(item);
@@ -221,7 +208,6 @@ router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) =>
              query = renderJsDates(query)
     return res.status(200).send(query);
 })
-export default router
 
 router.post("/import", [auth, canWrite], async (req: any, res: any) => {
     let array:any[] = req.body.items;
@@ -319,3 +305,26 @@ router.get("/FK/all", [auth, canRead], async (req: any, res: any) => {
     await Promise.all(requestPromises)
     return res.status(200).send(data)
 })
+router.get("/:id", [auth, canRead], async(req: any, res: any) => {
+    try
+    {
+    var query = await Connection.query(`select item.id as id, materiel.nom as materiel,marque.nom as marque,item.modele as modele,item.num_serie,item.num_produit,section.nom as section,
+                                            etat.nom as etat,lieu.nom as lieu,remarque,date_achat,garantie,fin_garantie,prix,archive
+                                                from item inner join section on section_FK=section.id
+                                                     inner join materiel on materiel_FK=materiel.id
+                                                     inner join etat on etat_FK=etat.id
+                                                     inner join marque on marque_FK=marque.id
+                                                     inner join lieu on lieu_FK = lieu.id
+                                                     where item.id=${req.params.id}`)
+                                                     query = renderJsDates(query)
+                                                     return res.status(200).send(query)
+    }
+    catch(error)
+    {
+        return res.status(500).send({"error":"unvalid id"})
+    }
+
+    
+})
+
+export default router;

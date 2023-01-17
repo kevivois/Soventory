@@ -73,7 +73,6 @@ export default function  TablePage(props:{user:any,type:string})
                     credentials: "include"
                 });
                 const response = await query.json();
-                
                 let categories = response.find((element:any) => element.key == "materiel") ? response.find((element:any) => element.key == "materiel").values : [];
                 let marques = response.find((element:any) => element.key == "marque") ? response.find((element:any) => element.key == "marque").values : [];
                 let etats = response.find((element:any) => element.key == "etat") ? response.find((element:any) => element.key == "etat").values : [];

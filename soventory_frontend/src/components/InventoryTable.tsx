@@ -54,6 +54,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [enablePagination,setEnablePagination] = useState(true);
     const [rowPerPage,setRowPerPage] = useState(0);
     const [maxPage,setMaxPage] = useState(Math.ceil(renderedData.length/rowPerPage));
+    const [totalPrice,setTotalPrice] = useState<number |null>(null);
     let timer : ReturnType<typeof setTimeout> | null = null;
     
     const handleEditPageClose = () => {
@@ -106,6 +107,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         handlePagination();
     },[renderedData,pageId,enablePagination,rowPerPage]);
     useEffect(() => {
+        fetchTotalPrice();
+    },[]);
+    useEffect(() => {
         determineRowPerPage()
         window.addEventListener("resize",handleResizing);
         return () => {
@@ -154,6 +158,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     async function refreshAll(){
         await fetchItems();
         await fetchDropDownList();
+        await fetchTotalPrice();
         var newF = [...filterList]
         setFilterList(newF);
     }
@@ -196,6 +201,23 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 setError(e.message)
             }
         }
+    async function fetchTotalPrice(){
+        try
+        {
+            const query = await fetch("http://"+getIp()+":3001/item/totalprice",{
+                credentials: "include",
+                method:"get"
+            });
+            const response = await query.json();
+            if(response.length > 0){
+                setTotalPrice(response[0].total);
+            }
+        }
+        catch(e:any){
+            setOpenWarning(true)
+            setError(e.message)
+        }
+    }
 
     function clearFilters(){
         setFilterList([]);
@@ -620,7 +642,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 </tr>
             </thead>
             <tbody>
-                {paginateData.length > 0 ?  paginateData.map((row) => {
+                {paginateData.length > 0 ? <div> {paginateData.map((row) => {
                     return (
                         <tr key={row.id} onMouseOver={(event) => {
                             // set color of the entire row when mouse over
@@ -641,9 +663,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             })}
                         </tr>
                     )
-                }): <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
+                })}
+                
+                </div>: <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
+            <div style={totalPrice ? {borderTop:"1px solid black"} : {display:"none"}}>
+            <div style={{display:"table",width:"100%"}}>
+            <div style={{display:"table-cell",width:"6%",float:"right",marginRight:"35px"}}>{new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(totalPrice || 0)}</div>
+            </div>
+            </div>
             <BottomBar onOpenIEO={() => setOpenIEO(true)} enablePagination={enablePagination} handlePageChange={handlePageChange} maxPage={maxPage} pageId={pageId} readOnly={readOnly}  setOpenIEO={(open:boolean) => setOpenIEO(open)} setOpenAddPopup={(open:boolean) => setOpenAddPopup(open)} setEnablePagination={() => setEnablePagination(!enablePagination)}   />
             </div>
             <div className="FilterPopup">
