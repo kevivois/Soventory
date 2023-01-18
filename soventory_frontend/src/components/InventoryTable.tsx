@@ -532,47 +532,28 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         await refreshAll();
     }
     async function fetchDropDownList(){
-
-        headers.forEach(async (header:any) => {
-
-            if(!header.inner)return;
-            const query = await fetch(`http://${getIp()}:3001/item.${header.key}/all`, {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+        try
+        {
+            const query = await fetch("http://"+getIp()+":3001/item/FK/all",{
+                credentials: "include"
             });
-            const response = await query.json()
-            if(response.error)
-            {
-                setError(String(response.error));
-                setOpenWarning(true)
-            }
-            else
-            {
-                if(header.key === "materiel")
-                {
-                    setMateriels(response);
-                }
-                else if(header.key === "marque")
-                {
-                    setMarques(response);
-                }
-                else if(header.key === "section")
-                {
-                    setSections(response);
-                }
-                else if(header.key === "etat")
-                {
-                    setEtats(response);
-                }
-                else if(header.key === "lieu")
-                {
-                    setLieux(response);
-                }
-            }
-        });
+            const response = await query.json();
+            let categories = response.find((element:any) => element.key == "materiel") ? response.find((element:any) => element.key == "materiel").values : [];
+            let marques = response.find((element:any) => element.key == "marque") ? response.find((element:any) => element.key == "marque").values : [];
+            let etats = response.find((element:any) => element.key == "etat") ? response.find((element:any) => element.key == "etat").values : [];
+            let lieux = response.find((element:any) => element.key == "lieu") ? response.find((element:any) => element.key == "lieu").values : [];
+            let sections = response.find((element:any) => element.key == "section") ? response.find((element:any) => element.key == "section").values : [];
+            setMateriels(categories);
+            setMarques(marques);
+            setEtats(etats);
+            setLieux(lieux);
+            setSections(sections);
+            
+        }
+        catch (error)
+        {
+            console.log(error)
+        }
     }
     const onImportCsv = async (array:any) => {
         const query = await fetch(`http://${getIp()}:3001/item/import`, {
@@ -642,7 +623,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 </tr>
             </thead>
             <tbody>
-                {paginateData.length > 0 ? <div> {paginateData.map((row) => {
+                {paginateData.length > 0 ? paginateData.map((row) => {
                     return (
                         <tr key={row.id} onMouseOver={(event) => {
                             // set color of the entire row when mouse over
@@ -663,9 +644,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             })}
                         </tr>
                     )
-                })}
+                        })
                 
-                </div>: <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
+                : <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
             <div style={totalPrice ? {borderTop:"1px solid black"} : {display:"none"}}>

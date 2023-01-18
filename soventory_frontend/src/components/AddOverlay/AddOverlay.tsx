@@ -399,10 +399,10 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                         </Box>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={onClose} color="primary">
+                        <Button onClick={onClose} color="primary" style={{color:"rgb(85,0,85)"}}>
                             Annuler
                         </Button>
-                        <Button onClick={() => {onApply()}} color="primary">
+                        <Button onClick={() => {onApply()}} color="primary" style={{color:"rgb(85,0,85)"}}>
                             Appliquer
                         </Button>
                     </DialogActions>

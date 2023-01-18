@@ -89,10 +89,11 @@ export default function ImportExportDialog(props:{open:boolean,onImport:(array:a
         reader.onload = (e) => {
           let csv = reader.result as any;
           if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
-            const workbook = XLSX.read(csv, { type: 'binary' });
+            const workbook = XLSX.read(csv, { type: 'binary',dateNF:'dd"."mm"."yyyy' });
             csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
           }
           setCsvFile(csv);
+          console.log(csv)
           let result = csvToObjectArray(csv);
           let r = checkFile(result.data);
           setEnableImport(r);
@@ -176,12 +177,12 @@ const downloadExample = (event:any) => {
   
 }
   return (
-    <div>
+    <div id="IEOverlay">
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth={maxWidth} fullWidth={fullWidth}>
-        <DialogTitle id="form-dialog-title">Import & Exportation</DialogTitle>
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label="Import" />
-          <Tab label="Export" />
+        <DialogTitle id="form-dialog-title" >Import & Exportation</DialogTitle>
+        <Tabs value={activeTab} color="rgb(85,0,85)" style={{color:"rgb(85,0,85)"}} onChange={handleTabChange}>
+          <Tab label="Import" style={{color:"rgb(85,0,85)"}} />
+          <Tab label="Export" style={{color:"rgb(85,0,85)"}} />
         </Tabs>
         <DialogContent className="root">
           {activeTab === 0 && 
@@ -215,11 +216,11 @@ const downloadExample = (event:any) => {
             {error && warningBar && <div className='error'><Warning open={warningBar} message={error} onClose={() => {setWarningBar(false)}} /></div> }
   </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
+          <Button onClick={handleClose} color="primary" style={{color:"rgb(85,0,85)"}}>
+            Annuler
           </Button>
-          <Button onClick={handleImportOrExport} disabled={activeTab === 0 ? props.enable ? false : true : false} color="primary">
-            {activeTab === 0 ? "Import" : "Export"}
+          <Button onClick={handleImportOrExport} disabled={activeTab === 0 ? props.enable ? false : true : false} style={{color:"rgb(85,0,85)"}} color="primary">
+            {activeTab === 0 ? "Importer" : "Exporter"}
           </Button>
         </DialogActions>
       </Dialog>

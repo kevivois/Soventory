@@ -22,7 +22,6 @@
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.28",
     "mdb-react-ui-kit": "^4.2.0",
-    "node-sass": "^7.0.3",
     "papaparse": "^5.3.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.5.0",
@@ -76,7 +75,7 @@
     "@types/react-datepicker": "^4.8.0",
     "@types/react-dom": "^18.0.6",
     "@types/react-table": "^7.7.12",
-    "sass": "^1.55.0",
+    "sass": "^1.57.1",
     "typescript": "^4.8.2"
   }
 }

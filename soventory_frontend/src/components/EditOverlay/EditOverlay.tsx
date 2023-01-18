@@ -104,17 +104,30 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         setDropDownData({...newDropDownData});
         return  response
     }
-    async function fetchDropDown(key:string){
-        var newDropDownData = dropDownData;
-        if(newDropDownData[key] == undefined){
-            const query = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
-            method: 'GET',
-            credentials: 'include',
-        })
-        const response = await query.json();
-        //create a list with only the name of all the items
-        newDropDownData[key] = response;
-        setDropDownData(newDropDownData);
+    async function fetchDropDownList(){
+        let newDropDownData = {...dropDownData}
+        try
+        {
+            const query = await fetch("http://"+getIp()+":3001/item/FK/all",{
+                credentials: "include"
+            });
+            const response = await query.json();
+            let categories = response.find((element:any) => element.key == "materiel") ? response.find((element:any) => element.key == "materiel").values : [];
+            let marques = response.find((element:any) => element.key == "marque") ? response.find((element:any) => element.key == "marque").values : [];
+            let etats = response.find((element:any) => element.key == "etat") ? response.find((element:any) => element.key == "etat").values : [];
+            let lieux = response.find((element:any) => element.key == "lieu") ? response.find((element:any) => element.key == "lieu").values : [];
+            let sections = response.find((element:any) => element.key == "section") ? response.find((element:any) => element.key == "section").values : [];
+            newDropDownData['materiel'] = categories;
+            newDropDownData["marque"] = marques;
+            newDropDownData["etat"] = etats;
+            newDropDownData["lieu"] = lieux;
+            newDropDownData['section'] = sections;
+            setDropDownData(newDropDownData)
+            
+        }
+        catch (error)
+        {
+            console.log(error)
         }
     }
     async function fetchItem()
@@ -133,11 +146,8 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         setEditRow(data[0]);
     }
     useEffect(() => {
-        props.headers.forEach((header) => {
-            if(header.inner === true){
-                fetchDropDown(header.key);
-            }
-        })
+
+        fetchDropDownList();
             
         if(props.id != null)
         {
@@ -378,10 +388,10 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                         </Box>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleClose} color="primary">
+                        <Button onClick={handleClose} color="primary" style={{color:"rgb(85,0,85)"}}>
                             Annuler
                         </Button>
-                        <Button disabled={!canModify} onClick={() => {onApply()}} color="primary">
+                        <Button disabled={!canModify} onClick={() => {onApply()}} color="primary" style={{color:"rgb(85,0,85)"}}>
                             Appliquer
                         </Button>
                     </DialogActions>
