@@ -113,19 +113,32 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
 
     }
 
-    function handleDatesChange(year:number)
+    function handleDatesChange(row:any,key:string,value:any)
     {
-        try{
+        if(key == "date_achat"){
 
-        const maxDate = new Date(editRow["date_achat"]).setFullYear(new Date(editRow["date_achat"]).getFullYear() + year);
-        const formatted = FormatDate(new Date(maxDate));
-        return formatted
+            // add value to year of date row.date_achat
+            if(row.garantie){
+                let date = new Date(row.date_achat);
+                date.setFullYear(date.getFullYear() + row.garantie);
+                row.fin_garantie = FormatDate(date);
+            }
+        }else if(key == "fin_garantie"){
+
+            if(row.date_achat){
+                let date = new Date(row.fin_garantie);
+                date.setFullYear(date.getFullYear() - row.garantie);
+                row.date_achat = FormatDate(date);
+            }
+
         }
-        catch(e:any){
-            setError(String(e.message))
-            setOpenWarning(true);
-            const normal = FormatDate(editRow["date_achat"]);
-            return normal
+        else if (key == "garantie"){
+            if(row.fin_garantie){
+                let date = new Date(row.date_achat);
+                date.setFullYear(date.getFullYear() + parseInt(value));
+                row.fin_garantie = FormatDate(date);
+            }
+
         }
     }
 
@@ -307,10 +320,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                     newEditRow[header.key] = e.target.value;
                                                 }
 
-                                                if(header.key == "garantie" && e.target.value != ""){
+                                                if(header.key == "garantie" || header.key == "date_achat" || header.key == "fin_garantie" && e.target.value != ""){
   
-                                                    var maxDate = handleDatesChange(parseInt(e.target.value));
-                                                    newEditRow["fin_garantie"] = maxDate;
+                                                    handleDatesChange(newEditRow,header.key,e.target.value);
                                                 }
                                                 setEditRow(newEditRow)
                                             }}/> : header.which == "dropdownlist" ? <CreatableSelect  readOnly={!modifyingMode} onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
@@ -318,6 +330,8 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                 newEditRow[header.key] = value;
                                                 if(header.key == "etat" && value == "detruit"){
                                                     newEditRow["archive"] = 1;
+                                                }else if (value !== "detruit"){
+                                                    newEditRow["archive"] = 0;
                                                 }
                                                 setEditRow(newEditRow)}} data={dropDownData[header.key]} defaultValue={editRow[header.key]}/> : header.which == "checkbox" ? 
                                                <Checkbox checked={Boolean(editRow[header.key])} inputProps={{readOnly:!modifyingMode}} onChange={(e) => {
@@ -334,6 +348,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                         var newEditRow = {...editRow};
                                                         var formatted = FormatDate(new Date(event.target.value));
                                                         newEditRow[header.key] = formatted;
+                                                        if(header.key == "garantie" || header.key == "date_achat" || header.key == "fin_garantie"){
+                                                            handleDatesChange(newEditRow,header.key,0);
+                                                        }
                                                         setEditRow(newEditRow)
                                                     }
                                                     catch(e:any){
@@ -355,9 +372,8 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                     newEditRow[nextHeader.key] = e.target.value;
                                                 }
                                                 
-                                                if(nextHeader.key == "garantie" && e.target.value != ""){
-                                                    var maxDate = handleDatesChange(parseInt(e.target.value));
-                                                    newEditRow["fin_garantie"] = maxDate;
+                                                if(nextHeader.key == "garantie" || nextHeader.key == "date_achat" || nextHeader.key == "fin_garantie" && e.target.value != ""){
+                                                    handleDatesChange(newEditRow,nextHeader.key,e.target.value);
                                                 }
                                                 setEditRow(newEditRow)
                                             }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect readOnly={!nextModifyingMode} onCreateNewValue={(value:any) => {return createNewInner(nextHeader.key,value)}} onDelete={(id:number) => deleteOneInner(nextHeader.key,id)} onChange={(value:any) =>  {
@@ -365,6 +381,8 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                 newEditRow[nextHeader.key] = value;
                                                 if(nextHeader.key == "etat" && value == "detruit"){
                                                     newEditRow["archive"] = 1;
+                                                }else if(value != "detruit"){
+                                                    newEditRow["archive"] = 0;
                                                 }
                                                 setEditRow(newEditRow)
                                                 }} data={dropDownData[nextHeader.key]} defaultValue={editRow[nextHeader.key]}/> : nextHeader.which == "checkbox" ? 
@@ -382,6 +400,9 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
                                                         var newEditRow = {...editRow};
                                                         var formatted = FormatDate(new Date(event.target.value));
                                                         newEditRow[nextHeader.key] = formatted;
+                                                        if(nextHeader.key == "garantie" || nextHeader.key == "date_achat" || nextHeader.key == "fin_garantie"){
+                                                            handleDatesChange(newEditRow,nextHeader.key,0);
+                                                        }
                                                         setEditRow(newEditRow)}
                                                     catch(e:any){
                                                         setError(String(e.message))

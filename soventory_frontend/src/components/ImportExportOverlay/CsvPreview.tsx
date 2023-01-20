@@ -2,7 +2,7 @@ import React,{useEffect}from 'react';
 import { useTable } from 'react-table';
 import headers from '../headers';
 
-export default function CsvPreview  ({ data,withId }:any) {
+export default function CsvPreview  ({ data }:any) {
   const [previewData, setPreviewData] = React.useState<any[]>(data.slice(0,50))
   useEffect(() => {
     setPreviewData(data.slice(0,50))
@@ -12,12 +12,6 @@ export default function CsvPreview  ({ data,withId }:any) {
       return {
         Header: header.labelName,
         accessor: header.key
-      }
-    }).filter((header:any) => {
-      if(withId === true){
-        return true;
-      }else{
-        return header.accessor !== "id"
       }
     }),
     []

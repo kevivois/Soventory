@@ -53,18 +53,32 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             setOpenWarning(true);
         }
     },[error])
-    function handleDatesChange(year:number)
+    function handleDatesChange(row:any,key:string,value:any)
     {
-        try{
+        if(key == "date_achat"){
 
-        const maxDate = new Date(editRow["date_achat"]).setFullYear(new Date(editRow["date_achat"]).getFullYear() + year);
-        const formatted = FormatDate(new Date(maxDate));
-        return formatted
+            // add value to year of date row.date_achat
+            if(row.garantie){
+                let date = new Date(row.date_achat);
+                date.setFullYear(date.getFullYear() + row.garantie);
+                row.fin_garantie = FormatDate(date);
+            }
+        }else if(key == "fin_garantie"){
+
+            if(row.date_achat){
+                let date = new Date(row.fin_garantie);
+                date.setFullYear(date.getFullYear() - row.garantie);
+                row.date_achat = FormatDate(date);
+            }
+
         }
-        catch(e:any){
-            setError(String(e.message))
-            const normal = FormatDate(editRow["date_achat"]);
-            return normal
+        else if (key == "garantie"){
+            if(row.fin_garantie){
+                let date = new Date(row.date_achat);
+                date.setFullYear(date.getFullYear() + parseInt(value));
+                row.fin_garantie = FormatDate(date);
+            }
+
         }
     }
     async function createNewInner(key:string,value:string){
@@ -284,20 +298,18 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                             <div style={{width:"100%"}}>
                                             <div style={{display:"block"}}>
                                             <label>{header.labelName}</label>
-                                            {header.which == "textbox" ? <TextField type={type}  fullWidth inputProps={header.number && header.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}} value={editRow[header.key]} onChange={(e) => {
+                                            {header.which == "textbox" ? <TextField type={type}  fullWidth inputProps={header.number && header.key != "garantie" ? {readOnly:!modifyingMode,step:0.05} :  {readOnly:!modifyingMode}} value={editRow[header.key]} onChange={(e) => {
                                                 var newEditRow = {...editRow};
 
-                                                if(nextHeader.number == true){
+                                                if(header.number == true){
                                                     newEditRow[header.key] = parseFloat(e.target.value);
                                                 }
                                                 else{
                                                     newEditRow[header.key] = e.target.value;
                                                 }
 
-                                                if(header.key == "garantie" && e.target.value != ""){
-  
-                                                    var maxDate = handleDatesChange(parseInt(e.target.value));
-                                                    newEditRow["fin_garantie"] = maxDate;
+                                                if(header.key == "garantie" || header.key == "date_achat" || header.key == "fin_garantie" && e.target.value != ""){
+                                                    handleDatesChange(newEditRow,header.key,e.target.value);
                                                 }
                                                 setEditRow(newEditRow)
                                             }}/> : header.which == "dropdownlist" ? <CreatableSelect  readOnly={!modifyingMode} onCreateNewValue={(value:any) =>  {return createNewInner(header.key,value)}} onDelete={(id:number) => deleteOneInner(header.key,id)} onChange={(value:any) =>  {
@@ -322,6 +334,9 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                         
                                                         var formatted = FormatDate(new Date(event.target.value));
                                                         newEditRow[header.key] = formatted;
+                                                        if(header.key == "garantie" || header.key == "date_achat" || header.key == "fin_garantie"){
+                                                            handleDatesChange(newEditRow,header.key,0);
+                                                        }
                                                         setEditRow(newEditRow)
                                                     }
                                                     catch(e:any){
@@ -334,7 +349,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                             {nextHeader != null ? <div style={{width:"100%",marginLeft:margin,marginRight:margin}}>
                                             <div style={{display:"block"}}>
                                             <label>{nextHeader.labelName}</label>
-                                            {nextHeader.which == "textbox" ? <TextField   type={nextType} fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.1} :  {readOnly:!modifyingMode}}value={editRow[nextHeader.key]} onChange={(e) => {
+                                            {nextHeader.which == "textbox" ? <TextField   type={nextType} fullWidth inputProps={nextHeader.number && nextHeader.key != "garantie" ? {readOnly:!modifyingMode,step:0.05} :  {readOnly:!modifyingMode}}value={editRow[nextHeader.key]} onChange={(e) => {
                                                 var newEditRow = {...editRow};
                                                 if(nextHeader.number == true){
                                                     newEditRow[nextHeader.key] = parseFloat(e.target.value);
@@ -343,9 +358,8 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                     newEditRow[nextHeader.key] = e.target.value;
                                                 }
                                                 
-                                                if(nextHeader.key == "garantie" && e.target.value != ""){
-                                                    var maxDate = handleDatesChange(parseInt(e.target.value));
-                                                    newEditRow["fin_garantie"] = maxDate;
+                                                if(nextHeader.key == "garantie" || nextHeader.key == "date_achat" || nextHeader.key == "fin_garantie" && e.target.value != ""){
+                                                    handleDatesChange(newEditRow,nextHeader.key,e.target.value);
                                                 }
                                                 setEditRow(newEditRow)
                                             }}/> : nextHeader.which == "dropdownlist" ? <CreatableSelect readOnly={!nextModifyingMode} onCreateNewValue={(value:any) => {return createNewInner(nextHeader.key,value)}} onDelete={(id:number) => deleteOneInner(nextHeader.key,id)} onChange={(value:any) =>  {
@@ -371,6 +385,9 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
                                                         var formatted = FormatDate(new Date(event.target.value));
                                                         
                                                         newEditRow[nextHeader.key] = formatted;
+                                                        if(nextHeader.key == "garantie" || nextHeader.key == "date_achat" || nextHeader.key == "fin_garantie"){
+                                                            handleDatesChange(newEditRow,nextHeader.key,0);
+                                                        }
                                                         setEditRow(newEditRow)}
                                                     catch(e:any){
                                                         setOpenWarning(true)

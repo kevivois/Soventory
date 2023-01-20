@@ -232,7 +232,7 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
                 }
                 if(header.inner == true){
                     await Connection.wait();
-                    var query = await Connection.query(`select id from ${key} where nom = "${item[key]}"`)
+                    var query = await Connection.query("select id from " + key + " where nom = '" + item[key] + "'")
                     if(query.length == 0)
                     {   try{
                             var query = await Connection.query("insert into " + key + " (nom) values ('" + item[key] + "')")
@@ -265,10 +265,13 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
     // step 2 : insert all items$
     const insertPromises : readonly unknown[] = sqlArray.map(async (item:any) => {
         if(!item)return;
-        if(item.id !== undefined)
-        {
-            // delete from the item the id
-            delete item.id;
+        if(item.id){
+            if(String(item.id).length == 6){
+                let year = String(item.id).substring(0,1)
+                let number = String(item.id).substring(2,5)
+                console.log(year,number)
+                return 
+            }
         }
             item.date_achat = formatToDBDate(item.date_achat)
             item.fin_garantie = formatToDBDate(item.fin_garantie)

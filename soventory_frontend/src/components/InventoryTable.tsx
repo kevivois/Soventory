@@ -105,10 +105,8 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     }
     useEffect(() => {
         handlePagination();
+        determineTotalPrice();
     },[renderedData,pageId,enablePagination,rowPerPage]);
-    useEffect(() => {
-        fetchTotalPrice();
-    },[]);
     useEffect(() => {
         determineRowPerPage()
         window.addEventListener("resize",handleResizing);
@@ -158,7 +156,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     async function refreshAll(){
         await fetchItems();
         await fetchDropDownList();
-        await fetchTotalPrice();
         var newF = [...filterList]
         setFilterList(newF);
     }
@@ -201,24 +198,13 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 setError(e.message)
             }
         }
-    async function fetchTotalPrice(){
-        try
-        {
-            const query = await fetch("http://"+getIp()+":3001/item/totalprice",{
-                credentials: "include",
-                method:"get"
-            });
-            const response = await query.json();
-            if(response.length > 0){
-                setTotalPrice(response[0].total);
-            }
-        }
-        catch(e:any){
-            setOpenWarning(true)
-            setError(e.message)
-        }
+    function determineTotalPrice(){
+        var total = 0;
+        renderedData.forEach((row:any) => {
+            total += parseFloat(row.prix);
+        });
+        setTotalPrice(total);
     }
-
     function clearFilters(){
         setFilterList([]);
         setCheckBoxFilterList([]);
@@ -227,7 +213,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         setRenderedData(data);
         setSearchBarValue("")
         setPageId(1);
-
         if(sortingFilter !=undefined){
             setSortingFilter(new Sorting(sortingFilter.header,"asc"))
         }

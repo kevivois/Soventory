@@ -107,7 +107,6 @@ export default function ImportExportDialog(props:{open:boolean,onImport:(array:a
     if(array.length > 0){
       let currentHeaders = Object.keys(array[0]);
       Headers.forEach((header)=>{
-        if(header.key =="id"){return}
         if(!currentHeaders.includes(header.key)){
           ok = false;
           Error("Le fichier ne contient pas les bonnes colonnes")
@@ -146,6 +145,8 @@ const Exporting = () => {
     case "pdf":
       exportToPDF(exportArray);
     break;
+    default:
+      Error("Le format d'export n'est pas supporté")
   };
 }
 
@@ -163,7 +164,7 @@ const handleImportOrExport = () => {
 };
 const downloadExample = (event:any) => {
   event.preventDefault();
-  const headers = Headers.filter((header) => header.key !== "id").map((header) => header.key);
+  const headers = Headers.map((header) => header.key);
   const data = [headers];
   const csvContent = `data:text/csv;charset=utf-8,${data.map((e) => e.join(";")).join("")}`;
   // show the good format for é,è,à,ù,ç
