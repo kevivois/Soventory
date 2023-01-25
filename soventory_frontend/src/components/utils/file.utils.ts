@@ -1,6 +1,7 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import jsPDF, { TableConfig, TableRowData } from "jspdf";
+const PDFDocument = require('@react-pdf/pdfkit');
 const filename = 'Soventory_data';
 export function csvToObjectArray(csvString:string) {
  
@@ -42,40 +43,59 @@ export function exportToCsv(data:any[]){
 
 }
 export function exportToPDF(data:any[]){
-  let pdf = new jsPDF();
-  let formated_date = new Date().toLocaleDateString().replace(/\//g, '-');
   let headers = Object.keys(data[0]);
-  //make small table config
-  let tableConfig:TableConfig = {
-    printHeaders: true,
-    autoSize: true,
-    margins: 2,
-    fontSize: 2,
-    headerBackgroundColor: '#000000',
-    headerTextColor: '#ffffff',
-    rowStart:(e:TableRowData,doc:jsPDF) => {
-      if(e.row === 0){
-        doc.setFontSize(10);
-        doc.setTextColor(0,0,0);
-      }
-      else{
-        doc.setFontSize(8);
-        doc.setTextColor(0,0,0);
-      }
-    },
-    cellStart:(e:TableRowData,doc:jsPDF) => {
-      if(e.row === 0){
-        doc.setFontSize(10);
-        doc.setTextColor(0,0,0);
-      }},
-      css:{
-        "font-size": 0.3
-      }
+  let doc = new jsPDF('p','px','a4');
+  doc.setFontSize(10);
+  //generateTable(doc,data,headers);
+  let stringData :any[]= [];
+  data.forEach((row:any) => {
+    let nr:any = {};
+    Object.keys(row).forEach((key:any) => {
+      nr[key] = String(row[key]);
 
-  };
-  pdf.table(1, 1, data, headers, tableConfig);
-  pdf.save(`${filename}_${formated_date}_.pdf`);
+    })
+    stringData.push(nr);
+
+  })
+ console.log(stringData)     
+  doc.table(10,50,stringData,headers,{autoSize:false})
+  // download it from client
+  let blob = new Blob([doc.output()], { type: 'application/pdf' });
+  let url= window.URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  let formated_date = new Date().toLocaleDateString().replace(/\//g, '-');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `${filename}_${formated_date}_.pdf`);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+
+
+
+
+}
+
+function generateTable(doc:jsPDF,data:any[],headers:any[]){
+  let base = 50;
+  generateHeaders(doc,headers,base);
+  data.forEach((row:any) => {
+    generateRow(doc,row,headers,(data.indexOf(row)+1)*40+base)
+  })
+}
+
+function generateHeaders(doc:jsPDF,headers:any[],y:number){
+  headers.forEach((h) => {
+    doc.text(h,headers.indexOf(h)*40,y,{maxWidth:120,align:'center'});
+  })
+}
+
+function generateRow(doc:jsPDF,row:any,headers:any[],y:number){
+
+  headers.forEach((h:any) =>{
+    doc.text(String(row[h]),headers.indexOf(h)*40,y,{maxWidth:120,align:'center'})
+  })
   
- 
 
 }

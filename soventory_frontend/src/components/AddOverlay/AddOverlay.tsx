@@ -230,10 +230,10 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
             <div>
                 <Dialog open={open}  fullWidth={fullWidth}
                                      maxWidth={maxWidth} onClose={onClose} aria-labelledby="form-dialog-title"  >
-                    <DialogTitle id="form-dialog-title">Edit</DialogTitle>
+                    <DialogTitle id="form-dialog-title">Ajout</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Modifier l'entrée
+                            Ajouter une  l'entrée
                         </DialogContentText>
                         <Box sx={{display:'flex',flexDirection:'row',width:"100%",heigth:"100%"}}>
                             <Box sx={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:"100%"}}>

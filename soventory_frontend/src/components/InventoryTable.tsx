@@ -634,7 +634,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 : <tr><td colSpan={headers.length} style={{textAlign:"center"}}>Pas de données</td></tr>}
              </tbody>
             </table>
-            <div style={totalPrice ? {borderTop:"1px solid black"} : {display:"none"}}>
+            <div style={totalPrice != null ? {borderTop:"1px solid black"} : {display:"none"}}>
             <div style={{display:"table",width:"100%"}}>
             <div style={{display:"table-cell",width:"6%",float:"right",marginRight:"35px"}}>{new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(totalPrice || 0)}</div>
             </div>

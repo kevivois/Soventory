@@ -2,7 +2,7 @@ import { FormatNumberLength } from "../../utils"
 import instance from "../Connection"
 const Connection = instance.getInstance()
 import { checkDestructedItem } from "../middleware/requestIntegrity"
-export async function createItem(item:any){
+export async function createItem(item:any,newId=true){
     
     await Connection.wait();
     await checkDestructedItem(item);
@@ -15,6 +15,9 @@ export async function createItem(item:any){
     }
 
     let id = `${year}${FormatNumberLength(nextId, 3)}`
+    if(!newId){
+        id = item.id;
+    }
     let prix = Math.round(parseFloat(item.prix) * 20) / 20.0
     item.date_achat = formatToDBDate(item.date_achat)
     item.fin_garantie = formatToDBDate(item.fin_garantie)

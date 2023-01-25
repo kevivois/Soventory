@@ -226,7 +226,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             <div >
                 <Dialog open={open}  fullWidth={fullWidth}
                                      maxWidth={maxWidth} onClose={handleClose} aria-labelledby="form-dialog-title"  >
-                    <DialogTitle id="form-dialog-title">Edit</DialogTitle>
+                    <DialogTitle id="form-dialog-title">Modification</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                         Modifier
