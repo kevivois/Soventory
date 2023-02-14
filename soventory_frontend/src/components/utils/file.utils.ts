@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import jsPDF, { TableConfig, TableRowData } from "jspdf";
-const PDFDocument = require('@react-pdf/pdfkit');
+const PDFDocument = require('jspdf');
 const filename = 'Soventory_data';
 export function csvToObjectArray(csvString:string) {
  
@@ -44,7 +44,7 @@ export function exportToCsv(data:any[]){
 }
 export function exportToPDF(data:any[]){
   let headers = Object.keys(data[0]);
-  let doc = new jsPDF('p','px','a4');
+  let doc = new jsPDF('l','px','a4');
   doc.setFontSize(10);
   //generateTable(doc,data,headers);
   let stringData :any[]= [];
@@ -57,8 +57,8 @@ export function exportToPDF(data:any[]){
     stringData.push(nr);
 
   })
- console.log(stringData)     
-  doc.table(10,50,stringData,headers,{autoSize:false})
+  generateTable(doc,stringData,headers);
+
   // download it from client
   let blob = new Blob([doc.output()], { type: 'application/pdf' });
   let url= window.URL.createObjectURL(blob);
@@ -70,32 +70,36 @@ export function exportToPDF(data:any[]){
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
-
-
-
-
 }
 
 function generateTable(doc:jsPDF,data:any[],headers:any[]){
-  let base = 50;
-  generateHeaders(doc,headers,base);
+  let base_y = 50;
+  let space_y = 20;
+  let pages = 0;
+  generateHeaders(doc,headers,base_y);
   data.forEach((row:any) => {
-    generateRow(doc,row,headers,(data.indexOf(row)+1)*40+base)
+    let y = (data.indexOf(row)+1)*space_y+base_y - pages*doc.internal.pageSize.height;
+    if(y >= doc.internal.pageSize.height - 30){
+      doc.addPage();
+      pages++;
+    }
+    generateRow(doc,row,headers,y)
   })
 }
 
 function generateHeaders(doc:jsPDF,headers:any[],y:number){
   headers.forEach((h) => {
-    doc.text(h,headers.indexOf(h)*40,y,{maxWidth:120,align:'center'});
+    let base_space_x = 20;
+    let row_length_px = 50;
+    doc.text(h,headers.indexOf(h)*row_length_px+base_space_x,y,{align:'center'})
   })
 }
 
 function generateRow(doc:jsPDF,row:any,headers:any[],y:number){
-
   headers.forEach((h:any) =>{
-    doc.text(String(row[h]),headers.indexOf(h)*40,y,{maxWidth:120,align:'center'})
+    let base_space_x = 20;
+    let row_length_px = 50;
+    // generate new page if row exceeds page height
+    doc.text(row[h],headers.indexOf(h)*row_length_px+base_space_x,y,{align:'center'})
   })
-  
-
 }
