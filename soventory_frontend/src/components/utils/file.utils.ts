@@ -1,6 +1,8 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import Icon_url from "../../logo/plussegaush.jpeg"
 import jsPDF, { TableConfig, TableRowData } from "jspdf";
+import autoTable from  "jspdf-autotable"
 const PDFDocument = require('jspdf');
 const filename = 'Soventory_data';
 export function csvToObjectArray(csvString:string) {
@@ -43,23 +45,56 @@ export function exportToCsv(data:any[]){
 
 }
 export function exportToPDF(data:any[]){
-  let headers = Object.keys(data[0]);
+  let headers = Object.keys(data[0]) as any[];
   let doc = new jsPDF('l','px','a4');
-  doc.setFontSize(10);
-  //generateTable(doc,data,headers);
-  let stringData :any[]= [];
+  let stringData : any[]= [];
   data.forEach((row:any) => {
-    let nr:any = {};
+    let nr:any[] = [];
     Object.keys(row).forEach((key:any) => {
-      nr[key] = String(row[key]);
+      nr.push(row[key]);
 
     })
     stringData.push(nr);
 
   })
-  generateTable(doc,stringData,headers);
+  // start from a margin of 50px
 
-  // download it from client
+  autoTable(doc, {
+    head: [headers],
+    body: stringData,
+    theme: 'striped',
+    styles: {
+      overflow: 'linebreak',
+      fontSize: 7,
+      cellPadding: 1,
+      halign: 'center',
+      valign: 'middle',
+      cellWidth: 'wrap',
+      minCellHeight: 10,
+    },
+    headStyles:{
+      fillColor: [85,0,85]
+    },
+    margin: { horizontal: 10,top: 40,bottom: 30 },
+  });
+
+  var Title = `Exportation du ${new Date().toLocaleDateString()}`;
+  for(let i = 1;i <= doc.getNumberOfPages();i++){
+    doc.setPage(i);
+    doc.setFontSize(20);
+    doc.setTextColor(40);
+    //doc.setFontStyle('normal');
+    doc.text(Title,10,30,{align:"left"});
+    // convert image url to base64
+    (async () => {
+    var imageData : any = await getBase64FromUrl(Icon_url);
+    doc.addImage(imageData, 'JPEG', doc.internal.pageSize.width-50, 10, 50,50);
+  })();
+    doc.setFontSize(10);
+     doc.text(`Page ${i.toString()}/${doc.getNumberOfPages()}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-20,{align:"center"});
+   
+  }
+
   let blob = new Blob([doc.output()], { type: 'application/pdf' });
   let url= window.URL.createObjectURL(blob);
   let a = document.createElement('a');
@@ -72,34 +107,16 @@ export function exportToPDF(data:any[]){
   document.body.removeChild(a);
 }
 
-function generateTable(doc:jsPDF,data:any[],headers:any[]){
-  let base_y = 50;
-  let space_y = 20;
-  let pages = 0;
-  generateHeaders(doc,headers,base_y);
-  data.forEach((row:any) => {
-    let y = (data.indexOf(row)+1)*space_y+base_y - pages*doc.internal.pageSize.height;
-    if(y >= doc.internal.pageSize.height - 30){
-      doc.addPage();
-      pages++;
+
+async function getBase64FromUrl(url:string) : Promise<string | ArrayBuffer | null>{
+  const data = await fetch(url);
+  const blob = await data.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob); 
+    reader.onloadend = () => {
+      const base64data = reader.result;   
+      resolve(base64data);
     }
-    generateRow(doc,row,headers,y)
-  })
-}
-
-function generateHeaders(doc:jsPDF,headers:any[],y:number){
-  headers.forEach((h) => {
-    let base_space_x = 20;
-    let row_length_px = 50;
-    doc.text(h,headers.indexOf(h)*row_length_px+base_space_x,y,{align:'center'})
-  })
-}
-
-function generateRow(doc:jsPDF,row:any,headers:any[],y:number){
-  headers.forEach((h:any) =>{
-    let base_space_x = 20;
-    let row_length_px = 50;
-    // generate new page if row exceeds page height
-    doc.text(row[h],headers.indexOf(h)*row_length_px+base_space_x,y,{align:'center'})
-  })
+  });
 }
