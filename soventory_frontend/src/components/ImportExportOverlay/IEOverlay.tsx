@@ -15,7 +15,7 @@ import Warning from '../WarningBar/WarningBar';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import {ExportToExcel,exportToCsv,exportToPDF} from "../utils/file.utils"
 const sizeLimitMB = 3;
-export default function ImportExportDialog(props:{open:boolean,onImport:(array:any) => void,onClose:() => void,exportArray:any[],enable:boolean}) {
+export default function ImportExportDialog(props:{open:boolean,onImport:(array:any) => void,onClose:() => void,exportArray:any[],exportheaders:any[],enable:boolean}) {
   const [open, setOpen] = useState(props.open);
   const [activeTab, setActiveTab] = useState(0); // 0 for import tab, 1 for export tab
   const [file, setFile] : any = useState<any>({}); // the selected file
@@ -93,7 +93,6 @@ export default function ImportExportDialog(props:{open:boolean,onImport:(array:a
             csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
           }
           setCsvFile(csv);
-          console.log(csv)
           let result = csvToObjectArray(csv);
           let r = checkFile(result.data);
           setEnableImport(r);
@@ -143,7 +142,7 @@ const Exporting = () => {
       ExportToExcel(exportArray,"xls");
     break;
     case "pdf":
-      exportToPDF(exportArray);
+      exportToPDF(props.exportheaders,exportArray);
     break;
     default:
       Error("Le format d'export n'est pas supporté")

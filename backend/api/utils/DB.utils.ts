@@ -73,7 +73,15 @@ export function formatToDBDate(date:any){
     let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
     return returnContent;
     }else{
-        return date;
+        splitted = String(date).split('/');
+        if(splitted.length >1){
+            let day = splitted[0];
+            let month = splitted[1];
+            let year = splitted[2];
+            let returnContent =  `${year}-${month.toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`
+            return returnContent;
+            }
     }
+    return date;
     
 }

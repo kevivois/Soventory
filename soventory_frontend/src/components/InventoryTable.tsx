@@ -691,7 +691,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={onApplyNewRow} /> : null}
         </div>
         <div className="IEOverlay">
-            {openIEO ? <IEOverlay enable={!readOnly} exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
+            {openIEO ? <IEOverlay exportheaders={headers} enable={!readOnly} exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
         </div>
         <div className="warning-error">
             {openWarning && error &&  <Warning message={error} open={true} onClose={() => {

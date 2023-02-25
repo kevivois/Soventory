@@ -735,7 +735,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         </div>
         
         <div className="editOverlay">
-        {openEditPopup ? <EditOverlay canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow,changed) => onApplyExistingRow(newRow,changed)} /> : null}
+        {openEditPopup ? <EditOverlay  canModify={!readOnly} open={openEditPopup} id={rowToEdit} deleteFunction={handleEditPageClose} headers={headers} onClose={handleEditPageClose} onApply={(newRow,changed) => onApplyExistingRow(newRow,changed)} /> : null}
             
         </div>
         <div className="warning-error">
@@ -745,7 +745,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             {openAddPopup ? <AddOverlay canModify={!readOnly} open={openAddPopup} headers={headers} onClose={handleAddPageClose} onApply={(newRow:any) => onApplyNewRow(newRow)} /> : null}
         </div>
         <div className="IEOverlay">
-            {openIEO ? <IEOverlay enable={!readOnly} exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
+            {openIEO ? <IEOverlay exportheaders={headers}  enable={!readOnly} exportArray={renderedData} open={openIEO} onImport={onImportCsv} onClose={() => setOpenIEO(false)} /> : null}
         </div>
         <div className="warning-error">
             {openWarning && error &&  <Warning message={error} open={true} onClose={() => {

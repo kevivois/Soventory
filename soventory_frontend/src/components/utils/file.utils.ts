@@ -44,8 +44,11 @@ export function exportToCsv(data:any[]){
   document.body.removeChild(a);
 
 }
-export function exportToPDF(data:any[]){
-  let headers = Object.keys(data[0]) as any[];
+export function exportToPDF(headers:any[],data:any[]){
+  let exportHeaders = headers.map((header:any) => {
+    // remove accents due to jsPdf library utf8 unsupported characters
+    return String(header.labelName).normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+    })
   let doc = new jsPDF('l','px','a4');
   let stringData : any[]= [];
   data.forEach((row:any) => {
@@ -58,9 +61,14 @@ export function exportToPDF(data:any[]){
 
   })
   // start from a margin of 50px
-
+  
+  // load the *.ttf font file as binary string
+  let font = new jsPDF().getFontList();
+  console.log(font);
+  doc.setFont('Courier');
+  doc.setFontSize(10);
   autoTable(doc, {
-    head: [headers],
+    head: [exportHeaders],
     body: stringData,
     theme: 'striped',
     styles: {
@@ -71,6 +79,8 @@ export function exportToPDF(data:any[]){
       valign: 'middle',
       cellWidth: 'wrap',
       minCellHeight: 10,
+      font: 'helvetica',
+      
     },
     headStyles:{
       fillColor: [85,0,85]
@@ -86,12 +96,9 @@ export function exportToPDF(data:any[]){
     //doc.setFontStyle('normal');
     doc.text(Title,10,30,{align:"left"});
     // convert image url to base64
-    (async () => {
-    var imageData : any = await getBase64FromUrl(Icon_url);
-    doc.addImage(imageData, 'JPEG', doc.internal.pageSize.width-50, 10, 50,50);
-  })();
     doc.setFontSize(10);
-     doc.text(`Page ${i.toString()}/${doc.getNumberOfPages()}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-20,{align:"center"});
+    doc.text(`Page ${i.toString()}/${doc.getNumberOfPages()}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-20,{align:"center"});
+    doc.addImage(Icon_url,'JPEG',doc.internal.pageSize.width-50,50,40,40);
    
   }
 
@@ -105,18 +112,4 @@ export function exportToPDF(data:any[]){
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-}
-
-
-async function getBase64FromUrl(url:string) : Promise<string | ArrayBuffer | null>{
-  const data = await fetch(url);
-  const blob = await data.blob();
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(blob); 
-    reader.onloadend = () => {
-      const base64data = reader.result;   
-      resolve(base64data);
-    }
-  });
 }

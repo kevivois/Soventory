@@ -210,16 +210,26 @@ router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) =>
 })
 
 router.post("/import", [auth, canWrite], async (req: any, res: any) => {
-    let array:any[] = req.body.items;
+    let array:any[] = [];
     let sqlArray:any[] = [];
     let errors:any = []
-    if(!array)
+    if(!req.body.items)
     {
         errors.push("pas de liste d'items")
         return res.status(400).send({errors:errors})
     }
     // step 1 : convert all FK to id, if not found, create it
-    
+    req.body.items.forEach((item:any) => {
+        if(item.id != null){
+            array.push(item)
+        }
+    })
+    if(array.length == 0)
+    {
+        errors.push("pas de liste d'items")
+        return res.status(400).send({errors:errors})
+    }
+    console.log(array)
     const promises : readonly unknown[] = array.map(async (item:any) => {
         let sqlItem:typeof item = {}
         let enable = true;
@@ -256,7 +266,7 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
             if(enable == true){
                 sqlArray.push(sqlItem);
             }else{
-                errors.push("l'item " + array.indexOf(item)  + " n'a pas pu être créé")
+                errors.push("l'item " + item.id  + " n'a pas pu être créé")
             }
         })
     })
@@ -282,8 +292,10 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
             }else{
                 return errors.push("l'item " + item.id + " n'a pas pu être créé , l'id est trop grand ")
             }
+            }else if (String(item.id).length < 5){
+                return errors.push("l'item " + item.id + " n'a pas pu être créé , l'id est trop petit ")
             }
-        }else{return}
+        }else{return errors.push('un item n\'a pas d\'id')}
             item.date_achat = formatToDBDate(item.date_achat)
             item.fin_garantie = formatToDBDate(item.fin_garantie)
             let {success,query,currentId} = await createItem(item,false)
@@ -297,7 +309,7 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
     {
         return res.status(200).send({errors:errors})
     }
-    return res.status(402).send({errors:errors})
+    return res.status(400).send({errors:errors})
 });
 
 
