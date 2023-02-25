@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import base64 from 'react-native-base64'
 import * as XLSX from 'xlsx';
 import Icon_url from "../../logo/plussegaush.jpeg"
 import jsPDF, { TableConfig, TableRowData } from "jspdf";
@@ -62,10 +63,7 @@ export function exportToPDF(headers:any[],data:any[]){
   })
   // start from a margin of 50px
   
-  // load the *.ttf font file as binary string
-  let font = new jsPDF().getFontList();
-  console.log(font);
-  doc.setFont('Courier');
+  doc.setFont('Helvetica');
   doc.setFontSize(10);
   autoTable(doc, {
     head: [exportHeaders],
@@ -89,18 +87,21 @@ export function exportToPDF(headers:any[],data:any[]){
   });
 
   var Title = `Exportation du ${new Date().toLocaleDateString()}`;
-  for(let i = 1;i <= doc.getNumberOfPages();i++){
-    doc.setPage(i);
+  /*create an array size of page */
+  var img = new Image();
+  img.src = Icon_url;
+  var imgData = base64.encode(img.src);
+  let pages = Array.from({length: doc.getNumberOfPages()}, (_, i) => i + 1);
+
+  pages.forEach(async (page) => {
+    doc.setPage(page);
     doc.setFontSize(20);
     doc.setTextColor(40);
-    //doc.setFontStyle('normal');
     doc.text(Title,10,30,{align:"left"});
-    // convert image url to base64
     doc.setFontSize(10);
-    doc.text(`Page ${i.toString()}/${doc.getNumberOfPages()}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-20,{align:"center"});
-    doc.addImage(Icon_url,'JPEG',doc.internal.pageSize.width-50,50,40,40);
-   
-  }
+    doc.text(`Page ${page.toString()}/${doc.getNumberOfPages()}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-20,{align:"center"});
+    //await doc.addImage(imgData,'JPEG',doc.internal.pageSize.width-50,50,40,40);
+  });
 
   let blob = new Blob([doc.output()], { type: 'application/pdf' });
   let url= window.URL.createObjectURL(blob);
