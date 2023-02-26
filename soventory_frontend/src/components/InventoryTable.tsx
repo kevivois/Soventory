@@ -587,9 +587,19 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 <tr className="columnContainer">
                     {headers.map((header) => {
                             if(header.show == false)return;
+                            let radiusTopLeft = 0;
+                            let radiusTopRight = 0;
+                            if(headers.indexOf(header) === 0){
+                                radiusTopLeft = 15;
+
+                            }
+                            if(headers.indexOf(header) === headers.length - 2){
+                                radiusTopRight = 15;
+                            }
                             if(header.filter !== undefined && header.filter == true)
                             {
-                                return (<th className="tableHeader" key={header.id}><div style={{display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" style={{width:"100%"}} onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
+                                
+                                return (<th className="tableHeader" key={header.id}><div style={{borderTopLeftRadius:`${radiusTopLeft}px`,borderTopRightRadius:`${radiusTopRight}px`,  display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" style={{width:"100%"}} onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
@@ -598,11 +608,11 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                                     order = sortingFilter.order == "asc" ? "desc" : "asc";
                                 }
                                 const icon = order === "desc" ? "▼" : "▲";
-                                return (<th className="tableHeader" onClick={() => setSortingFilter(new Sorting(header,order))} key={header.id}>{header.labelName}{icon}</th>)
+                                return (<th className="tableHeader" onClick={() => setSortingFilter(new Sorting(header,order))} style={{borderTopLeftRadius:`${radiusTopLeft}px`,borderTopRightRadius:`${radiusTopRight}px`}} key={header.id}>{header.labelName}{icon}</th>)
                             }
                             else
                             {
-                                return (<th className="tableHeader" key={header.id}>{header.labelName}</th>)
+                                return (<th className="tableHeader" style={{borderTopLeftRadius:`${radiusTopLeft}px`,borderTopRightRadius:`${radiusTopRight}px`}} key={header.id}>{header.labelName}</th>)
                             }
                         })}
                 </tr>
