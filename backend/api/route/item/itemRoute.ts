@@ -229,7 +229,6 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
         errors.push("pas de liste d'items")
         return res.status(400).send({errors:errors})
     }
-    console.log(array)
     const promises : readonly unknown[] = array.map(async (item:any) => {
         let sqlItem:typeof item = {}
         let enable = true;

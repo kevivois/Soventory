@@ -1,20 +1,22 @@
 use soventory;
-insert into materiel (nom) values ("Portable"),("Imprimante"),("Serveur");
-insert into marque (nom) values("HP"),("DELL"),("OMEN");
-insert into section (nom) values ("ME"),("ME1"),("ME2");
-insert into etat (nom) values ("OK"),("casse"),("neuf");
-insert into lieu (nom) values("203"),("204"),("205");
+# insert into materiel (nom) values ("Portable"),("Imprimante"),("Serveur");
+#insert into marque (nom) values("HP"),("DELL"),("OMEN");
+#insert into section (nom) values ("ME"),("ME1"),("ME2");
+#insert into etat (nom) values ("OK"),("casse"),("neuf");
+#insert into lieu (nom) values("203"),("204"),("205");
 insert into droit (name) values ("ADMINISTRATEUR"),("LIRE"),("ECRIRE"),("AUCUN");
-insert into item values (22001,1,1,"SIU","WEIURHWEU","PROD12172723",2,1,1,"OUI","2022-04-12",5,"2027-04-12",1200,0);
-insert into item values (22002,2,1,"SIU","WEIURHWEU","PROD12172723",1,1,1,"SHEEESH","2022-04-12",5,"2027-04-12",1200,0);
-insert into item values (22003,1,2,"SIU","WEIURHWEU","PROD12172723",1,2,2,"NEIN","2022-04-12",5,"2027-04-12",1200,0);
-insert into item values (22004,1,2,"SIU","WEIURHWEU","PROD12172723",1,1,2,"NON","2022-04-12",5,"2027-04-12",13300,0);
+#insert into item values (22001,1,1,"SIU","WEIURHWEU","PROD12172723",2,1,1,"OUI","2022-04-12",5,"2027-04-12",1200,0);
+#insert into item values (22002,2,1,"SIU","WEIURHWEU","PROD12172723",1,1,1,"SHEEESH","2022-04-12",5,"2027-04-12",1200,0);
+#insert into item values (22003,1,2,"SIU","WEIURHWEU","PROD12172723",1,2,2,"NEIN","2022-04-12",5,"2027-04-12",1200,0);
+#insert into item values (22004,1,2,"SIU","WEIURHWEU","PROD12172723",1,1,2,"NON","2022-04-12",5,"2027-04-12",13300,0);
 
-insert into item values (22005,3,1,"SIU","ztiuztrugztru","OKEY123243214",1,1,2,"NON","2022-04-12",5,"2027-04-12",13,0);
-insert into item values (22006,3,2,"SIU","ewqaewqrfef","ZRUT74657",1,1,2,"PEUTETRE","2022-04-12",5,"2027-04-12",120000,0);
-insert into item values (22008,2,3,"SIU","trhzterdterd","ERWTWSE43654365",1,1,2,"NON","2022-04-12",5,"2027-04-12",12222,0);
-
-
+#insert into item values (22005,3,1,"SIU","ztiuztrugztru","OKEY123243214",1,1,2,"NON","2022-04-12",5,"2027-04-12",13,0);
+#insert into item values (22006,3,2,"SIU","ewqaewqrfef","ZRUT74657",1,1,2,"PEUTETRE","2022-04-12",5,"2027-04-12",120000,0);
+#insert into item values (22008,2,3,"SIU","trhzterdterd","ERWTWSE43654365",1,1,2,"NON","2022-04-12",5,"2027-04-12",12222,0);
 
 
-select * from droit
+set SQL_SAFE_UPDATES = 0;
+delete from item ;
+
+
+select * from item

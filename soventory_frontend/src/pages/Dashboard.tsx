@@ -138,12 +138,19 @@ export default function Dashboard(props:{mode:number})
                 credentials: "include",
                 method: "GET"
             });
-            const response = await query.json();
-            if(response.error){
+            let response : any = {};
+            try{
+              response = await query.json();
+            }catch(e){
+                setUser(null);
+                return setErrorMessage("ERROR");
+            }
+            if(!response.id || response.error ){
                setUser(null);
                return setErrorMessage(response.error);
             }
             setUser({id:response.id,username:response.nom_utilisateur,droit:response.droit});
+            
         }
         async function load(){
             let content = await renderScreen(mode);

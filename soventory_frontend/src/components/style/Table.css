@@ -54,6 +54,7 @@
     display: table-cell;
     /*max-width: 250px;*/
     word-break: keep-all;
+    /*background-color:#ee81cf10;*/
 }
 .columnContainer
 {
