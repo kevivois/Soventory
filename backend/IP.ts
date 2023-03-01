@@ -21,6 +21,6 @@ export default function getIp(){
         }
     }
     var n = Object.keys(results)[0]
-    return results[n][0]
+    return '192.168.10.10'
  }
  

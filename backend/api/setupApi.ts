@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cors({
-    origin:["http://"+getIp()+":3000","http://localhost:3000"], // change after deployment
+    origin:'http://soventory.info',
     credentials:true
 }))
 app.use(handleCors)

@@ -13,7 +13,7 @@ export default class Connection {
             connectionLimit: 1, // Only allow a single connection in the pool
             host: "localhost",
             user: "root",
-            password: "password",
+            password: "kBKh92TvU76x",
             database: "soventory",
             port: 3306
         });
