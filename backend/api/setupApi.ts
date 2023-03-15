@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cors({
-    origin:'http://soventory',
+    origin:'http://soventory.info',
     credentials:true
 }))
 app.use(handleCors)
