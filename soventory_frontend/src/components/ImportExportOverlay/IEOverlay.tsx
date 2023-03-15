@@ -88,9 +88,11 @@ export default function ImportExportDialog(props:{open:boolean,onImport:(array:a
         }
         reader.onload = (e) => {
           let csv = reader.result as any;
+          console.log(csv,typeof csv)
           if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
-            const workbook = XLSX.read(csv, { type: 'binary',dateNF:'dd"."mm"."yyyy' });
+            const workbook = XLSX.read(csv, { type: 'binary',dateNF:'dd"."mm"."yyyy'});
             csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+            console.log(csv,typeof csv)
           }
           setCsvFile(csv);
           let result = csvToObjectArray(csv);
