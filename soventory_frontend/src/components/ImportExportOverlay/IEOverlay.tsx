@@ -79,20 +79,23 @@ export default function ImportExportDialog(props:{open:boolean,onImport:(array:a
   }, [file]);
   const transformFile = async () =>{
 
-        var reader = new FileReader();
+        var reader = new FileReader()
         // convert to show in table  format
         if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
           await reader.readAsBinaryString(file);
         }else{
-          await reader.readAsText(file, "UTF-8");
+          await reader.readAsText(file,'latin3');
         }
         reader.onload = (e) => {
-          let csv = reader.result as any;
-          console.log(csv,typeof csv)
+          let csv = String(reader.result)
+          let workbook;
           if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
-            const workbook = XLSX.read(csv, { type: 'binary',dateNF:'dd"."mm"."yyyy'});
+            workbook = XLSX.read(csv, { type: 'binary',dateNF:'dd"."mm"."yyyy'});
             csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-            console.log(csv,typeof csv)
+          }
+          else{
+            workbook = XLSX.read(csv, { type: 'string',dateNF:'dd"."mm"."yyyy'});
+            csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
           }
           setCsvFile(csv);
           let result = csvToObjectArray(csv);
