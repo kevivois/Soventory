@@ -14,9 +14,4 @@ insert into droit (name) values ("ADMINISTRATEUR"),("LIRE"),("ECRIRE"),("AUCUN")
 #insert into item values (22006,3,2,"SIU","ewqaewqrfef","ZRUT74657",1,1,2,"PEUTETRE","2022-04-12",5,"2027-04-12",120000,0);
 #insert into item values (22008,2,3,"SIU","trhzterdterd","ERWTWSE43654365",1,1,2,"NON","2022-04-12",5,"2027-04-12",12222,0);
 
-
-set SQL_SAFE_UPDATES = 0;
-delete from item ;
-
-
 select * from item
