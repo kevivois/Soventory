@@ -127,7 +127,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         try
         {
             var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,materiel_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,modele:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
-            const query = await fetch("http://"+getIp()+":3001/item/create",{
+            const query = await fetch(getIp()+"/item/create",{
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -160,7 +160,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         
         try
         {
-            const query = await fetch(`http://${getIp()}:3001/item/${id}/delete`,{
+            const query = await fetch(`${getIp()}/item/${id}/delete`,{
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -226,7 +226,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         {
             try
             {
-                const query = await fetch("http://"+getIp()+":3001/item/archived/inner/all",{
+                const query = await fetch(getIp()+"/item/archived/inner/all",{
                     credentials: "include"
                 });
                 const response = await query.json();
@@ -317,7 +317,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 return {name:filter.header.key,values:selectedValues}
             }
         })].filter((item:any)=>item != null);
-        var query = await fetch("http://"+getIp()+":3001/item/archived/byValues",{
+        var query = await fetch(getIp()+"/item/archived/byValues",{
             credentials: "include",
             method:"POST",
             headers: {
@@ -533,7 +533,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         if(!changed)return;
         var formatedRow = {garantie:newRow.garantie,archive:newRow.archive,date_achat:newRow.date_achat,fin_garantie:newRow.fin_garantie,prix:newRow.prix,remarque:newRow.remarque,id:newRow.id,section_FK:newRow.section,materiel_FK:newRow.materiel,etat_FK:newRow.etat,marque_FK:newRow.marque,lieu_FK:newRow.lieu,modele:newRow.modele,num_serie:newRow.num_serie,num_produit:newRow.num_produit};
         
-        const query = await fetch(`http://${getIp()}:3001/item/${newRow.id}/update`, {
+        const query = await fetch(`${getIp()}/item/${newRow.id}/update`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -554,7 +554,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         headers.forEach(async (header:any) => {
 
             if(!header.inner)return;
-            const query = await fetch(`http://${getIp()}:3001/item.${header.key}/all`, {
+            const query = await fetch(`${getIp()}/item.${header.key}/all`, {
                 method: "GET",
                 credentials: "include",
                 headers: {
@@ -592,7 +592,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         });
     }
     const onImportCsv = async (array:any) => {
-        const query = await fetch(`http://${getIp()}:3001/item/import`, {
+        const query = await fetch(`${getIp()}/item/import`, {
             method: "POST",
             credentials: "include",
             headers: {

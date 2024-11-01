@@ -21,6 +21,6 @@ export default function  getIp(){
         }
     }
     return results["Principale"][0]*/
-    return "localhost"
+    return "https://soventory-api.onrender.com"
  }
  

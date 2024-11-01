@@ -24,7 +24,7 @@ export default function  TablePage(props:{user:any,type:string})
     {
         try
         {
-            const query = await fetch("http://"+getIp()+":3001/item/inner/all",{
+            const query = await fetch(getIp()+"/item/inner/all",{
                 credentials: "include"
             });
             const response = await query.json();
@@ -40,7 +40,7 @@ export default function  TablePage(props:{user:any,type:string})
     {
         try
         {
-            const query = await fetch("http://"+getIp()+":3001/item/archived/inner/all",{
+            const query = await fetch(getIp()+"/item/archived/inner/all",{
                 credentials: "include"
             });
             const response = await query.json();
@@ -69,7 +69,7 @@ export default function  TablePage(props:{user:any,type:string})
         async function fetchInnerData(){
             try
             {
-                const query = await fetch("http://"+getIp()+":3001/item/FK/all",{
+                const query = await fetch(getIp()+"/item/FK/all",{
                     credentials: "include"
                 });
                 const response = await query.json();

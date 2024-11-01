@@ -152,7 +152,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
 
     async function createNewInner(key:string,value:string){
         var newDropDownData = dropDownData;
-        const query = await fetch(`http://${getIp()}:3001/item.${key}/create`,{
+        const query = await fetch(`${getIp()}/item.${key}/create`,{
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -160,7 +160,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
             },
             body: JSON.stringify({nom:value})
         })
-        const queryAll = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
+        const queryAll = await fetch(`${getIp()}/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -172,14 +172,14 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
 
     async function deleteOneInner(key:string,id:number){
         var newDropDownData = dropDownData;
-        const query = await fetch(`http://${getIp()}:3001/item.${key}/${id}/delete`,{
+        const query = await fetch(`${getIp()}/item.${key}/${id}/delete`,{
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        const queryAll = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
+        const queryAll = await fetch(`${getIp()}/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -192,7 +192,7 @@ export default function AddOverlay(props:{headers:any[],onApply:(row:any) => voi
     async function fetchDropDown(key:string){
         var newDropDownData = dropDownData;
         if(newDropDownData[key] == undefined){
-            const query = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
+            const query = await fetch(`${getIp()}/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })

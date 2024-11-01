@@ -122,7 +122,7 @@ export default function Dashboard(props:{mode:number})
             }
         }
     const disconnect = async () => {
-        const query = await fetch("http://"+getIp()+":3001/user/logout",{
+        const query = await fetch(getIp()+"/user/logout",{
             credentials: "include",
             method: "POST"
         });
@@ -134,7 +134,7 @@ export default function Dashboard(props:{mode:number})
     };
     useEffect(() => {
         async function fetchMe(){
-            const query = await fetch("http://"+getIp()+":3001/user/me",{
+            const query = await fetch(getIp()+"/user/me",{
                 credentials: "include",
                 method: "GET"
             });

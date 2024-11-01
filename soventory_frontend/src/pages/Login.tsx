@@ -31,7 +31,7 @@ export default function SignIn() {
      
       async function tryLogin()
       {
-        const query = await fetch("http://"+getIp()+":3001/user/tryLogin", {
+        const query = await fetch(getIp()+"/user/tryLogin", {
           method: "GET",
           credentials: "include",
           headers: {
@@ -53,7 +53,7 @@ export default function SignIn() {
     
     if(name && password && name != "" && password != "")
     {
-      const query = await fetch("http://"+getIp()+":3001/user/login",{
+      const query = await fetch(getIp()+"/user/login",{
         method: "POST",
         credentials: "include",
         headers: {

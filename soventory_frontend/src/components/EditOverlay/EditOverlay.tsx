@@ -83,7 +83,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     }
     async function createNewInner(key:string,value:string){
         var newDropDownData = dropDownData;
-        const query = await fetch(`http://${getIp()}:3001/item.${key}/create`,{
+        const query = await fetch(`${getIp()}/item.${key}/create`,{
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -91,7 +91,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
             },
             body: JSON.stringify({nom:value})
         })
-        const queryAll = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
+        const queryAll = await fetch(`${getIp()}/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -102,14 +102,14 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     }
     async function deleteOneInner(key:string,id:number){
         var newDropDownData = dropDownData;
-        const query = await fetch(`http://${getIp()}:3001/item.${key}/${id}/delete`,{
+        const query = await fetch(`${getIp()}/item.${key}/${id}/delete`,{
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        const queryAll = await fetch(`http://${getIp()}:3001/item.${key}/all`,{
+        const queryAll = await fetch(`${getIp()}/item.${key}/all`,{
             method: 'GET',
             credentials: 'include',
         })
@@ -122,7 +122,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
         let newDropDownData = {...dropDownData}
         try
         {
-            const query = await fetch("http://"+getIp()+":3001/item/FK/all",{
+            const query = await fetch(getIp()+"/item/FK/all",{
                 credentials: "include"
             });
             const response = await query.json();
@@ -146,7 +146,7 @@ export default function EditOverlay(props:{id:number|null,onApply:(row:any,chang
     }
     async function fetchItem()
     {
-        const response = await fetch('http://'+getIp()+':3001/item/'+props.id,{
+        const response = await fetch(getIp()+'/item/'+props.id,{
             method: 'GET',
             credentials: 'include',
             headers: {
