@@ -11,11 +11,11 @@ export default class Connection {
     private async init() {
         this.mysqlConnectionPool = mysql2.createPool({
             connectionLimit: 1, // Only allow a single connection in the pool
-            host: "localhost",
-            user: "root",
-            password: "Pa$$w0rd",   //kBKh92TvU76x
-            database: "soventory",
-            port: 3306
+            host: "mysql-26e90521-superpizzaman2004-512a.j.aivencloud.com",
+            user: "avnadmin",
+            password: "AVNS_22Xvt5U2Ul_KS_o53GX",   //kBKh92TvU76x
+            database: "defaultdb",
+            port: 16079
         });
     }
 
