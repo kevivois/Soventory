@@ -14,7 +14,7 @@ export default class Connection {
             host: "mysql-26e90521-superpizzaman2004-512a.j.aivencloud.com",
             user: "avnadmin",
             password: "AVNS_22Xvt5U2Ul_KS_o53GX",   //kBKh92TvU76x
-            database: "defaultdb",
+            database: "soventory",
             port: 16079
         });
     }
