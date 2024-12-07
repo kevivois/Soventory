@@ -122,7 +122,7 @@ router.post("/login",async(req,res) => {
   {
     return res.status(400).send({"error":"Missing parameters"})
   }
-
+  console.log(req.body.nom_utilisateur,req.body.mot_de_passe)
   var user:any = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
   if(user[0])
   {
@@ -151,6 +151,7 @@ router.post("/login",async(req,res) => {
     createCookie("accessToken",accessToken,req,res,undefined)
     return res.status(200).send({user:user[0],droit:droit,refreshToken:refreshToken,accessToken:accessToken})
   }
+  console.log("user:",user)
   return res.status(400).send({"error":"Wrong password or email"})
 })
 router.get("/getcookies",async(req,res) => {
