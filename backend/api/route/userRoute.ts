@@ -101,7 +101,7 @@ router.post("/create",async(req:any,res:any) => {
     {   
       throw new Error("undefined variables in body")
     }
-    var droit = await Connection.query(`select id from droit where name="${req.body.droit}"`)
+    var droit = await Connection.query(`select * from droit where name="${req.body.droit}"`)
     var isExisting = await Connection.query(`select id from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
     if(isExisting.length > 0)
     {

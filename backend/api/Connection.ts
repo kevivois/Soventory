@@ -1,5 +1,4 @@
 import mysql2 from "mysql2/promise"
-import getIp from "../IP"
 import fs from "fs"
 
 export default class Connection {
@@ -56,7 +55,7 @@ export default class Connection {
         } catch (error) {
             connection.release() // Release the connection back to the pool in case of error
             this.connCount--;
-            await this.__log(String(error))
+            //await this.__log(String(error))
             return []
             
         }
@@ -71,9 +70,13 @@ export default class Connection {
         this.file.write(text);
         this.file.end();
     }
+    private clean_query(query:string):string{
+        let new_query = query.replace(/"/g, "'");
+        return new_query
+    }
     public async query(query: string): Promise<any> {
         try{
-            return await this.__query(query)
+            return await this.__query(this.clean_query(query))
         }
         catch(error){
             console.log(error)

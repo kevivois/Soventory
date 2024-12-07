@@ -21,12 +21,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-/*app.use(cors({
-    origin:'https://soventoryapi.vercel.app',
-    credentials:true
-}))*/
 app.use(cors({
-    origin:'*',
+    origin:'https://soventoryapi.vercel.app',
     credentials:true
 }))
 app.use(handleCors)
