@@ -172,6 +172,7 @@ router.post("/logout",[auth],async(req:any,res:any) => {
     secure: true,
     sameSite: 'None',
 })
+console.log("clearing cookies")
   return res.status(200).send({"message":"Logged out"})
 })
 router.get("/get/:id",[auth,isAdmin],async(req:any,res:any) => {
