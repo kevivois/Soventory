@@ -162,8 +162,16 @@ router.get("/getcookies",async(req,res) => {
 })
 router.post("/logout",[auth],async(req:any,res:any) => {
   await Connection.query(`delete from refreshtoken where token="${req.cookies.refreshToken}"`)
-  res.clearCookie("refreshToken")
-  res.clearCookie("accessToken")
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+})
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+})
   return res.status(200).send({"message":"Logged out"})
 })
 router.get("/get/:id",[auth,isAdmin],async(req:any,res:any) => {
