@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cors({
-    origin:'https://soventoryapi.vercel.app',
+    origin:['https://soventoryapi.vercel.app','https://soventory.jevs.ch'],
     credentials:true
 }))
 app.use(handleCors)

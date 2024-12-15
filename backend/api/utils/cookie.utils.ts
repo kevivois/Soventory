@@ -1,5 +1,4 @@
 export function createCookie(name:string,value:string,req:Express.Request,res:any,maxAge:number | undefined) : any{
-    console.log("Creating cookies !!")
     if(!maxAge)
     {
         return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",domain:'test.jevs.ch'})
