@@ -1,11 +1,11 @@
 export function createCookie(name:string,value:string,req:Express.Request,res:any,maxAge:number | undefined) : any{
     if(!maxAge)
     {
-        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",domain:'test.jevs.ch'})
+        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",domain:'kevivoisapi.jevs.ch'})
         // if site is http, do not put secure:true
     }
     else{
-        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",maxAge:maxAge,domain:'test.jevs.ch'})
+        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",maxAge:maxAge,domain:'kevivoisapi.jevs.ch'})
         // if site is http, do not put secure:true  
     }
 }

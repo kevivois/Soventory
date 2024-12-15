@@ -21,6 +21,6 @@ export default function  getIp(){
         }
     }
     return results["Principale"][0]*/
-    return "https://test.jevs.ch"
+    return "https://kevivoisapi.jevs.ch"
  }
  
