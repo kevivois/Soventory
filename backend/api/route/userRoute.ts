@@ -118,12 +118,14 @@ router.post("/create",async(req:any,res:any) => {
   }
 })
 router.post("/login",async(req,res) => {
+  console.log("login !")
   if(!req.body.nom_utilisateur || !req.body.mot_de_passe)
   {
     return res.status(400).send({"error":"Missing parameters"})
   }
   console.log(req.body.nom_utilisateur,req.body.mot_de_passe)
   var user:any = await Connection.query(`select * from utilisateur where nom_utilisateur="${req.body.nom_utilisateur}"`)
+  console.log(user,"user")
   if(user[0])
   {
     var Logged = bcrypt.compareSync(req.body.mot_de_passe,user[0].mot_de_passe)
@@ -147,11 +149,11 @@ router.post("/login",async(req,res) => {
     var accessToken = signJWT({id:user[0].id,droit:droit},"30m")
     //adding refresh token to database
     // saving into cookies
+    console.log("abcd")
     createCookie("refreshToken",refreshToken,req,res,3.154e10)
     createCookie("accessToken",accessToken,req,res,undefined)
     return res.status(200).send({user:user[0],droit:droit,refreshToken:refreshToken,accessToken:accessToken})
   }
-  console.log("user:",user)
   return res.status(400).send({"error":"Wrong password or email"})
 })
 router.get("/getcookies",async(req,res) => {
