@@ -2,11 +2,11 @@ export function createCookie(name:string,value:string,req:Express.Request,res:an
     console.log("Creating cookies !!")
     if(!maxAge)
     {
-        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",domain:'soventory-api.onrender.com'})
+        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",domain:'test.jevs.ch'})
         // if site is http, do not put secure:true
     }
     else{
-        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",maxAge:maxAge,domain:'soventory-api.onrender.com'})
+        return res.cookie(name,value,{httpOnly:true,secure:true,sameSite:"None",maxAge:maxAge,domain:'test.jevs.ch'})
         // if site is http, do not put secure:true  
     }
 }

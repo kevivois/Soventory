@@ -149,9 +149,9 @@ router.post("/login",async(req,res) => {
     var accessToken = signJWT({id:user[0].id,droit:droit},"30m")
     //adding refresh token to database
     // saving into cookies
-    console.log("abcd")
     createCookie("refreshToken",refreshToken,req,res,3.154e10)
     createCookie("accessToken",accessToken,req,res,undefined)
+    console.log(req.cookies)
     return res.status(200).send({user:user[0],droit:droit,refreshToken:refreshToken,accessToken:accessToken})
   }
   return res.status(400).send({"error":"Wrong password or email"})
