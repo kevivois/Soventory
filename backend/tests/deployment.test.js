@@ -177,3 +177,66 @@ test("item creation reports failed insertions instead of false success", async (
         connection.query = originalQuery
     }
 })
+
+test("20 imported items share category lookups and avoid ID-generation queries", async () => {
+    const connection = Connection.getInstance()
+    const originalQuery = connection.query
+    const queries = []
+    connection.query = async query => {
+        queries.push(query)
+        if (query.toLowerCase().includes("inner join droit")) return [{ name: "ECRIRE" }]
+        if (query.startsWith("select id from ") && query.includes("where nom = '")) return []
+        if (query.startsWith("insert into ")) return { insertId: 1 }
+        return []
+    }
+    try {
+        const items = Array.from({ length: 20 }, (_, i) => ({
+            id: 26901 + i, materiel: "DEMO Portable", marque: "DEMO Dell",
+            modele: "DEMO", num_serie: `FAKE-${i}`, num_produit: `FAKE-${i}`,
+            section: "DEMO Section", etat: "DEMO Fonctionnel", lieu: "DEMO Salle",
+            remarque: "Test", date_achat: "2026-01-01", garantie: 2,
+            fin_garantie: "2028-01-01", prix: 850, archive: 0
+        }))
+        const response = await fetch(`${baseUrl}/item/import`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `accessToken=${signJWT({ id: 1 }, "30m")}`
+            },
+            body: JSON.stringify({ items })
+        })
+        assert.equal(response.status, 200)
+        assert.deepEqual(await response.json(), { errors: [] })
+        assert.equal(queries.filter(query => query.startsWith("insert into item ")).length, 20)
+        assert.equal(queries.filter(query => query.includes("where nom = '")).length, 5)
+        assert.equal(queries.filter(query => query.startsWith("insert into ") && !query.startsWith("insert into item ")).length, 5)
+        assert.equal(queries.filter(query => query.includes("SUBSTRING")).length, 0)
+    } finally {
+        connection.query = originalQuery
+    }
+})
+
+test("category lookup failures return JSON with CORS instead of leaving import pending", async () => {
+    const connection = Connection.getInstance()
+    const originalQuery = connection.query
+    connection.query = async query => {
+        if (query.toLowerCase().includes("inner join droit")) return [{ name: "ECRIRE" }]
+        throw new Error("Simulated category lookup timeout")
+    }
+    try {
+        const response = await fetch(`${baseUrl}/item/import`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Origin: "https://inventory.example.com",
+                Cookie: `accessToken=${signJWT({ id: 1 }, "30m")}`
+            },
+            body: JSON.stringify({ items: [{ id: 26901, materiel: "DEMO" }] })
+        })
+        assert.equal(response.status, 500)
+        assert.equal(response.headers.get("access-control-allow-origin"), "https://inventory.example.com")
+        assert.equal((await response.json()).errors.length, 1)
+    } finally {
+        connection.query = originalQuery
+    }
+})

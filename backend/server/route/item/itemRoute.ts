@@ -210,6 +210,23 @@ router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) =>
 })
 
 router.post("/import", [auth, canWrite], async (req: any, res: any) => {
+    try {
+    const categoryIds = new Map<string, Promise<number>>()
+    function resolveCategory(table: string, value: string): Promise<number> {
+        const key = JSON.stringify([table, value])
+        const existing = categoryIds.get(key)
+        if (existing) return existing
+        const pending = (async () => {
+            const rows = await Connection.query(
+                "select id from " + table + " where nom = '" + value + "'", true)
+            if (rows.length > 0) return rows[0].id
+            const result = await Connection.query(
+                "insert into " + table + " (nom) values ('" + value + "')", true)
+            return result.insertId
+        })()
+        categoryIds.set(key, pending)
+        return pending
+    }
     let array:any[] = [];
     let sqlArray:any[] = [];
     let errors:any = []
@@ -240,20 +257,7 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
                     return enable = false;
                 }
                 if(header.inner == true){
-                    await Connection.wait();
-                    var query = await Connection.query("select id from " + key + " where nom = '" + item[key] + "'")
-                    if(query.length == 0)
-                    {   try{
-                            var query = await Connection.query("insert into " + key + " (nom) values ('" + item[key] + "')")
-                    }catch(e){}
-                        var lastId = await Connection.query("select id from " + key + " where nom = '" + item[key] + "'")
-                        item[`${key}_FK`] = lastId[0].id;
-                        sqlItem[`${key}_FK`] = lastId[0].id;
-                    }
-                    else{
-                        item[`${key}_FK`] = query[0].id
-                        sqlItem[`${key}_FK`] = query[0].id
-                    }
+                    sqlItem[`${key}_FK`] = await resolveCategory(key, String(item[key]))
                 }else{
                     sqlItem[key] = item[key];
                 } 
@@ -309,6 +313,10 @@ router.post("/import", [auth, canWrite], async (req: any, res: any) => {
         return res.status(200).send({errors:errors})
     }
     return res.status(400).send({errors:errors})
+    } catch (error) {
+        console.error("Item import failed", error)
+        return res.status(500).send({errors:["Echec de l'import : erreur de base de donnees. Consultez les logs du backend."]})
+    }
 });
 
 

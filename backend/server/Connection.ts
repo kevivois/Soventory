@@ -23,6 +23,7 @@ export default class Connection {
             password: requiredEnv("DB_PASSWORD"),
             database: requiredEnv("DB_NAME"),
             port,
+            connectTimeout: 10000,
             ssl: process.env.DB_SSL === "true" ? {
                 rejectUnauthorized: true,
                 ...(process.env.DB_SSL_CA ? {ca: process.env.DB_SSL_CA.replace(/\\n/g, "\n")} : {})
@@ -57,7 +58,7 @@ export default class Connection {
         let connection: mysql2.PoolConnection | undefined
         try {
             connection = await this.getConnection()
-            const result = await connection.query(query) // Perform the query
+            const result = await connection.query({ sql: query, timeout: 15000 })
             return result[0]
         } finally {
             connection?.release()

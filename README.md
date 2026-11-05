@@ -33,3 +33,6 @@ TypeScript et ESLint restent bloquantes. La commande locale reste `npm run build
 Les categories sont creees avant les equipements : leur presence ne confirme pas
 la reussite de l'import. Un echec SQL d'insertion est journalise dans les Runtime
 Logs du backend et signale comme un echec par la route d'import.
+Les categories identiques sont resolues une seule fois par import pour limiter
+les allers-retours MySQL. Les connexions expirent apres 10 secondes et les
+requetes apres 15 secondes plutot que de rester bloquees indefiniment.

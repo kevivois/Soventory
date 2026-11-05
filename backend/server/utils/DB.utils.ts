@@ -7,7 +7,9 @@ export async function createItem(item:any,newId=true){
     await Connection.wait();
     await checkDestructedItem(item);
     let year = new Date(Date.now()).getFullYear().toString().substring(2, 4)
-    let queryNextId = await Connection.query(`select SUBSTRING(id,3,5) as nextId from item where item.id >= ${parseInt(year)*1000} order by item.id desc limit 1`)
+    let queryNextId = newId
+        ? await Connection.query(`select SUBSTRING(id,3,5) as nextId from item where item.id >= ${parseInt(year)*1000} order by item.id desc limit 1`)
+        : []
     let nextId=0;
     if(queryNextId.length>0)
     {
