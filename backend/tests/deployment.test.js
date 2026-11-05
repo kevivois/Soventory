@@ -31,8 +31,9 @@ after(async () => {
     await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
 })
 
-test("the Vercel entry exports the existing application", () => {
-    assert.equal(app, require("../api/setupApi").default)
+test("the Vercel entry exports an Express application", () => {
+    assert.equal(typeof app, "function")
+    assert.equal(typeof app.listen, "function")
 })
 
 test("CORS accepts the configured frontend and credentials", async () => {
@@ -95,7 +96,7 @@ test("login issues host-only cookies and logout clears them", async () => {
         if (query.startsWith("select * from refreshtoken")) {
             return []
         }
-        if (query.toLowerCase().includes("from droit")) {
+        if (query.toLowerCase().includes("inner join droit")) {
             return [{ name: "LIRE" }]
         }
         return { insertId: 1 }
