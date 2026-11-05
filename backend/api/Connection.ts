@@ -1,5 +1,6 @@
 import mysql2 from "mysql2/promise"
 import fs from "fs"
+import { requiredEnv } from "./config"
 
 export default class Connection {
     private static instance: Connection;
@@ -7,23 +8,30 @@ export default class Connection {
     private mysqlConnectionPool: any
     private connCount: number = 0
     private file: any;
-    private async init() {
+    private init() {
+        const port = Number(process.env.DB_PORT || 3306)
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+            throw new Error("DB_PORT must be an integer between 1 and 65535")
+        }
+        if (process.env.DB_SSL && !["true", "false"].includes(process.env.DB_SSL)) {
+            throw new Error("DB_SSL must be true or false")
+        }
         this.mysqlConnectionPool = mysql2.createPool({
             connectionLimit: 1, // Only allow a single connection in the pool
-            host: "mysql-26e90521-superpizzaman2004-512a.j.aivencloud.com",
-            user: "avnadmin",
-            password: "AVNS_22Xvt5U2Ul_KS_o53GX",   //kBKh92TvU76x
-            database: "soventory",
-            port: 16079
+            host: requiredEnv("DB_HOST"),
+            user: requiredEnv("DB_USER"),
+            password: requiredEnv("DB_PASSWORD"),
+            database: requiredEnv("DB_NAME"),
+            port,
+            ssl: process.env.DB_SSL === "true" ? {
+                rejectUnauthorized: true,
+                ...(process.env.DB_SSL_CA ? {ca: process.env.DB_SSL_CA.replace(/\\n/g, "\n")} : {})
+            } : undefined
         });
     }
 
     private constructor() {
-        try {
-            this.init()
-        } catch (error) {
-            console.log("unnable to connect to mysql database")
-        }
+        this.init()
     }
 
     public static getInstance() {

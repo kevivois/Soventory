@@ -1,4 +1,3 @@
-import ConnClass from "./Connection"
 import cookieParser from "cookie-parser"
 import userRoute from "./route/userRoute"
 import itemRoute from "./route/item/itemRoute"
@@ -9,12 +8,9 @@ import marqueRoute from "./route/item/marque"
 import materielRoute  from"./route/item/materiel"
 import sectionRoute from"./route/item/section"
 import {handleCors} from "./middleware/cors"
-import bodyParser from "body-parser"
-import getIp from "../IP"
-const Connection  = ConnClass.getInstance()
-const cors = require("cors")
-const express = require("express")
-const PORT = 3001;
+import cors from "cors"
+import express from "express"
+const PORT = Number(process.env.PORT || 3001);
 const app = express()
 
 app.use(cookieParser());
@@ -22,7 +18,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cors({
-    origin:['https://soventoryapi.vercel.app','https://soventory.jevs.ch'],
+    origin: (process.env.CORS_ORIGINS || "https://soventory.jevs.ch,http://localhost:3000")
+        .split(",").map(origin => origin.trim()).filter(Boolean),
     credentials:true
 }))
 app.use(handleCors)
@@ -46,10 +43,11 @@ app.use("/item.materiel",materielRoute)
 app.use("/item.section",sectionRoute)
 
 
-app.listen(PORT,() => {    
-    console.log("Ecoute le port " + PORT);
+if (require.main === module) {
+    app.listen(PORT,() => {
+        console.log("Ecoute le port " + PORT);
+    })
+}
 
-})
-
-
+export default app
 

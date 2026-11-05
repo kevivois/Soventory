@@ -2,29 +2,35 @@
   "name": "soventory_backend",
   "version": "1.0.0",
   "description": "soventory backend",
-  "main": "index.js",
+  "private": true,
+  "main": "index.ts",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
+    "start": "ts-node api/setupApi.ts",
+    "build": "tsc --noEmit",
+    "test": "node --test --require ts-node/register tests/*.test.js",
     "api": "ts-node --transpile-only api/setupApi.ts",
-    "prodapi": "ts-node -T -P api/setupApi.ts"
+    "prodapi": "ts-node --project tsconfig.json api/setupApi.ts"
   },
   "author": "Kevin Voisin",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "crypto": "^1.0.1",
     "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
     "ts-node": "^10.9.1",
-    "ts-node-dev": "^2.0.0",
-    "tsc": "^2.0.4"
+    "ts-node-dev": "^2.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.9",
     "@types/mysql": "^2.15.21",
