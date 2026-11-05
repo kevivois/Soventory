@@ -2,7 +2,7 @@ module.exports = {
     apps:[
         {
             name:"api",
-            script:"api/setupApi.ts",
+            script:"server/setupApi.ts",
             automation:false,
             exec_mode:"cluster",
             watch:true,

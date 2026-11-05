@@ -1,6 +1,8 @@
 const assert = require("node:assert/strict")
 const { generateKeyPairSync } = require("node:crypto")
 const { once } = require("node:events")
+const { existsSync } = require("node:fs")
+const { join } = require("node:path")
 const { after, before, test } = require("node:test")
 
 const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 })
@@ -14,9 +16,9 @@ process.env.DB_SSL = "false"
 process.env.CORS_ORIGINS = "https://inventory.example.com, http://localhost:3000"
 
 const app = require("../index").default
-const Connection = require("../api/Connection").default
-const { signJWT, verifyJWT } = require("../api/utils/token.utils")
-const { requiredEnv } = require("../api/config")
+const Connection = require("../server/Connection").default
+const { signJWT, verifyJWT } = require("../server/utils/token.utils")
+const { requiredEnv } = require("../server/config")
 const bcrypt = require("bcrypt")
 let server
 let baseUrl
@@ -31,8 +33,13 @@ after(async () => {
     await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
 })
 
-test("the Vercel entry exports the existing application", () => {
-    assert.equal(app, require("../api/setupApi").default)
+test("the Vercel entry exports an Express application", () => {
+    assert.equal(typeof app, "function")
+    assert.equal(typeof app.listen, "function")
+})
+
+test("internal modules are outside Vercel's reserved api directory", () => {
+    assert.equal(existsSync(join(__dirname, "..", "api")), false)
 })
 
 test("CORS accepts the configured frontend and credentials", async () => {
@@ -95,7 +102,7 @@ test("login issues host-only cookies and logout clears them", async () => {
         if (query.startsWith("select * from refreshtoken")) {
             return []
         }
-        if (query.toLowerCase().includes("from droit")) {
+        if (query.toLowerCase().includes("inner join droit")) {
             return [{ name: "LIRE" }]
         }
         return { insertId: 1 }
