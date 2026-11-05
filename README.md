@@ -27,3 +27,9 @@ Les modules internes sont dans `backend/server`, pas dans le dossier reserve
 La commande Vercel conserve les avertissements ESLint existants sans les rendre
 bloquants via le mode CI de Create React App. Les erreurs de compilation,
 TypeScript et ESLint restent bloquantes. La commande locale reste `npm run build`.
+
+## Diagnostic des imports
+
+Les categories sont creees avant les equipements : leur presence ne confirme pas
+la reussite de l'import. Un echec SQL d'insertion est journalise dans les Runtime
+Logs du backend et signale comme un echec par la route d'import.

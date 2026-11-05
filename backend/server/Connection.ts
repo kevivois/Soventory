@@ -54,18 +54,14 @@ export default class Connection {
     private async __query(query: string): Promise<any> {
         await this.wait();
         this.connCount++;
-        const connection = await this.getConnection() // Get a connection from the pool
+        let connection: mysql2.PoolConnection | undefined
         try {
+            connection = await this.getConnection()
             const result = await connection.query(query) // Perform the query
-            connection.release() // Release the connection back to the pool
-            this.connCount--;
             return result[0]
-        } catch (error) {
-            connection.release() // Release the connection back to the pool in case of error
+        } finally {
+            connection?.release()
             this.connCount--;
-            //await this.__log(String(error))
-            return []
-            
         }
         
     }
@@ -82,12 +78,13 @@ export default class Connection {
         let new_query = query.replace(/"/g, "'");
         return new_query
     }
-    public async query(query: string): Promise<any> {
+    public async query(query: string, throwOnError = false): Promise<any> {
         try{
             return await this.__query(this.clean_query(query))
         }
         catch(error){
             console.log(error)
+            if (throwOnError) throw error
             return []
         }
     }
