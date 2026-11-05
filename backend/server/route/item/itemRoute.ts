@@ -9,6 +9,7 @@ const auth = require("../../middleware/auth")
 const { isAdmin, canRead, canWrite } = require("../../middleware/roles")
 const { ItemIntegrity, ItemFKIntegrity } = require("../../middleware/requestIntegrity")
 import {formatToDBDate,updateItem} from "../../utils/DB.utils"
+import { importItems } from "../../utils/import.utils"
 
 const sortedById = "order by item.id asc"
 
@@ -210,113 +211,11 @@ router.get("/archived/inner/all", [auth, canRead], async (req: any, res: any) =>
 })
 
 router.post("/import", [auth, canWrite], async (req: any, res: any) => {
-    try {
-    const categoryIds = new Map<string, Promise<number>>()
-    function resolveCategory(table: string, value: string): Promise<number> {
-        const key = JSON.stringify([table, value])
-        const existing = categoryIds.get(key)
-        if (existing) return existing
-        const pending = (async () => {
-            const rows = await Connection.query(
-                "select id from " + table + " where nom = '" + value + "'", true)
-            if (rows.length > 0) return rows[0].id
-            const result = await Connection.query(
-                "insert into " + table + " (nom) values ('" + value + "')", true)
-            return result.insertId
-        })()
-        categoryIds.set(key, pending)
-        return pending
+    if (!Array.isArray(req.body.items) || req.body.items.length === 0) {
+        return res.status(400).send({errors:["pas de liste d'items"]})
     }
-    let array:any[] = [];
-    let sqlArray:any[] = [];
-    let errors:any = []
-    if(!req.body.items)
-    {
-        errors.push("pas de liste d'items")
-        return res.status(400).send({errors:errors})
-    }
-    // step 1 : convert all FK to id, if not found, create it
-    req.body.items.forEach((item:any) => {
-        if(item.id != null){
-            array.push(item)
-        }
-    })
-    if(array.length == 0)
-    {
-        errors.push("pas de liste d'items")
-        return res.status(400).send({errors:errors})
-    }
-    const promises : readonly unknown[] = array.map(async (item:any) => {
-        let sqlItem:typeof item = {}
-        let enable = true;
-        const Itempromise : readonly unknown[] =  Object.keys(item).map(async (key) => {
-            let header = headers.find((k:any) => k.key == String(key) );
-            if(header !== undefined && header.required)
-            {
-                if(item[key] === undefined || item[key] == null || item[key] == ""){
-                    return enable = false;
-                }
-                if(header.inner == true){
-                    sqlItem[`${key}_FK`] = await resolveCategory(key, String(item[key]))
-                }else{
-                    sqlItem[key] = item[key];
-                } 
-            }else{
-                sqlItem[key] = item[key];
-            }
-        })
-        await Promise.all(Itempromise).then(() => {
-            if(enable == true){
-                sqlArray.push(sqlItem);
-            }else{
-                errors.push("l'item " + item.id  + " n'a pas pu être créé")
-            }
-        })
-    })
-    await Promise.all(promises)
-
-    // step 2 : insert all items$
-    const insertPromises : readonly unknown[] = sqlArray.map(async (item:any) => {
-        if(!item)return;
-        if(item.id){
-            if(String(item.id).length > 5){
-              if(String(item.id).length == 6){
-                let number = String(item.id).substring(String(item.id).length -4,String(item.id).length)
-                if(parseInt(number) > 999){
-                    let year = String(item.id).substring(1,3)
-                    number = String(item.id).substring(String(item.id).length -3,String(item.id).length)
-                    item.id = parseInt(`${year}${number}`)
-                }else{
-                    let year = String(item.id).substring(0,2);
-                    number = number.replace('0','');
-
-                    item.id = parseInt(`${year}${number}`)
-                }
-            }else{
-                return errors.push("l'item " + item.id + " n'a pas pu être créé , l'id est trop grand ")
-            }
-            }else if (String(item.id).length < 5){
-                return errors.push("l'item " + item.id + " n'a pas pu être créé , l'id est trop petit ")
-            }
-        }else{return errors.push('un item n\'a pas d\'id')}
-            item.date_achat = formatToDBDate(item.date_achat)
-            item.fin_garantie = formatToDBDate(item.fin_garantie)
-            let {success,query,currentId} = await createItem(item,false)
-            if(!success)
-            {
-                errors.push("l'item " + item.id + " n'a pas pu être créé")
-            }
-    })
-    await Promise.all(insertPromises)
-    if(errors.length == 0)
-    {
-        return res.status(200).send({errors:errors})
-    }
-    return res.status(400).send({errors:errors})
-    } catch (error) {
-        console.error("Item import failed", error)
-        return res.status(500).send({errors:["Echec de l'import : erreur de base de donnees. Consultez les logs du backend."]})
-    }
+    const result = await importItems(req.body.items)
+    return res.status(200).send(result)
 });
 
 

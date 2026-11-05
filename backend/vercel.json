@@ -1,4 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "express"
+  "framework": "express",
+  "functions": {
+    "index.ts": { "maxDuration": 60 }
+  }
 }

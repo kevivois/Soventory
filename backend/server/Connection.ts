@@ -52,13 +52,13 @@ export default class Connection {
         return this.mysqlConnectionPool.getConnection() // Get a connection from the pool
     }
 
-    private async __query(query: string): Promise<any> {
+    private async __query(query: string, values?: unknown[]): Promise<any> {
         await this.wait();
         this.connCount++;
         let connection: mysql2.PoolConnection | undefined
         try {
             connection = await this.getConnection()
-            const result = await connection.query({ sql: query, timeout: 15000 })
+            const result = await connection.query({ sql: query, timeout: 5000 }, values)
             return result[0]
         } finally {
             connection?.release()
@@ -88,6 +88,9 @@ export default class Connection {
             if (throwOnError) throw error
             return []
         }
+    }
+    public async execute(query: string, values: unknown[]): Promise<any> {
+        return this.__query(query, values)
     }
     public async wait() {
         if(this.connCount <= 0) return 0;

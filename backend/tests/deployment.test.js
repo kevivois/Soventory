@@ -181,6 +181,7 @@ test("item creation reports failed insertions instead of false success", async (
 test("20 imported items share category lookups and avoid ID-generation queries", async () => {
     const connection = Connection.getInstance()
     const originalQuery = connection.query
+    const originalExecute = connection.execute
     const queries = []
     connection.query = async query => {
         queries.push(query)
@@ -188,6 +189,11 @@ test("20 imported items share category lookups and avoid ID-generation queries",
         if (query.startsWith("select id from ") && query.includes("where nom = '")) return []
         if (query.startsWith("insert into ")) return { insertId: 1 }
         return []
+    }
+    connection.execute = async (query, values) => {
+        queries.push(query)
+        assert.ok(values.length > 0)
+        return { insertId: 1 }
     }
     try {
         const items = Array.from({ length: 20 }, (_, i) => ({
@@ -206,23 +212,25 @@ test("20 imported items share category lookups and avoid ID-generation queries",
             body: JSON.stringify({ items })
         })
         assert.equal(response.status, 200)
-        assert.deepEqual(await response.json(), { errors: [] })
-        assert.equal(queries.filter(query => query.startsWith("insert into item ")).length, 20)
-        assert.equal(queries.filter(query => query.includes("where nom = '")).length, 5)
-        assert.equal(queries.filter(query => query.startsWith("insert into ") && !query.startsWith("insert into item ")).length, 5)
+        assert.deepEqual(await response.json(), { imported: 20, skipped: 0, errors: [] })
+        assert.equal(queries.filter(query => query.startsWith("INSERT INTO item ")).length, 20)
+        assert.equal(queries.filter(query => query.includes("ON DUPLICATE KEY UPDATE")).length, 5)
         assert.equal(queries.filter(query => query.includes("SUBSTRING")).length, 0)
     } finally {
         connection.query = originalQuery
+        connection.execute = originalExecute
     }
 })
 
 test("category lookup failures return JSON with CORS instead of leaving import pending", async () => {
     const connection = Connection.getInstance()
     const originalQuery = connection.query
+    const originalExecute = connection.execute
     connection.query = async query => {
         if (query.toLowerCase().includes("inner join droit")) return [{ name: "ECRIRE" }]
         throw new Error("Simulated category lookup timeout")
     }
+    connection.execute = async () => { throw new Error("Simulated category timeout") }
     try {
         const response = await fetch(`${baseUrl}/item/import`, {
             method: "POST",
@@ -231,12 +239,58 @@ test("category lookup failures return JSON with CORS instead of leaving import p
                 Origin: "https://inventory.example.com",
                 Cookie: `accessToken=${signJWT({ id: 1 }, "30m")}`
             },
-            body: JSON.stringify({ items: [{ id: 26901, materiel: "DEMO" }] })
+            body: JSON.stringify({ items: [{
+                id: 26901, materiel: "DEMO", marque: "DEMO", section: "DEMO",
+                etat: "DEMO", lieu: "DEMO", modele: "DEMO", date_achat: "2026-01-01",
+                fin_garantie: "2028-01-01", prix: 0, garantie: 0
+            }] })
         })
-        assert.equal(response.status, 500)
+
+        assert.equal(response.status, 200)
         assert.equal(response.headers.get("access-control-allow-origin"), "https://inventory.example.com")
-        assert.equal((await response.json()).errors.length, 1)
+        const result = await response.json()
+        assert.equal(result.errors.length, 1)
+        assert.equal(result.skipped, 1)
     } finally {
         connection.query = originalQuery
+        connection.execute = originalExecute
     }
 })
+
+test("invalid and duplicate rows are skipped while later valid rows are inserted", async () => {
+            const { importItems } = require("../server/utils/import.utils")
+            const connection = Connection.getInstance()
+            const originalExecute = connection.execute
+            const calls = []
+            connection.execute = async (sql, values) => {
+                calls.push({ sql, values })
+                if (sql.startsWith("INSERT INTO item ") && values[0] === 26901) {
+                    throw Object.assign(new Error("duplicate"), { code: "ER_DUP_ENTRY" })
+                }
+                return { insertId: 7 }
+            }
+            const valid = {
+                id: 26901, materiel: "L'ordinateur", marque: 'Une "marque"', modele: "DEMO",
+                section: "Test", etat: "OK", lieu: "Salle", date_achat: "01.01.2026",
+                fin_garantie: "01.01.2028", garantie: 0, prix: "12,50"
+            }
+            try {
+                const result = await importItems([
+                    { ...valid, id: 26900, date_achat: "31.02.2026" },
+                    valid, { ...valid, id: 26902 }, null
+                ])
+                assert.equal(result.imported, 1)
+                assert.equal(result.skipped, 3)
+                assert.equal(result.errors.length, 3)
+                assert.match(result.errors[1], /identifiant deja existant/)
+                assert.equal(calls.filter(call => call.sql.includes("ON DUPLICATE KEY UPDATE")).length, 5)
+                const inserted = calls.find(call => call.sql.startsWith("INSERT INTO item ") && call.values[0] === 26902)
+                assert.equal(inserted.values[5], "2026-01-01")
+                assert.equal(inserted.values[6], 12.5)
+                assert.equal(inserted.values[14], 0)
+                assert.ok(calls.some(call => call.values[0] === "L'ordinateur"))
+                assert.ok(calls.every(call => !call.sql.includes("L'ordinateur")))
+            } finally {
+                connection.execute = originalExecute
+            }
+        })

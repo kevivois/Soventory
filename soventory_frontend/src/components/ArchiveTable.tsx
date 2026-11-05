@@ -25,6 +25,7 @@ import IEOverlay from "./ImportExportOverlay/IEOverlay";
 import Pagination from "./Pagination/Pagination";
 import BottomBar from "./BottomBar/BottomBar";
 import {H_DetermineRowPerPage} from "./utils/data.utils";
+import { importItems } from "./utils/import.utils";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
@@ -592,23 +593,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         });
     }
     const onImportCsv = async (array:any) => {
-        const query = await fetch(`${getIp()}/item/import`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({items:array}),
-        });
-        const response = await query.json()
-        if(response.error)
-        {
-            setError(String(response.error));
-        }
-        else
-        {
-            await refreshAll();
-        }
+        const summary = await importItems(array);
+        setError(summary);
+        await refreshAll();
     }
 
     return (
