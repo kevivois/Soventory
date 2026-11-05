@@ -1,5 +1,5 @@
 import express from "express"
-import api from "./api/setupApi"
+import api from "./server/setupApi"
 
 const app = express()
 app.use(api)

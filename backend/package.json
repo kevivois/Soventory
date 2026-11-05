@@ -8,11 +8,11 @@
     "node": "22.x"
   },
   "scripts": {
-    "start": "ts-node api/setupApi.ts",
+    "start": "ts-node server/setupApi.ts",
     "build": "tsc --noEmit",
     "test": "node --test --require ts-node/register tests/*.test.js",
-    "api": "ts-node --transpile-only api/setupApi.ts",
-    "prodapi": "ts-node --project tsconfig.json api/setupApi.ts"
+    "api": "ts-node --transpile-only server/setupApi.ts",
+    "prodapi": "ts-node --project tsconfig.json server/setupApi.ts"
   },
   "author": "Kevin Voisin",
   "license": "ISC",

@@ -12,3 +12,5 @@ WebApp inventaire for EPTM
 
 Le point d'entree `backend/index.ts` doit importer Express directement pour
 permettre sa detection par Vercel. Il monte l'API existante sans changer ses routes.
+Les modules internes sont dans `backend/server`, pas dans le dossier reserve
+`backend/api`, afin que Vercel ne cree pas une fonction par fichier TypeScript.
