@@ -140,3 +140,40 @@ test("login issues host-only cookies and logout clears them", async () => {
 test("missing production configuration fails explicitly", () => {
     assert.throws(() => requiredEnv("SOVENTORY_MISSING_TEST_VARIABLE"), /Missing environment variable/)
 })
+
+test("strict database queries propagate failures and release the query counter", async () => {
+    const connection = Connection.getInstance()
+    const originalGetConnection = connection.getConnection
+    const failure = new Error("Simulated database connection failure")
+    connection.getConnection = async () => { throw failure }
+    try {
+        await assert.rejects(connection.query("SELECT 1", true), error => error === failure)
+        assert.equal(connection.connCount, 0)
+    } finally {
+        connection.getConnection = originalGetConnection
+    }
+})
+
+test("item creation reports failed insertions instead of false success", async () => {
+    const { createItem } = require("../server/utils/DB.utils")
+    const connection = Connection.getInstance()
+    const originalQuery = connection.query
+    connection.query = async (query, throwOnError) => {
+        if (query.startsWith("insert into item")) {
+            assert.equal(throwOnError, true)
+            throw new Error("Simulated item insertion failure")
+        }
+        return []
+    }
+    try {
+        const result = await createItem({
+            id: 26901,
+            prix: 850,
+            date_achat: "01.01.2026",
+            fin_garantie: "01.01.2028"
+        }, false)
+        assert.equal(result.success, false)
+    } finally {
+        connection.query = originalQuery
+    }
+})

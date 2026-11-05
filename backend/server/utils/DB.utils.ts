@@ -25,7 +25,7 @@ export async function createItem(item:any,newId=true){
     {
         var query = await Connection.query(`insert into item (id,modele,num_serie,num_produit,remarque,date_achat,prix,garantie,fin_garantie,materiel_FK,marque_FK,section_FK,etat_FK,lieu_FK,archive) values 
                                                     ("${id}","${item.modele}","${item.num_serie}","${item.num_produit}","${item.remarque}","${item.date_achat}","${prix}","${item.garantie}","${item.fin_garantie}",
-                                                    "${item.materiel_FK}","${item.marque_FK}","${item.section_FK}","${item.etat_FK}","${item.lieu_FK}","${item.archive}")`)
+                                                    "${item.materiel_FK}","${item.marque_FK}","${item.section_FK}","${item.etat_FK}","${item.lieu_FK}","${item.archive}")`, true)
         return {success:true,query:query,currentId:id}
     }
     catch(error)
