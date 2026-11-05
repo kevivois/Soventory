@@ -21,6 +21,6 @@ export default function  getIp(){
         }
     }
     return results["Principale"][0]*/
-    return "https://kevivoisapi.jevs.ch"
+    return (process.env.REACT_APP_API_URL || "https://soventoryapi.vercel.app").replace(/\/+$/, "")
  }
  

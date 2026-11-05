@@ -25,11 +25,14 @@ module.exports = async(req:any,res:any,next:any) => {
         if (expiredAccessToken) {
             if (refreshToken) {
                 const { user, expired } = verifyJWT(refreshToken)
+                if (expired || !user) {
+                    return res.status(401).send({"error":"Forbidden"})
+                }
                 if(!droit || droit == "")
                 {
                     droit = await getRightOfUser(user.id)
                 }
-                if (expired || droit=="") {
+                if (droit=="") {
                     return res.status(401).send({"error":"Forbidden"})
                 }
                 else
@@ -69,4 +72,3 @@ module.exports = async(req:any,res:any,next:any) => {
         return res.status(401).send({"error":"Forbidden"})
     }
 }
-

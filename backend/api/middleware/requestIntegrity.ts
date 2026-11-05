@@ -1,6 +1,5 @@
 import ConnectionInstance from "../Connection"
 const Connection = ConnectionInstance.getInstance()
-import Headers from "../../../soventory_frontend/src/components/headers"
 
 export  function ItemIntegrity(req:any, res:any, next:any) {
 

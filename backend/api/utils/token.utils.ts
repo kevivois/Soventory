@@ -1,56 +1,32 @@
-const jwt = require("jsonwebtoken");
-const env = require("../env.json");
+import jwt from "jsonwebtoken"
+import { createPrivateKey, createPublicKey } from "crypto"
+import { requiredEnv } from "../config"
 
-const privateKey = `
------BEGIN RSA PRIVATE KEY-----
-MIICWwIBAAKBgHgnvr7O2tiApjJfid1orFnIGm6980fZp+Lpbjo+NC/0whMFga2B
-iw5b1G2Q/B2u0tpO1Fs/E8z7Lv1nYfr5jx2S8x6BdA4TS2kB9Kf0wn0+7wSlyikH
-oKhbtzwXHZl17GsyEi6wHnsqNBSauyIWhpha8i+Y+3GyaOY536H47qyXAgMBAAEC
-gYAOphnVPXbk6lpYzdkLC1Xn5EOEuNfOLLURLxBnPWozZo26r/Mtahu/9mYhrYlv
-PP8r6mxta3VIil8iOdZyOLa/4d1LPd+UehgEXIJEiYXLtn7RS5eUnoPuQxssfs1k
-OWjdN8p6SzppleegFTvGRX4KM3cDLfSphOk8JuBCrpSSYQJBAOdqizTSrdKMTuVe
-c7Jk1JOJkyFuFs+N5zeryyeFGH7IpRdWy0rkWMxIUAi8Ap1vYVBPHv4tDOo3sy5X
-VLc/knkCQQCE62pg+0TmsrhO/2Pgog6MLBkzlzXYMRp/01HbmznwYF+ejfPnzLkz
-hnUlxRUNK3lhXM/7H6oAjvqF2R72u/OPAkEAterkmdbQfEZ+MwNoEiH/lie9OLdx
-SSI1VGdBYcTYN7qFRW6eizYstBJYkDU0HQ0Uw+we4hMKJwk4W0KdvxxDiQJAeqlB
-V1QqBneBbK10PzVuFV8QtrJhJyxRVwrtbKq38iMNuqUnI4+ijXEUpJFWVvv6nKXo
-7McQvEk12dU/JNTX8wJAOlAtSNjp9tVwpMpC0w2St1eKc1L2SknjeohA5ldoBz8s
-GeZsPhTU3eHSD1neAZXLKN5K68z3zFBr20ubY9nyLw==
------END RSA PRIVATE KEY-----`;
-
-const publicKey = `-----BEGIN PUBLIC KEY-----
-MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHgnvr7O2tiApjJfid1orFnIGm69
-80fZp+Lpbjo+NC/0whMFga2Biw5b1G2Q/B2u0tpO1Fs/E8z7Lv1nYfr5jx2S8x6B
-dA4TS2kB9Kf0wn0+7wSlyikHoKhbtzwXHZl17GsyEi6wHnsqNBSauyIWhpha8i+Y
-+3GyaOY536H47qyXAgMBAAE=
------END PUBLIC KEY-----`;
-
-
-
-
-
-
+const privateKey = createPrivateKey(requiredEnv("JWT_PRIVATE_KEY").replace(/\\n/g, "\n"))
+if (privateKey.asymmetricKeyType !== "rsa" || (privateKey.asymmetricKeyDetails?.modulusLength || 0) < 2048) {
+    throw new Error("JWT_PRIVATE_KEY must be an RSA key of at least 2048 bits")
+}
+const privateKeyPem = privateKey.export({ type: "pkcs8", format: "pem" })
+const publicKeyPem = createPublicKey(privateKey).export({ type: "spki", format: "pem" })
 
 export function verifyJWT(token: string) {
     try {
-      const decoded = jwt.verify(token, publicKey)
-      return { user: decoded, expired: false };
+        const decoded = jwt.verify(token, publicKeyPem, { algorithms: ["RS256"] })
+        if (typeof decoded === "string") {
+            return { user: null, expired: false }
+        }
+        return { user: decoded, expired: false }
     } catch (error) {
-        if (error instanceof Error) {
-          console.log(error)
-      return { user: null, expired: error.message.includes("jwt expired") };
+        if (error instanceof jwt.JsonWebTokenError) {
+            return { user: null, expired: error instanceof jwt.TokenExpiredError }
+        }
+        throw error
     }
-    return { user: null, expired:true };
-  }
 }
-export function signJWT(payload: object, expiresIn: string | number | undefined) {
-  if (expiresIn === undefined) {
-    return jwt.sign(payload, privateKey,{algorithm: "RS256"});
-  }
-  else
-  {
-    return jwt.sign(payload, privateKey, {algorithm: "RS256",expiresIn: expiresIn });
-  }
 
-  
+export function signJWT(payload: object, expiresIn: string | number | undefined) {
+    return jwt.sign(payload, privateKeyPem, {
+        algorithm: "RS256",
+        ...(expiresIn === undefined ? {} : { expiresIn })
+    })
 }
