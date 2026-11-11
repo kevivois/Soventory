@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   ProSidebar,
   Menu,
@@ -9,19 +9,12 @@ import {
   SidebarContent
 } from "react-pro-sidebar";
 import {
-  FaTachometerAlt,
-  FaGem,
-  FaList,
-  FaGithub,
-  FaRegLaughWink,
-  FaHeart,
-} from "react-icons/fa";
-import {
   BiLogOut
 } from "react-icons/bi";
 import { IconType } from "react-icons/lib";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 const Aside = (props:{ onIconClick:()=> void,image:any, collapsed:any, rtl:any, toggled:any,title:string,options:{id:number,key:string,labelName:string,icon:IconType,onClickMenuitem:(which: number) => void,active:boolean}[],disconnectFunction:() => Promise<void>,menuIcon:string}) => {
+  const location = useLocation();
   return (
     <ProSidebar
     style={{height:"100vh",width:"100%"}}
@@ -32,23 +25,15 @@ const Aside = (props:{ onIconClick:()=> void,image:any, collapsed:any, rtl:any, 
     >
       <SidebarHeader>
         <div
-          style={{
-            padding: "24px",
-            textTransform: "uppercase",
-            fontWeight: "bold",
-            fontSize: 14,
-            letterSpacing: "1px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            textAlign: "center",
-            display:"inline-flex",
-            flexDirection:"row",
-          }}
+          className="sidebar-brand"
         >
-          <div><img src={props.menuIcon} onClick={() => {
-            props.onIconClick();
-          }} style={{width:"50px",height:"50px",marginLeft:"10px"}}/></div> <div style={{margin:"auto",marginLeft:"10px"}}>{props.title}</div>
+          <button type="button" className="sidebar-mark" aria-label="Aller au tableau de bord" onClick={props.onIconClick}>
+            <img className="brand-mascot" src={props.menuIcon} alt="" />
+          </button>
+          <div className="sidebar-brand-copy">
+            <strong>{props.title}</strong>
+            <span>GESTION DE PARC</span>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -58,6 +43,7 @@ const Aside = (props:{ onIconClick:()=> void,image:any, collapsed:any, rtl:any, 
             return (
               <MenuItem
                 key={option.key}
+                className={location.pathname === `/${option.key}` ? "menu-item-active" : ""}
                 icon={<option.icon />}
                 onClick={() => {
                     option.onClickMenuitem(option.id);

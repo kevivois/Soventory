@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import TablePage from "./TablePage"
 import { Routes, Route } from 'react-router-dom';
-import Box from '@mui/material/Box';
 import SideBar from "../components/Sidebar"
 import "react-pro-sidebar/dist/css/styles.css";
 import "../components/style/Sidebar.scss"
-import { Navigate } from 'react-router-dom';
-import {FaTachometerAlt} from "react-icons/fa"
-import {FaGem} from "react-icons/fa"
 import { useNavigate } from 'react-router-dom';
 import { IconType } from 'react-icons/lib';
+import {FaTachometerAlt} from "react-icons/fa"
 import {CgOptions} from "react-icons/cg"
-import {VscAccount,VscFeedback} from "react-icons/vsc"
+import {VscAccount} from "react-icons/vsc"
 import {BsArchive} from "react-icons/bs"
 import ProjectIcon from "../logo/plussegaush.png"
 import getIp from '../IP';
@@ -29,6 +26,13 @@ export default function Dashboard(props:{mode:number})
     const [content,setContent] = useState<JSX.Element | undefined>(<div>loading</div>);
     const [errorMessage,setErrorMessage] = useState<string>("");
     const naviguate = useNavigate();
+    const pageTitle = {
+        [MODE.TABLE]: "Inventaire",
+        [MODE.ARCHIVE]: "Archives",
+        [MODE.ACCOUNT]: "Mon compte",
+        [MODE.PARAMETERS]: "Paramètres",
+        [MODE.FEEDBACK]: "Retours",
+    }[mode] || "Soventory";
 
     const isAdmin = (user:any) => {
         if(!user) return false;
@@ -95,15 +99,19 @@ export default function Dashboard(props:{mode:number})
     }
     const renderAccount = async () => {
         return (
-            <div>
-                <h1>Compte</h1>
+            <div className="workspace-placeholder">
+                <span className="workspace-eyebrow">ESPACE PERSONNEL</span>
+                <h2>Votre compte</h2>
+                <p>Connecté en tant que <strong>{user?.username}</strong>.</p>
             </div>
         );
     }
     const renderParameters = async () => {
         return (
-            <div>
-                <h1>Paramètres</h1>
+            <div className="workspace-placeholder">
+                <span className="workspace-eyebrow">CONFIGURATION</span>
+                <h2>Paramètres</h2>
+                <p>Les préférences de votre espace seront accessibles ici.</p>
             </div>
         );
     }
@@ -177,9 +185,36 @@ export default function Dashboard(props:{mode:number})
     const onIconClick = () => {
         window.location.replace("/dashboard");
     }
-    return ( <div style={{display:"block",width:"100vw",height:"100%"}}> 
-        {user != null && errorMessage == ""  ?  <div>
-        <div style={{display:"inline-flex",flexDirection:"row",width:"15%"}}><SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} onIconClick={onIconClick} /></div>
-        <div style={{display:"inline-flex",flexDirection:"row",width:"85%",float:"right"}}>{content}</div>
-        </div> : <div>{errorMessage}</div>}</div>); 
+    return (
+        <div className="workspace-shell">
+            {user != null && errorMessage == "" ? (
+                <>
+                    <aside className="workspace-sidebar">
+                        <SideBar menuIcon={ProjectIcon} collapsed={false} image={false} rtl={false} toggled={true} title={"Soventory"} options={menuOptions} disconnectFunction={disconnect} onIconClick={onIconClick} />
+                    </aside>
+                    <main className="workspace-main">
+                        <header className="workspace-header">
+                            <div>
+                                <span className="workspace-eyebrow">ESPACE DE GESTION</span>
+                                <h1>{pageTitle}</h1>
+                            </div>
+                            <div className="workspace-user">
+                                <span className="workspace-user-mark">{user.username?.slice(0, 1).toUpperCase()}</span>
+                                <span>
+                                    <strong>{user.username}</strong>
+                                    <small>{user.droit}</small>
+                                </span>
+                            </div>
+                        </header>
+                        <section className="workspace-content">{content}</section>
+                    </main>
+                </>
+            ) : (
+                <div className="workspace-loading" role="status">
+                    <span className="workspace-loading-mark">S</span>
+                    <p>{errorMessage || "Préparation de votre espace…"}</p>
+                </div>
+            )}
+        </div>
+    );
 }

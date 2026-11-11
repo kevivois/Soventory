@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes ,Route } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from "./Dashboard";
+import Landing from "./Landing";
 const MODE={
     TABLE:1,
     ACCOUNT:2,
@@ -14,7 +15,8 @@ export default  function Main()
     return (
         <div>
             <Routes>
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<Landing />} />
+                <Route path="/connexion" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard mode={MODE.TABLE} />} />
                 <Route path="/archives" element={<Dashboard mode={MODE.ARCHIVE} />} />
                 <Route path="/account" element={<Dashboard mode={MODE.ACCOUNT} />} />
