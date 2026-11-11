@@ -1,9 +1,9 @@
-import React,{useState,useEffect} from "react"
+import React,{useMemo,useState,useEffect} from "react"
 import HeaderMode from "./Mode";
 import TextField from "@mui/material/TextField";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import {Filtering,Searching,Sorting,Filter,HeaderType} from "./Filter.utils";
+import InputAdornment from "@mui/material/InputAdornment";
+import {Filtering,Sorting,HeaderType} from "./Filter.utils";
 import Headers from "./headers"
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
@@ -13,9 +13,8 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Checkbox from '@mui/material/Checkbox';
 import EditOverlay from "./EditOverlay/EditOverlay";
-import {FiFilter,FiPlus} from "react-icons/fi"
+import {FiFilter} from "react-icons/fi"
 import "./style/Table.css";
-import FilterOverlay from "./FilterOverlay";
 import BottomBar from "./BottomBar/BottomBar";
 import AddOverlay from "./AddOverlay/AddOverlay";
 import Warning from "./WarningBar/WarningBar";
@@ -24,15 +23,14 @@ import IEOverlay from "./ImportExportOverlay/IEOverlay";
 import Pagination from "./Pagination/Pagination";
 import {H_DetermineRowPerPage} from "./utils/data.utils";
 import { importItems } from "./utils/import.utils";
+import { filterAndSortRows } from "./utils/tableData.utils";
 export default function DataTable(props:{data:any[],materiels:any[],marques:any[],sections:any[],etats:any[],lieux:any[],user:any})
 {
     const [data, setData] = useState<any[]>(props.data);
-    const [headers,setHeaders] = useState<typeof Headers>(Headers)
-    const [filteredData,setFilteredData] = useState<any[]>(data);
-    const [renderedData,setRenderedData] = useState<any[]>(data);
+    const headers = Headers;
     const [filterList,setFilterList] = useState<any[]>([]);
     const [openPopup,setOpenPopup] = useState<boolean>(false);
-    const [headerFiltering,setHeaderFiltering] = useState<HeaderType>(headers[0]);
+    const [headerFiltering,setHeaderFiltering] = useState<HeaderType>(Headers[0]);
     const [materiels,setMateriels] = useState<any[]>(props.materiels);
     const [marques,setMarques] = useState<any[]>(props.marques);
     const [sections,setSections] = useState<any[]>(props.sections);
@@ -43,7 +41,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const[rowToEdit,setRowToEdit] = useState<number | null>(null);
     const [searchBarValue,setSearchBarValue] = useState<string>("");
     const [openEditPopup,setOpenEditPopup] = useState<boolean>(false);
-    const [divFilterOverlay,setDivFilterOverlay] = useState<React.LegacyRef<HTMLDivElement> | null>(null);
     const [readOnly,setReadOnly] = useState<boolean>(true);
     const [sortingFilter,setSortingFilter] = useState<Sorting>(new Sorting(Headers[0],"asc"));
     const [openWarning,setOpenWarning] = useState(false);
@@ -51,12 +48,31 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [error,setError] = useState<string>("");
     const [openIEO,setOpenIEO] = useState(false);
     const [pageId,setPageId] = useState(1);
-    const [paginateData,setPaginateData] = useState<any[]>([]);
     const [enablePagination,setEnablePagination] = useState(true);
-    const [rowPerPage,setRowPerPage] = useState(0);
-    const [maxPage,setMaxPage] = useState(Math.ceil(renderedData.length/rowPerPage));
-    const [totalPrice,setTotalPrice] = useState<number |null>(null);
-    let timer : ReturnType<typeof setTimeout> | null = null;
+    const [rowPerPage,setRowPerPage] = useState(23);
+    const headers = Headers;
+    const activeFilters = useMemo(
+        () => filterList.filter((item:any) => item instanceof Filtering) as Filtering[],
+        [filterList]
+    );
+    const renderedData = useMemo(
+        () => filterAndSortRows(data, activeFilters, searchBarValue, sortingFilter),
+        [data, activeFilters, searchBarValue, sortingFilter]
+    );
+    const maxPage = Math.max(1, Math.ceil(renderedData.length / Math.max(1, rowPerPage)));
+    const paginateData = useMemo(
+        () => enablePagination
+            ? renderedData.slice((pageId - 1) * rowPerPage, pageId * rowPerPage)
+            : renderedData,
+        [renderedData, enablePagination, pageId, rowPerPage]
+    );
+    const totalPrice = useMemo(
+        () => renderedData.reduce((total, row) => {
+            const price = Number.parseFloat(row.prix);
+            return total + (Number.isFinite(price) ? price : 0);
+        }, 0),
+        [renderedData]
+    );
     
     const handleEditPageClose = () => {
         setOpenEditPopup(false)
@@ -66,20 +82,9 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         fetchDropDownList();
         setOpenAddPopup(false)
     };
-    const handlePagination = () => {
-        if(!enablePagination){
-            const paginateData = [...renderedData];
-            return setPaginateData(paginateData);
-        }
-        const paginateData = renderedData.slice((pageId-1)*rowPerPage,pageId*rowPerPage);
-        setPaginateData(paginateData);
-        let mx = Math.ceil(renderedData.length / rowPerPage)
-        if(mx <= 0) mx = 1;
-        setMaxPage(mx);
-        if(pageId > mx){
-            setPageId(mx);
-        }
-    };
+    useEffect(() => {
+        if (pageId > maxPage) setPageId(maxPage);
+    }, [pageId, maxPage]);
     function determineRowPerPage(){
         if(!enablePagination) return;
         try{
@@ -98,22 +103,19 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             setPageId(maxPage);
         };
     };
-    function handleResizing(){
-        timer = setTimeout(()=> {
-            determineRowPerPage();
-            clearTimeout(timer as ReturnType<typeof setTimeout>);
-        },1000);
-    }
     useEffect(() => {
-        handlePagination();
-        determineTotalPrice();
-    },[renderedData,pageId,enablePagination,rowPerPage]);
-    useEffect(() => {
-        determineRowPerPage()
+        let timer: ReturnType<typeof setTimeout>;
+        const handleResizing = () => {
+            clearTimeout(timer);
+            timer = setTimeout(determineRowPerPage, 150);
+        };
+        determineRowPerPage();
         window.addEventListener("resize",handleResizing);
         return () => {
+            clearTimeout(timer);
             window.removeEventListener("resize",handleResizing);
-        }},[]);
+        };
+    },[]);
     const onApplyNewRow = async (newRow:any) => {
         var errors = null
         try
@@ -199,262 +201,37 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                 setError(e.message)
             }
         }
-    function determineTotalPrice(){
-        var total = 0;
-        renderedData.forEach((row:any) => {
-            total += parseFloat(row.prix);
-        });
-        setTotalPrice(total);
-    }
     function clearFilters(){
         setFilterList([]);
         setCheckBoxFilterList([]);
-        setHeaders(Headers);
-        setFilteredData(data);
-        setRenderedData(data);
         setSearchBarValue("")
         setPageId(1);
-        if(sortingFilter !=undefined){
-            setSortingFilter(new Sorting(sortingFilter.header,"asc"))
-        }
-    }
-    useEffect(() => {
-            if(filterList.filter((item:any) => item instanceof Filtering).length > 0)
-            {
-                ApplyFilteringFilter(filterList.filter((item:any) => item instanceof Filtering));
-            }
-            else
-            {
-                if(filterList.length == 0){
-                    //fetchItems();
-                }
-                setFilteredData(data);
-              
-            }
-    },[filterList])
-
-    useEffect(() => {
-        filterList.forEach((filter:Filter)=>{
-            if(filter instanceof  Searching)
-            {
-             ApplySearchingFilter(filter);
-            }
-         })
-         if(filterList.filter((item:any) => item instanceof Searching).length == 0)
-         {
-             ApplySortingFilter(true,filteredData);
-                
-             if(filterList.filter((item:any) => item instanceof Filtering).length == 0)
-             {
-                 setEnablePagination(true);
-             }else{
-                setEnablePagination(false);
-             }
-         }else{
-            setEnablePagination(false);
-         }
-
-        },[filteredData,filterList]);
-
-
-    
-    useEffect(() => {
-        if(sortingFilter != undefined)
-        {
-            ApplySortingFilter(true);
-        }
-    },[sortingFilter])
-    const ApplyFilteringFilter = async (filters:any[])=>
-    {   
-        var checkBoxFilter = checkBoxFilterList;
-        var body = [...filters.map((filter:Filtering)=>{
-            // name : value
-            var selectedValues = filter.selectedValues.filter((item:any)=>item.checked == true);
-            if(selectedValues.length == 0) {
-                let newFilterList = [...filterList];
-                newFilterList.splice(newFilterList.indexOf(filter),1);
-                setFilterList(newFilterList);
-                return
-            }
-            if(filter.header.inner)
-            {
-                return {name:`${filter.header.key}.nom`,values:selectedValues}
-            }
-            else
-            {
-                return {name:filter.header.key,values:selectedValues}
-            }
-        })].filter((item:any)=>item != null);
-        var query = await fetch(getIp()+"/item/byValues",{
-            credentials: "include",
-            method:"POST",
-            headers: {
-                'Content-Type': 'application/json'
-              },
-            body:JSON.stringify(body)
-        })
-        var newData = await query.json();
-        setFilteredData(newData);
-    }
-    const ApplySortingFilter = (apply:boolean,array?:any[])=>
-    {       
-            var sortedData = []
-            
-            if(array == null){
-                sortedData = [...renderedData];
-            }else{
-                sortedData = [...array];
-            }
-            if(sortingFilter == null) return sortedData;
-            const filter = sortingFilter;
-            const newHeaders = [...headers];
-            newHeaders.forEach((h) => {
-                if (h.key === filter.header.key) {
-                    h.order = filter.order
-                }
-            });
-            setHeaders(newHeaders);
-            sortedData.sort((a, b) => {
-
-                if (a[filter.header.key] < b[filter.header.key]) {
-                    return filter.header.order === "asc" ? -1 : 1;
-                }
-                if (a[filter.header.key] > b[filter.header.key]) {
-                    return filter.header.order === "asc" ? 1 : -1;
-                }
-                return 0;
-            });
-            if(apply){
-                setRenderedData(sortedData)
-                return sortedData
-            }
-            else{
-                return sortedData
-            }
-    }
-    const ApplySearchingFilter = (filter:Searching)=>
-    {
-        function eachData(filterText:any,data:any) :boolean
-        {
-            var result = false;
-            Object.values(data).forEach((value) => {
-                const vl = String(value).toLowerCase();
-                    if (vl.includes(filterText.toLowerCase()))
-                    {
-                        result =  true;
-                    }
-            });
-            return result;
-        }
-        var newData = [...filteredData];
-        newData = [];
-        filteredData.forEach((dt) => {
-          if (eachData(filter.value,dt)) {
-            newData.push(dt);
-          }
-        });
-
-        var sorted = ApplySortingFilter(true,newData);
-    }
-    const AddNewFilter = (filter:Filter) => {
-        var newFilterList = [...filterList];
-
-        if(filter instanceof Searching)
-        {
-            //check if there is a filtering filter with the same header
-            var index = newFilterList.findIndex((flt:Filter)=>flt instanceof Searching);
-            if(filter.value == ""){
-                
-                if(index !== -1)
-                {
-                    newFilterList.splice(index,1);
-                }
-            }else{
-                if(index !== -1)
-                {
-                    newFilterList[index] = filter;
-                }
-                else
-                {
-                    newFilterList.push(filter);
-                }
-            }
-
-        }
-        else if(filter instanceof Filtering)
-        {
-           //check if there is a filtering filter with the same header
-              var index = newFilterList.findIndex((flt:Filter)=> flt instanceof Filtering && flt.header === filter.header);
-              
-                if(index !== -1)
-                {
-                    newFilterList[index] = filter;
-                }
-                else
-                {
-                    newFilterList.push(filter);
-                }
-        }
-        else if(filter instanceof Sorting)
-        {
-           //check if there is a filtering filter with the same header
-                var index = newFilterList.findIndex((flt:Filter)=> {
-                    return flt.header == filter.header
-                });
-                if(index !== -1)
-                {
-                    newFilterList[index] = filter;
-                }
-                else
-                {
-                    newFilterList.push(filter);
-                }
-        }
-        setFilterList(newFilterList);
+        setSortingFilter(new Sorting(Headers[0],"asc"));
     }
 
-      const onClickFilterPopupOpen = (event:any,header:any) => {
-        let target = event.currentTarget as any;
-        setDivFilterOverlay(target);
-        if(header.key === "materiel")
-        {
-            setFilterDataList(materiels);
-        }
-        else if(header.key === "marque")
-        {
-            setFilterDataList(marques);
-        }
-        else if(header.key === "section")
-        {
-            setFilterDataList(sections);
-        }
-        else if(header.key === "etat")
-        {
-            setFilterDataList(etats);
-        }
-        else if(header.key === "lieu")
-        {
-            setFilterDataList(lieux);
-        }
-        setHeaderFiltering(header);
-        setOpenPopup(true)
-      };
+      const onClickFilterPopupOpen = (header:HeaderType) => {
+          const optionsByKey: Record<string, any[]> = {
+              materiel: materiels,
+              marque: marques,
+              section: sections,
+              etat: etats,
+              lieu: lieux,
+          };
+          const options = optionsByKey[header.key] || [];
+          const currentFilter = activeFilters.find((filter) => filter.header.key === header.key);
+          setFilterDataList(options);
+          setCheckBoxFilterList(options.map((option) => ({
+              ...option,
+              checked: currentFilter?.selectedValues.some((selected) => selected.nom === option.nom && selected.checked) || false,
+          })));
+          setHeaderFiltering(header);
+          setOpenPopup(true);
+        };
       
-      const addNewCheckBoxToCheckBoxList = (dt:any,event:any) => {
-        var newCheckBoxFilterList = [...checkBoxFilterList];
-        // check if checkbox exist in list
-        var index = newCheckBoxFilterList.findIndex((item:any) => item.nom === dt.nom);
-            // if exist and true do nothing
-           
-        // if exist replace it with new one if not add it
-        var row = {...dt,checked:event.target.checked}
-        if (index !== -1) {
-          newCheckBoxFilterList[index] = row;
-        } else {
-          newCheckBoxFilterList.push(row);
-        }
-        setCheckBoxFilterList(newCheckBoxFilterList);
-        
+        const addNewCheckBoxToCheckBoxList = (dt:any,event:any) => {
+          setCheckBoxFilterList((current) => current.map((option) =>
+              option.nom === dt.nom ? {...option, checked:event.target.checked} : option
+          ));
     };
     const onRowClick = (event:any,row:any) => {
         // on each row right click
@@ -464,37 +241,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     }
 
     const addCheckBoxFilter = () => {
-        var newFilterList = [...filterList];
-        var newFilter = new Filtering(headerFiltering, checkBoxFilterList);
-        setCheckBoxFilterList([])
-        var index = newFilterList.findIndex((item:any) => item instanceof Filtering &&  item.header.key === headerFiltering.key);
-        if(newFilter.selectedValues.length === 0){
-            return setOpenPopup(false);
+        const remainingFilters = filterList.filter(
+            (filter:any) => !(filter instanceof Filtering && filter.header.key === headerFiltering.key)
+        );
+        const selectedValues = checkBoxFilterList.filter((option) => option.checked);
+        if (selectedValues.length > 0) {
+            remainingFilters.push(new Filtering(headerFiltering, selectedValues));
         }
-        if(index !== -1)
-        {
-
-            newFilterList[index].selectedValues.forEach((item:any) => {
-                var index2 = newFilter.selectedValues.findIndex((item2:any) => item2.nom === item.nom);
-                if(index2 === -1)
-                {
-                    newFilter.selectedValues.push(item);
-                }
-            });
-            if(newFilter.selectedValues.find((item:any) => item.checked === true) === undefined ){
-                console.log(newFilterList)
-                newFilterList.splice(index,1);
-                console.log(newFilterList)
-            }else{
-                newFilterList[index] = newFilter;
-            }
-        }
-        else
-        {
-            newFilterList.push(newFilter);
-        }
-        setFilterList(newFilterList);
-        setOpenPopup(false)
+        setFilterList(remainingFilters);
+        setPageId(1);
+        setOpenPopup(false);
     }
 
     const onApplyExistingRow = async (newRow:any,changed:boolean) => {
@@ -555,19 +311,43 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             id="outlined-basic"
             variant="outlined"
             label="Rechercher"
+            inputProps={{"aria-label":"Rechercher un équipement"}}
+            InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>}}
             value={searchBarValue}
             onChange={(event) => {
-                var searchValue = String(event.target.value).trimStart();
-                setSearchBarValue(searchValue);
-                AddNewFilter(new Searching(searchValue))}}/></div>
+                setSearchBarValue(event.target.value);
+                setPageId(1);
+            }}/></div>
             <div className="clearFiltersButton">
-            <Button style={{color:"#550055",borderColor:"#550055"}} variant="outlined" onClick={() => {
-               clearFilters();
-            }}><FiFilter style={{marginRight:"5px"}}/>Effacer les filtres</Button>
+            <Button aria-label="Effacer la recherche et les filtres" style={{color:"#550055",borderColor:"#550055"}} variant="outlined" onClick={clearFilters}>
+                <FiFilter style={{marginRight:"5px"}}/>
+                {searchBarValue || activeFilters.length ? `Effacer (${activeFilters.length + (searchBarValue ? 1 : 0)})` : "Effacer les filtres"}
+            </Button>
             <div>
             </div>
             </div>
             </div>
+            {activeFilters.length > 0 && (
+                <div className="active-filters" aria-label="Filtres actifs">
+                    {activeFilters.map((filter) => (
+                        <button
+                            type="button"
+                            className="active-filter-chip"
+                            key={filter.header.key}
+                            aria-label={`Retirer le filtre ${filter.header.labelName}`}
+                            onClick={() => {
+                                setFilterList((current) => current.filter(
+                                    (item:any) => !(item instanceof Filtering && item.header.key === filter.header.key)
+                                ));
+                                setPageId(1);
+                            }}
+                        >
+                            {filter.header.labelName}<span>{filter.selectedValues.filter((value) => value.checked).length}</span><b aria-hidden="true">×</b>
+                        </button>
+                    ))}
+                    <span className="result-count">{renderedData.length} résultat{renderedData.length === 1 ? "" : "s"}</span>
+                </div>
+            )}
             <div className="InventoryTable">
         <table>
             <thead>
@@ -586,16 +366,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
                             if(header.filter !== undefined && header.filter == true)
                             {
                                 
-                                return (<th className="tableHeader" key={header.id}><div style={{borderTopLeftRadius:`${radiusTopLeft}px`,borderTopRightRadius:`${radiusTopRight}px`,  display:"flex",flexDirection:"row",width:"100px"}}><div className="headerContent">{header.labelName}</div><FiFilter className="FilterIcon" style={{width:"100%"}} onClick={(event) => onClickFilterPopupOpen(event,header) } /></div></th>)
+                                const isFiltered = activeFilters.some((filter) => filter.header.key === header.key);
+                                return (<th className="tableHeader" key={header.id}><div className="filterable-header"><span>{header.labelName}</span><button type="button" className={`table-filter-button${isFiltered ? " is-active" : ""}`} aria-label={`Filtrer par ${header.labelName}`} aria-pressed={isFiltered} onClick={() => onClickFilterPopupOpen(header)}><FiFilter /></button></div></th>)
                             }
                             else if(header.ordering !== undefined && header.ordering == true)
                             {
-                                var order = "desc"
-                                if(sortingFilter != null){
-                                    order = sortingFilter.order == "asc" ? "desc" : "asc";
-                                }
-                                const icon = order === "desc" ? "▼" : "▲";
-                                return (<th className="tableHeader" onClick={() => setSortingFilter(new Sorting(header,order))} style={{borderTopLeftRadius:`${radiusTopLeft}px`,borderTopRightRadius:`${radiusTopRight}px`}} key={header.id}>{header.labelName}{icon}</th>)
+                                const isSorted = sortingFilter.header.key === header.key;
+                                const order = isSorted && sortingFilter.order === "asc" ? "desc" : "asc";
+                                const icon = isSorted ? sortingFilter.order === "asc" ? "↑" : "↓" : "";
+                                return (<th className="tableHeader" key={header.id}><button type="button" className="table-sort-button" aria-label={`Trier par ${header.labelName}${isSorted ? sortingFilter.order === "asc" ? ", croissant" : ", décroissant" : ""}`} onClick={() => {setSortingFilter(new Sorting(header,order)); setPageId(1);}}>{header.labelName}<span>{icon}</span></button></th>)
                             }
                             else
                             {
@@ -665,7 +444,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             <FormControlLabel
               value={dt.nom}
               key={dt.id}
-              control={<Checkbox color="primary" defaultChecked={checked} onChange={(event) => addNewCheckBoxToCheckBoxList(dt,event)} />}
+              control={<Checkbox color="primary" checked={checkBoxFilterList.find((option) => option.nom === dt.nom)?.checked || false} onChange={(event) => addNewCheckBoxToCheckBoxList(dt,event)} />}
               label={dt.nom}
             />
             </div>

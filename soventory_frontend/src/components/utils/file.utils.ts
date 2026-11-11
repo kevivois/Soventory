@@ -1,68 +1,61 @@
 import Papa from 'papaparse';
-import base64 from 'react-native-base64'
 import * as XLSX from 'xlsx';
-import Icon_url from "../../logo/plussegaush.jpeg"
-import jsPDF, { TableConfig, TableRowData } from "jspdf";
+import jsPDF from "jspdf";
 import autoTable from  "jspdf-autotable"
-const PDFDocument = require('jspdf');
 const filename = 'Soventory_data';
-export function csvToObjectArray(csvString:string) {
- 
-  return Papa.parse(csvString, {
-    header: true,
-    dynamicTyping: true,
-    complete: function(results:any) {
-      const arrayOfObjects = results.data;
-    }
-  });
-  }
+type ExportHeader = { key: string; labelName?: string };
 
-export function ExportToExcel(data:any[],extension:string){
-  
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+function exportRows(headers: ExportHeader[], data: any[]) {
+  return data.map((row) => Object.fromEntries(
+    headers.map(({key}) => {
+      const value = row[key];
+      return [key, value && typeof value === "object" && "nom" in value ? value.nom : value];
+    })
+  ));
+}
+
+function download(blob: Blob, extension: string) {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const formattedDate = new Date().toLocaleDateString().replace(/\//g, '-');
+  link.setAttribute('hidden', '');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}_${formattedDate}_.${extension}`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
+export function csvToObjectArray(csvString:string) {
+  return Papa.parse(csvString, { header: true, dynamicTyping: true, skipEmptyLines: true });
+}
+
+export function ExportToExcel(data:any[],extension:string,headers:ExportHeader[]){
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportRows(headers, data));
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Soventory_data');
-    let formated_date = new Date().toLocaleDateString().replace(/\//g, '-');
-    return XLSX.writeFile(wb,`${filename}_${formated_date}_.${extension}`);
-
+    const formattedDate = new Date().toLocaleDateString().replace(/\//g, '-');
+    return XLSX.writeFile(wb,`${filename}_${formattedDate}_.${extension}`);
 }
-export function exportToCsv(data:any[]){
-  let papaConfig = {
+
+export function exportToCsv(data:any[],headers:ExportHeader[]){
+  const papaConfig = {
     header: true,
     delimiter: ';',
-    
   }
-  let csvData = Papa.unparse(data,papaConfig);
-  let blob = new Blob([csvData], { type: 'text/csv' });
-  let url= window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
-  let formated_date = new Date().toLocaleDateString().replace(/\//g, '-');
-  a.setAttribute('hidden', '');
-  a.setAttribute('href', url);
-  a.setAttribute('download', `${filename}_${formated_date}_.csv`);
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
+  const csvData = Papa.unparse(exportRows(headers, data), papaConfig);
+  download(new Blob(['\uFEFF', csvData], { type: 'text/csv;charset=utf-8' }), 'csv');
 }
-export function exportToPDF(headers:any[],data:any[]){
-  let exportHeaders = headers.map((header:any) => {
-    // remove accents due to jsPdf library utf8 unsupported characters
-    return String(header.labelName).normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-    })
+
+export function exportToPDF(headers:ExportHeader[],data:any[]){
+  const exportHeaders = headers.map((header) =>
+    String(header.labelName || header.key).normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+  );
   let doc = new jsPDF('l','px','a4');
-  let stringData : any[]= [];
-  data.forEach((row:any) => {
-    let nr:any[] = [];
-    Object.keys(row).forEach((key:any) => {
-      nr.push(row[key]);
-
-    })
-    stringData.push(nr);
-
-  })
-  // start from a margin of 50px
-  
+  const stringData = exportRows(headers, data).map((row) =>
+    headers.map(({key}) => row[key] == null ? "" : String(row[key]))
+  );
   doc.setFont('Helvetica');
   doc.setFontSize(10);
   autoTable(doc, {
@@ -87,10 +80,6 @@ export function exportToPDF(headers:any[],data:any[]){
   });
 
   var Title = `Exportation du ${new Date().toLocaleDateString()}`;
-  /*create an array size of page */
-  var img = new Image();
-  img.src = Icon_url;
-  var imgData = base64.encode(img.src);
   let pages = Array.from({length: doc.getNumberOfPages()}, (_, i) => i + 1);
 
   pages.forEach(async (page) => {
@@ -100,17 +89,6 @@ export function exportToPDF(headers:any[],data:any[]){
     doc.text(Title,10,30,{align:"left"});
     doc.setFontSize(10);
     doc.text(`Page ${page.toString()}/${doc.getNumberOfPages()}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-20,{align:"center"});
-    //await doc.addImage(imgData,'JPEG',doc.internal.pageSize.width-50,50,40,40);
   });
-
-  let blob = new Blob([doc.output()], { type: 'application/pdf' });
-  let url= window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
-  let formated_date = new Date().toLocaleDateString().replace(/\//g, '-');
-  a.setAttribute('hidden', '');
-  a.setAttribute('href', url);
-  a.setAttribute('download', `${filename}_${formated_date}_.pdf`);
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  download(doc.output('blob'), 'pdf');
 }
