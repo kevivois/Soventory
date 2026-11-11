@@ -50,7 +50,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     const [pageId,setPageId] = useState(1);
     const [enablePagination,setEnablePagination] = useState(true);
     const [rowPerPage,setRowPerPage] = useState(23);
-    const headers = Headers;
     const activeFilters = useMemo(
         () => filterList.filter((item:any) => item instanceof Filtering) as Filtering[],
         [filterList]
@@ -85,17 +84,6 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
     useEffect(() => {
         if (pageId > maxPage) setPageId(maxPage);
     }, [pageId, maxPage]);
-    function determineRowPerPage(){
-        if(!enablePagination) return;
-        try{
-            let rowPP = H_DetermineRowPerPage(window.innerHeight);
-            setRowPerPage(rowPP);
-        }
-        catch(e){
-            console.log("error",e);
-        }
-
-    }
     const handlePageChange = (pageId:number) => {
         if(pageId > 0 && pageId <= maxPage){
             setPageId(pageId);
@@ -104,6 +92,15 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
         };
     };
     useEffect(() => {
+        if (!enablePagination) return;
+        const determineRowPerPage = () => {
+            try{
+                setRowPerPage(H_DetermineRowPerPage(window.innerHeight));
+            }
+            catch(e){
+                console.log("error",e);
+            }
+        };
         let timer: ReturnType<typeof setTimeout>;
         const handleResizing = () => {
             clearTimeout(timer);
@@ -115,7 +112,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             clearTimeout(timer);
             window.removeEventListener("resize",handleResizing);
         };
-    },[]);
+    },[enablePagination]);
     const onApplyNewRow = async (newRow:any) => {
         var errors = null
         try

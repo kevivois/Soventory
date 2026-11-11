@@ -14,31 +14,37 @@ import "./IEOverlay.css";
 import Warning from '../WarningBar/WarningBar';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import {ExportToExcel,exportToCsv,exportToPDF} from "../utils/file.utils"
-const sizeLimitMB = 3;
+const sizeLimitBytes = 3_000_000;
+
+function getFileValidationError(rows:any[]):string | null {
+  if(rows.length === 0) return "Le fichier est vide";
+  const currentHeaders = Object.keys(rows[0]);
+  return Headers.some((header) => !currentHeaders.includes(header.key))
+    ? "Le fichier ne contient pas les bonnes colonnes"
+    : null;
+}
+
 export default function ImportExportDialog(props:{open:boolean,onImport:(array:any) => void,onClose:() => void,exportArray:any[],exportheaders:any[],enable:boolean}) {
   const [open, setOpen] = useState(props.open);
   const [activeTab, setActiveTab] = useState(0); // 0 for import tab, 1 for export tab
-  const [file, setFile] : any = useState<any>({}); // the selected file
-  const [fileSize, setFileSize] = useState(0); // the size of the selected file in bytes
-  const [maxWidth, setMaxWidth] = React.useState<DialogProps['maxWidth']>('md');
-  const [fullWidth, setFullWidth] = React.useState(true);
-  const [fileSizeInMB,setFileSizeInMB] = useState(0)
+  const [file, setFile] = useState<File | null>(null);
+  const maxWidth: DialogProps['maxWidth'] = 'md';
+  const fullWidth = true;
   const [fileArray,setFileArray] = useState<any[]>([])
-  const [csvFile,setCsvFile] = useState<string>("")
   const [error,setError] = useState<string>("")
   const [enableImport,setEnableImport] = useState<boolean>(false)
   const [enableExport,setEnableExport] = useState<boolean>(false)
-  const [exportArray,setExportArray] = useState<any[]>(props.exportArray);
+  const exportArray = props.exportArray;
   const [warningBar,setWarningBar] = useState<boolean>(false);
   const exportOptions = ["csv","xlsx","xls","pdf"];
   const [exportExt,setExportExt] = useState<string>(exportOptions[0]);
 
   useEffect(() => {
-    if(activeTab == 1){
-      setEnableExport(checkFile(exportArray));
+    if(activeTab === 1){
+      setEnableExport(exportArray.length > 0);
     }
   },[exportArray,activeTab]);
-  function Error(text:string){
+  function showError(text:string){
     setError(text);
     setWarningBar(true);
 
@@ -55,102 +61,100 @@ export default function ImportExportDialog(props:{open:boolean,onImport:(array:a
 
 
   const handleFileChange = async (event:any) => {
-    let selectedFile = event.target.files[0];
-    //check if file is csv or xlsx
-    let size = selectedFile.size/1000000
-    if(!selectedFile.name.match(/.csv|.xlsx/||/.xls/)){
-      return Error("Le fichier n'est pas au bon format, format accepté : .csv, .xlsx, .xls")
+    const selectedFile = event.target.files?.[0] as File | undefined;
+    setError("");
+    setWarningBar(false);
+    setFileArray([]);
+    setEnableImport(false);
+    if(!selectedFile) return;
+    if(!/\.(csv|xls|xlsx)$/i.test(selectedFile.name)){
+      setFile(null);
+      return showError("Le fichier n'est pas au bon format, formats acceptés : .csv, .xls, .xlsx");
     }
-    if(size <= sizeLimitMB){
-    setFileSizeInMB(size);
+    if(selectedFile.size <= sizeLimitBytes){
     setFile(selectedFile);
-    setFileSize(selectedFile.size)
   }else{
-    Error("Le fichier est trop volumineux")
+    setFile(null);
+    showError("Le fichier est trop volumineux")
   }
   };
   useEffect(() => {
-    async function refresh(){
-      if(file.name){
-        await transformFile();
+    if (!file) return;
+    const selectedFile = file;
+    const reader = new FileReader();
+    reader.onerror = () => {
+      setError("Impossible de lire le fichier sélectionné");
+      setWarningBar(true);
+    };
+    reader.onload = () => {
+      try {
+        let csv: string;
+        if (/\.(xls|xlsx)$/i.test(selectedFile.name)) {
+          const workbook = XLSX.read(reader.result, { type: "array", cellDates: true, dateNF: "dd.mm.yyyy" });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          if (!firstSheet) return showError("Le fichier Excel ne contient aucune feuille");
+          csv = XLSX.utils.sheet_to_csv(firstSheet, { FS: ";", dateNF: "dd.mm.yyyy" });
+        } else {
+          csv = String(reader.result || "").replace(/^\uFEFF/, "");
+        }
+        const result = csvToObjectArray(csv);
+        if (result.errors.length > 0) {
+          setFileArray([]);
+          setEnableImport(false);
+          return showError(`Impossible de lire le fichier : ${result.errors[0].message}`);
+        }
+        const rows = result.data.filter((row:any) => Object.values(row).some((value) => value !== ""));
+        const validationError = getFileValidationError(rows);
+        setFileArray(rows);
+        setEnableImport(validationError === null);
+        if(validationError) {
+          setError(validationError);
+          setWarningBar(true);
+        }
+      } catch (error) {
+        setFileArray([]);
+        setEnableImport(false);
+        setError(`Impossible de lire le fichier : ${error instanceof Error ? error.message : String(error)}`);
+        setWarningBar(true);
       }
+    };
+    try {
+      if (/\.(xls|xlsx)$/i.test(selectedFile.name)) reader.readAsArrayBuffer(selectedFile);
+      else reader.readAsText(selectedFile, "UTF-8");
+    } catch (error) {
+      setFileArray([]);
+      setEnableImport(false);
+      setError(`Impossible de lire le fichier : ${error instanceof Error ? error.message : String(error)}`);
+      setWarningBar(true);
     }
-    refresh();
   }, [file]);
-  const transformFile = async () =>{
-
-        var reader = new FileReader()
-        // convert to show in table  format
-        if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
-          await reader.readAsBinaryString(file);
-        }else{
-          await reader.readAsText(file,'latin3');
-        }
-        reader.onload = (e) => {
-          let csv = String(reader.result)
-          let workbook;
-          if(file.type.match(/application\/vnd.ms-excel|application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/)){
-            workbook = XLSX.read(csv, { type: 'binary',dateNF:'dd"."mm"."yyyy'});
-            csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-          }
-          else{
-            workbook = XLSX.read(csv, { type: 'string',dateNF:'dd"."mm"."yyyy'});
-            csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-          }
-          setCsvFile(csv);
-          let result = csvToObjectArray(csv);
-          let r = checkFile(result.data);
-          setEnableImport(r);
-          setFileArray(result.data as []);
-        }
-        
-  }
-
-  function checkFile(array:any){
-    let ok = true;
-    if(array.length > 0){
-      let currentHeaders = Object.keys(array[0]);
-      Headers.forEach((header)=>{
-        if(!currentHeaders.includes(header.key)){
-          ok = false;
-          Error("Le fichier ne contient pas les bonnes colonnes")
-        }
-      });
-      
-    }else{
-      ok = false;
-      Error("Le fichier est vide")
-    }
-    return ok
-  }
 
 const Importing = () => {
-    let canImport = checkFile(fileArray);
-    if(canImport){
+    if(enableImport){
       handleClose();
       props.onImport(fileArray);
-  };
+    }
 }
 const Exporting = () => {
   
-  if(exportArray.length == 0){return Error("Aucune donnée à exporter")}
+  if(exportArray.length === 0){return showError("Aucune donnée à exporter")}
 
 
   switch(exportExt){
     case "csv":
-      exportToCsv(exportArray);
+      exportToCsv(exportArray, props.exportheaders);
     break;
     case "xlsx":
-      ExportToExcel(exportArray,"xlsx");
+      ExportToExcel(exportArray,"xlsx", props.exportheaders);
     break;
     case "xls":
-      ExportToExcel(exportArray,"xls");
+      ExportToExcel(exportArray,"xls", props.exportheaders);
     break;
     case "pdf":
       exportToPDF(props.exportheaders,exportArray);
     break;
     default:
-      Error("Le format d'export n'est pas supporté")
+      showError("Le format d'export n'est pas supporté")
   };
 }
 
@@ -170,9 +174,8 @@ const downloadExample = (event:any) => {
   event.preventDefault();
   const headers = Headers.map((header) => header.key);
   const data = [headers];
-  const csvContent = `data:text/csv;charset=utf-8,${data.map((e) => e.join(";")).join("")}`;
-  // show the good format for é,è,à,ù,ç
-  const encodedUri = encodeURI(csvContent);
+  const csvContent = `\uFEFF${data.map((row) => row.join(";")).join("\r\n")}`;
+  const encodedUri = `data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`;
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
   link.setAttribute("download", "Soventory_Example_format.csv");

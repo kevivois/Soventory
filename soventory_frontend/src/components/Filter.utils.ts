@@ -34,7 +34,7 @@ export class Filtering implements Filter {
     name=FilterMode.FILTERING
     header:HeaderType;
     selectedValues:any[]
-    constructor(header:HeaderType,selectedValues:string[]){
+    constructor(header:HeaderType,selectedValues:any[]){
         this.header = header
         this.selectedValues = selectedValues
     }
@@ -57,4 +57,3 @@ export class Searching implements Filter {
     }
 }
  
-

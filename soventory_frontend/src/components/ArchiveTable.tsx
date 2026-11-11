@@ -74,18 +74,16 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             setPageId(maxPage);
         };
     };
-    function determineRowPerPage(){
-        if(!enablePagination) return;
-        try{
-            let rowPP = H_DetermineRowPerPage(window.innerHeight);
-            setRowPerPage(rowPP);
-        }
-        catch(e){
-            console.log("error",e);
-        }
-
-    }
     useEffect(() => {
+        if (!enablePagination) return;
+        const determineRowPerPage = () => {
+            try{
+                setRowPerPage(H_DetermineRowPerPage(window.innerHeight));
+            }
+            catch(e){
+                console.log("error",e);
+            }
+        };
         let timer: ReturnType<typeof setTimeout>;
         const handleResizing = () => {
             clearTimeout(timer);
@@ -97,7 +95,7 @@ export default function DataTable(props:{data:any[],materiels:any[],marques:any[
             clearTimeout(timer);
             window.removeEventListener("resize",handleResizing);
         };
-    },[]);
+    },[enablePagination]);
     useEffect(() => {
         if (pageId > maxPage) setPageId(maxPage);
     }, [pageId, maxPage]);

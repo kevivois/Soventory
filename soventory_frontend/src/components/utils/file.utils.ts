@@ -24,7 +24,7 @@ function download(blob: Blob, extension: string) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+  window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
 }
 
 export function csvToObjectArray(csvString:string) {

@@ -44,7 +44,7 @@ export default class Connection {
 
         this.mysqlConnectionPool.end(() => {
             // Destroy the connection pool
-            this.mysqlConnectionPool = mysql2.createPool(this.dataConnection) // Create a new connection pool with the updated dataConnection
+            this.mysqlConnectionPool = mysql2.createPool(this.dataConnection)
         });
     }
 
